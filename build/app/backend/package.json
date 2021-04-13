@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
+    "prepare": "husky install",
     "start": "node ./bin/www.js",
     "start-dev": "nodemon -e js,pug,html,json ./bin/www.js",
     "test": "jest tests"

@@ -1,0 +1,131 @@
+version: '3.3'
+
+services:
+
+#Sawtooth----------------------------------
+
+  settings-tp:
+    image: hyperledger/sawtooth-settings-tp:1.2.6
+    container_name: sawtooth-settings-tp-default
+    depends_on:
+      - validator
+    entrypoint: settings-tp -vv -C tcp://validator:4004
+
+
+  # intkey-tp:
+  #   build:
+  #     context: ./tp
+  #     dockerfile: Dockerfile
+  #   image: le999/intkey-tp:1.0
+  #   container_name: sawtooth-intkey-tp-js-default
+  #   environment:
+  #     - VALIDATOR=tcp://validator:4004
+  #   depends_on:
+  #     - validator
+
+  # intkey-tp-python:
+  #   image: hyperledger/sawtooth-intkey-tp-python:1.2.6
+  #   container_name: sawtooth-intkey-tp-python-default
+  #   depends_on:
+  #     - validator
+  #   entrypoint: intkey-tp-python -vv -C tcp://validator:4004
+
+  #xo-tp-python:
+    #image: hyperledger/sawtooth-xo-tp-python:1.2.6
+    #container_name: sawtooth-xo-tp-python-default
+    #depends_on:
+      #- validator
+    #entrypoint: xo-tp-python -vv -C tcp://validator:4004
+
+  validator:
+    image: hyperledger/sawtooth-validator:1.2.6
+    container_name: sawtooth-validator-default
+    expose:
+      - 4004
+    ports:
+      - "4004:4004"
+    # start the validator with an empty genesis batch
+    entrypoint: "bash -c \"\
+        sawadm keygen && \
+        sawtooth keygen my_key && \
+        sawset genesis -k /root/.sawtooth/keys/my_key.priv && \
+        sawset proposal create \
+          -k /root/.sawtooth/keys/my_key.priv \
+          sawtooth.consensus.algorithm.name=Devmode \
+          sawtooth.consensus.algorithm.version=0.1 \
+          -o config.batch && \
+        sawadm genesis config-genesis.batch config.batch && \
+        sawtooth-validator -vv \
+          --endpoint tcp://validator:8800 \
+          --bind component:tcp://eth0:4004 \
+          --bind network:tcp://eth0:8800 \
+          --bind consensus:tcp://eth0:5050 \
+          --scheduler serial \
+        \""
+
+  devmode-engine:
+    image: hyperledger/sawtooth-devmode-engine-rust:1.2.4
+    container_name: sawtooth-devmode-engine-rust-default
+    depends_on:
+      - validator
+    entrypoint: devmode-engine-rust -C tcp://validator:5050
+
+  rest-api:
+    image: hyperledger/sawtooth-rest-api:1.2.6
+    container_name: sawtooth-rest-api-default
+    ports:
+      - "8008:8008"
+    depends_on:
+      - validator
+    entrypoint: sawtooth-rest-api -C tcp://validator:4004 --bind rest-api:8008
+
+  shell:
+    image: hyperledger/sawtooth-shell:1.2.6
+    container_name: sawtooth-shell-default
+    depends_on:
+      - rest-api
+    entrypoint: "bash -c \"\
+        sawtooth keygen && \
+        tail -f /dev/null \
+        \""
+
+  # sawtooth-explorer:
+  #   image: le999/sawtooth-explorer:0.0.1
+  #   container_name: sawtooth-explorer
+  #   ports:
+  #     - "8090:8090"
+  #     - "8091:8091"
+  #   # command: [nginx, '-g', 'daemon off;']
+  #   environment:
+  #     - SAWTOOTH_REST=rest-api:8008 
+  #     - SAWTOOTH_EXPLORER_PROXY=localhost:8090  #Should point to this server port 8090
+  #   depends_on:
+  #     - rest-api
+
+
+  #https://hub.docker.com/_/mongo
+  mongo:
+    image: mongo:4.2.7
+    restart: always
+    ports:
+      - 27017:27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+      MONGO_INITDB_DATABASE: mydb
+    volumes:
+      - ./init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js
+
+  #https://hub.docker.com/_/mongo-express
+  mongo-express:
+    image: mongo-express:0.54.0
+    restart: always
+    ports:
+      - 8081:8081
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongo
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: example
+
+
+
