@@ -1,0 +1,117 @@
+{
+  "ERRORS": {
+    "USER": {
+      "INPUT": {
+        "NO_INPUT": {
+          "error": "Expected user parameter {{property}}, but received undefined",
+          "msg": "Se esperaba el parámetro {{property}}, pero no se recibió"
+        },
+        "MISSING_REQUIRED_INPUT": {
+          "error": "{{message}}"
+        },
+
+        "INCORRECT_INPUT": {
+          "error": "{{message}}"
+        },
+        "INCORRECT_INPUT_TYPE": {
+          "error": "User property {{propertyName}} received an incorrect type {{receivedType}}, expected {{expectedType}}",
+          "msg": "La propiedad {{propertyName}} recibida es inválida"
+        },
+        "USER_EXISTS": {
+          "error": "User with address {{address}} already exists",
+          "msg": "El usuario ya existe"
+        },
+        "USER_DOES_NOT_EXIST": {
+          "error": "User with address {{address}} does not exist",
+          "msg": "El usuario {{address}} no existe"
+        },
+        "NO_TRANSACTIONS": {
+          "error": "User with address {{address}} does not have any lastest_transactions",
+          "msg": "El usuario no tiene transacciones registradas"
+        },
+        "INSUFFICIENT_FUNDS": {
+          "error": "User with address {{address}} does not have enough funds to create this transaction",
+          "msg": "El usuario no tiene fondos suficientes para crear esta transacción"
+        },
+        "INSUFFICIENT_FUNDS_PENDING_TRANSACTIONS": {
+          "error": "User with address {{address}} does not have enough funds to create this transaction. User's pending transaction sum up to {{amountPending}} CNKs, thus the available balance is {{{actualBalance}} CNKs",
+          "msg": "El usuario no tiene fondos suficientes para crear esta transacción. Las transacciones pendientes del usuario suman {{amountPending}} CNKs, por lo que el saldo disponible es {{{actualBalance}} CNKs"
+        },
+        "INSUFFICIENT_FUNDS_UNEXPECTED_BALANCE": {
+          "error": "User with address {{address}} does not have enough funds to create this transaction. User's lastest transactions reflect a balance of {{actualBalance}}",
+          "msg": "El usuario no tiene fondos suficientes para crear esta transacción. Las últimas transacciones del usuario reflejan un saldo de {{actualBalance}}"
+        },
+        "UNDEFINED_RETURN_TO_REASON": {
+          "error": "User with address {{address}} does not have a return to address that matches the reason {{reason}}",
+          "msg": "El usuario no tiene registrada una dirección de retorno de recursos para la operación de {{reason}}"
+        }
+      },
+      "LOGIC": {
+        "USER_IS_NOT_ACTIVE": {
+          "error": "User with address {{address}} is not active",
+          "msg": "El usuario {{address}} no está activo"
+        },
+        "USER_DOES_NOT_HAVE_PERMISSIONS": {
+          "error": "User with address {{address}} does not have {{requiredPermission}} permission",
+          "msg": "El usuario no tiene permisos para esta operación. Por favor, contacte al administrador para más información."
+        },
+        "USER_DOES_NOT_HAVE_TRANSFER_PERMISSIONS": {
+          "error": "User with address {{address}} does not have transfer_to permission to {{recipient}}",
+          "msg": "El usuario no tiene permisos para esta operación. Por favor, contacte al administrador para más información."
+        },
+        "NONEXISTENT_LASTEST_TRANSACTION": {
+          "error": "User with address {{address}}'s lastest transaction with signature {{transactionSignature}} does not exist",
+          "msg": "La transacción con firma {{transactionSignature}} no hace parte de las transacciones registradas para el usuario. Por favor, contacte al administrador para más información."
+        },
+        "NONEXISTENT_PENDING_TRANSACTION": {
+          "error": "User with address {{address}}'s pending transaction with signature {{transactionSignature}} does not exist",
+          "msg": "La transacción pendiente con firma {{transactionSignature}} no hace parte de las transacciones registradas para el usuario. Por favor, contacte al administrador para más información."
+        },
+        "INCORRECT_RECIPIENT_LASTEST_TRANSACTION": {
+          "error": "User with address {{address}}'s lastest transaction with signature {{transactionSignature}} does not belong to them",
+          "msg": "La transacción con firma {{transactionSignature}} no hace parte de las transacciones registradas para el usuario. Por favor, contacte al administrador para más información."
+        },
+        "NO_RETURN_TO_ADDRESSES": {
+          "error": "User with address {{address}} does not have any return to addresses",
+          "msg": "El usuario no tiene registrada ninguna dirección de retorno de recursos. Por favor, contacte al administrador para más información."
+        }
+      }
+    },
+    "TRANSACTION": {
+      "INPUT": {
+        "NO_INPUT": {
+          "error": "Expected transaction parameter {{property}}, but received undefined",
+          "msg": "Se esperaba el parámetro {{property}}, pero no se recibió"
+        },
+        "MISSING_REQUIRED_INPUT": {
+          "error": "{{message}}"
+        },
+        "INCORRECT_INPUT": {
+          "error": "{{message}}"
+        },
+        "TRANSACTION_EXISTS": {
+          "error": "Transaction with signature {{signature}} already exists",
+          "msg": "La transacción ya existe"
+        },
+        "TRANSACTION_DOES_NOT_EXIST": {
+          "error": "Transaction with signature {{signature}} does not exist",
+          "msg": "La transacción no existe"
+        },
+        "TRANSACTION_IS_NOT_PENDING": {
+          "error": "Transaction with signature {{signature}} is not pending, thus it cannot be updated",
+          "msg": "La transacción no está pendiente, y por ende no se puede actualizar"
+        }
+      },
+      "LOGIC": {
+        "NON_MATCHING_KEYS": {
+          "error": "Transaction's signature cannot be decrypted with creator's public key",
+          "msg": "El usuario no tiene permisos sobre esta transacción. Por favor, contacte al administrador para más información."
+        },
+        "DECRYPTING_ERROR": {
+          "error": "Transaction's object cannot be decrypted",
+          "msg": "Hubo un error al validar la transacción. Por favor, contacte al administrador para más información."
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: validators/common.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: validators/common.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>const { validationResult } = require("express-validator");
+const { findByAddress } = require("../controllers/common");
+const { TYPE } = require("../utils/constants");
+const { ERRORS } = require("../utils/errors");
+const { SEVERITY, logFormatted } = require("../utils/logger");
+
+/**
+ * Validates an array of validations using express-validator.
+ *
+ * @param {Array} validations - Array of validation Promises.
+ * @return {Function} Next callback if there was not any validation errors, void otherwise (response object will contain the validation errors).
+ */
+const validate = (validations) => (req, res, next) => {
+  return Promise.all(validations.map((validation) => validation.run(req))).then(
+    () => {
+      const errors = validationResult(req);
+      if (errors.isEmpty()) {
+        return next();
+      }
+      const arrayOfErrors = [];
+
+      //Use custom error object
+      (errors.array() || []).forEach(
+        (error) => error.msg &amp;&amp; arrayOfErrors.push(error.msg)
+      );
+
+      res.status(400).json({
+        errors: arrayOfErrors.length > 0 ? arrayOfErrors : errors.array(),
+      });
+    }
+  );
+};
+
+const createErrorObj = (req, { error, location, params }) => {
+  const errorObj = {};
+  if (error.errorCode) errorObj.errorCode = error.errorCode;
+  if (error.error) errorObj.error = error.error(req, params);
+  if (error.msg) errorObj.msg = error.msg(req, params);
+  errorObj.location = location || "body";
+  if (params.param) errorObj.param = params.param;
+  if (params.value) errorObj.value = params.value;
+  logFormatted(
+    `Validation error with code ${errorObj.errorCode} - ${errorObj.error}`,
+    SEVERITY.WARN
+  );
+  return { ...errorObj };
+};
+
+const createError = (req, res, { error, location, params }) => {
+  const errorObj = createErrorObj(req, { error, location, params });
+  return res.status(400).json({ errors: [{ ...errorObj }] });
+};
+
+/**
+ * Validates if a asset exists in the blockchain.
+ *
+ * @param {String} type - Type of asset, @see TYPE
+ * @param {String} txid - Asset unique identification (before calculated address)
+ * @param {Boolean} shouldExist - Represents if the asset should or should not exist, used to manage error.
+ * @param {Response} res - Express.js response object.
+ * @return {Promise} Promise rejection if:
+ *   The type was missing
+ *   The asset exists and it should not exist
+ *   The asset does not exist and should exist
+ *  Otherwise resolves the obj.
+ */
+const validateAssetExistence = (
+  type,
+  txid,
+  shouldExist,
+  req,
+  res,
+  { location = null, param = null } = {}
+) => {
+  let errorType;
+  let identifier;
+  txid = (txid + "").trim();
+  switch (type) {
+    case TYPE.TRANSACTION:
+      errorType = ERRORS.TRANSACTION;
+      identifier = "signature";
+      break;
+    case TYPE.USER:
+      errorType = ERRORS.USER;
+      identifier = "address";
+      break;
+    default:
+      return Promise.reject(`Missing type ${type}`);
+  }
+  if (txid &amp;&amp; txid !== "") {
+    return findByAddress(type, txid, false, false, res).then(
+      (existingAsset) => {
+        const expectedToExist = shouldExist &amp;&amp; existingAsset === null;
+        const notExpectedToExist = !shouldExist &amp;&amp; existingAsset !== null;
+        if (expectedToExist || notExpectedToExist) {
+          const errorMsg = `${type.toProperCase()} with address {${txid}} ${
+            expectedToExist ? "does not" : "already"
+          } exist${expectedToExist ? "" : "s"}`;
+          logFormatted(errorMsg, SEVERITY.ERROR);
+          //      return Promise.reject(errorMsg);
+          let errorObj;
+          switch (type) {
+            case TYPE.TRANSACTION:
+              if (expectedToExist)
+                errorObj = {
+                  error: ERRORS.TRANSACTION.INPUT.TRANSACTION_DOES_NOT_EXIST,
+                  location: location || "params",
+                  params: {
+                    signature: txid,
+                    param: param || "address",
+                    value: txid,
+                  },
+                };
+              else if (notExpectedToExist)
+                errorObj = {
+                  error: ERRORS.TRANSACTION.INPUT.TRANSACTION_EXISTS,
+                  location: location || "body",
+                  params: {
+                    signature: txid,
+                    param: param || "signature",
+                    value: txid,
+                  },
+                };
+              break;
+            case TYPE.USER:
+              if (expectedToExist)
+                errorObj = {
+                  error: ERRORS.USER.INPUT.USER_DOES_NOT_EXIST,
+                  location: location || "query",
+                  params: {
+                    address: txid,
+                    param: param || "address",
+                    value: txid,
+                  },
+                };
+              else if (notExpectedToExist)
+                errorObj = {
+                  error: ERRORS.USER.INPUT.USER_EXISTS,
+                  location: location || "body",
+                  params: {
+                    address: txid,
+                    param: param || "address",
+                    value: txid,
+                  },
+                };
+              break;
+            default:
+              break;
+          }
+          return Promise.reject(() => createError(req, res, errorObj));
+        }
+        const obj = {};
+        obj[type] = existingAsset;
+        return Promise.resolve(obj);
+      }
+    );
+  } else
+    return Promise.reject(() =>
+      createError(req, res, {
+        error: errorType.INPUT.NO_INPUT,
+        location: location,
+        params: {
+          property: identifier,
+          param: identifier,
+          value: null,
+        },
+      })
+    );
+};
+
+module.exports.validateAssetExistence = validateAssetExistence;
+module.exports.validate = validate;
+module.exports.createError = createError;
+module.exports.createErrorObj = createErrorObj;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-MongoUtils.html">MongoUtils</a></li></ul><h3>Classes</h3><ul><li><a href="Asset.html">Asset</a></li><li><a href="BaseModel.html">BaseModel</a></li><li><a href="Transaction.html">Transaction</a></li><li><a href="User.html">User</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_putAsset">_putAsset</a></li><li><a href="global.html#_updateTransaction">_updateTransaction</a></li><li><a href="global.html#_updateUser">_updateUser</a></li><li><a href="global.html#buildAssetTransaction">buildAssetTransaction</a></li><li><a href="global.html#buildBatch">buildBatch</a></li><li><a href="global.html#createTransaction">createTransaction</a></li><li><a href="global.html#expandSupportingTransactions">expandSupportingTransactions</a></li><li><a href="global.html#findAllAssets">findAllAssets</a></li><li><a href="global.html#findByAddress">findByAddress</a></li><li><a href="global.html#findTransaction">findTransaction</a></li><li><a href="global.html#findUser">findUser</a></li><li><a href="global.html#getAddress">getAddress</a></li><li><a href="global.html#getSupportingTransactions">getSupportingTransactions</a></li><li><a href="global.html#getTransactionAddress">getTransactionAddress</a></li><li><a href="global.html#getTransactionByAddress">getTransactionByAddress</a></li><li><a href="global.html#getTransactions">getTransactions</a></li><li><a href="global.html#getTransferAddress">getTransferAddress</a></li><li><a href="global.html#getUserAddress">getUserAddress</a></li><li><a href="global.html#getUserByAddress">getUserByAddress</a></li><li><a href="global.html#getUsers">getUsers</a></li><li><a href="global.html#hash512">hash512</a></li><li><a href="global.html#http">http</a></li><li><a href="global.html#inputValidation">inputValidation</a></li><li><a href="global.html#normalizePort">normalizePort</a></li><li><a href="global.html#onError">onError</a></li><li><a href="global.html#onListening">onListening</a></li><li><a href="global.html#port">port</a></li><li><a href="global.html#putAsset">putAsset</a></li><li><a href="global.html#putBatch">putBatch</a></li><li><a href="global.html#server">server</a></li><li><a href="global.html#updateTransaction">updateTransaction</a></li><li><a href="global.html#validate">validate</a></li><li><a href="global.html#validateAssetExistence">validateAssetExistence</a></li><li><a href="global.html#validateExistingTransaction">validateExistingTransaction</a></li><li><a href="global.html#validatePendingTransaction">validatePendingTransaction</a></li><li><a href="global.html#validateTransactionAddress">validateTransactionAddress</a></li><li><a href="global.html#validateTransactionUpdateRequest">validateTransactionUpdateRequest</a></li><li><a href="global.html#validateUserCreation">validateUserCreation</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.6</a> on Fri May 07 2021 12:06:04 GMT-0500 (Colombia Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

@@ -1,0 +1,5 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+#Run tests
+prettier --write src/app/backend && grunt && git add -A

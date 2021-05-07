@@ -1,0 +1,1438 @@
+/* eslint-disable no-undef */
+const chai = require("chai");
+// eslint-disable-next-line no-unused-vars
+const should = chai.should();
+const _ = require("lodash");
+chai.use(require("chai-http"));
+const { v4: uuidv4 } = require("uuid");
+const API_URL = require("../app");
+const User = require("../models/User");
+const CRYPTO_ENDPOINT = "/cryptocurrency";
+const ENFORCER_ENDPOINT = "/validate";
+const USERS_ENDPOINT = "/users";
+const { expect } = chai;
+const identifiers = {
+  W1000: uuidv4(),
+  W0: uuidv4(),
+  NoCoinbase: uuidv4(),
+  CantTransferW1000: uuidv4(),
+  ToDeleteW1000: uuidv4(),
+  Inactive: uuidv4(),
+};
+const createdVariables = {
+  createdUserW1000: identifiers.W1000,
+  createdUserW0: identifiers.W0,
+  createdUserNoCoinbase: identifiers.NoCoinbase,
+  createdUserCantTransferW1000: identifiers.CantTransferW1000,
+  createdUserToDeleteW1000: identifiers.ToDeleteW1000,
+  createdUserInactive: identifiers.Inactive,
+  transactions: {
+    user: {
+      [identifiers.W1000]: {},
+      [identifiers.W0]: {},
+      [identifiers.NoCoinbase]: {},
+      [identifiers.CantTransferW1000]: {},
+      [identifiers.ToDeleteW1000]: {},
+      [identifiers.Inactive]: {},
+    },
+    transaction: {
+      [identifiers.W1000]: {},
+      [identifiers.W0]: {},
+      [identifiers.NoCoinbase]: {},
+      [identifiers.CantTransferW1000]: {},
+      [identifiers.ToDeleteW1000]: {},
+      [identifiers.Inactive]: {},
+    },
+  },
+};
+
+const createUser = ({
+  alias,
+  coinbasePermission = true,
+  transferToPermissions = null,
+  active = true,
+  returnTo = null,
+  callback = null,
+}) => {
+  const permissions = {};
+  const address = identifiers[alias];
+  const request = {
+    address,
+    public_key: address,
+  };
+
+  if (returnTo) {
+    request.return_to = returnTo;
+  }
+  if (coinbasePermission) {
+    permissions.coinbase = true;
+  }
+  if (typeof active === "boolean") {
+    request.active = active;
+  }
+  if (transferToPermissions) {
+    permissions.transfer_to = transferToPermissions;
+  }
+  request.permissions = permissions;
+  chai
+    .request(API_URL)
+    .post(`${USERS_ENDPOINT}`)
+    .send(request)
+    .end(function (err, res) {
+      return callback({ err, res, alias });
+    });
+
+  return true;
+};
+
+const createTransaction = ({
+  recipientAlias,
+  amount,
+  pending,
+  signature = null,
+  senderAlias = null,
+  creatorAlias = null,
+  callback = null,
+  valid_thru = null,
+}) => {
+  let senderAddress;
+  let creatorAddress;
+  const request = {
+    recipient: identifiers[recipientAlias] || recipientAlias,
+    amount,
+    signature: signature === null ? uuidv4() : signature,
+  };
+
+  if (typeof pending === "boolean") {
+    request.pending = pending;
+  }
+  if (valid_thru) {
+    request.valid_thru = valid_thru;
+  }
+  if (senderAlias) {
+    senderAddress = identifiers[senderAlias] || senderAlias;
+    request.sender = senderAddress;
+  }
+  if (creatorAlias) {
+    creatorAddress = identifiers[creatorAlias] || creatorAlias;
+    request.creator = creatorAddress;
+  }
+  chai
+    .request(API_URL)
+    .post(`${CRYPTO_ENDPOINT}`)
+    .send(request)
+    .end(function (err, res) {
+      return callback({
+        err,
+        res,
+        recipientAlias,
+        senderAlias,
+        amount,
+        pending,
+        signature: request.signature,
+      });
+    });
+  return true;
+};
+
+describe(`Cryptocurrency Test Suite`, () => {
+  before(function (done) {
+    this.timeout(20000);
+
+    const createdUserCallback = ({ res, alias, callback }) => {
+      const address = identifiers[alias];
+      return expect(res).to.satisfy((res) => {
+        createdVariables.transactions.user[address] = res.body;
+        if (res.statusCode === 201) {
+          console.log(
+            `[Before hook]: User ${alias} created with address: ${address}`
+          );
+          if (callback) callback(res);
+          return true;
+        }
+        return false;
+      });
+    };
+
+    const createdTransactionCallback = ({
+      recipientAlias,
+      senderAlias,
+      amount,
+      pending,
+      signature,
+      res,
+      callback,
+    }) => {
+      const recipientAddress = identifiers[recipientAlias];
+      const senderAddress = identifiers[senderAlias];
+      return expect(res).to.satisfy((res) => {
+        if (!senderAlias && recipientAddress)
+          createdVariables.transactions.transaction[recipientAddress].coinbase =
+            res.body;
+        else if (typeof pending === "boolean" && senderAddress)
+          createdVariables.transactions.transaction[senderAddress].pending =
+            res.body;
+        else
+          createdVariables.transactions.transaction[senderAddress][
+            recipientAlias
+          ] = res.body;
+        if (res.statusCode === 201) {
+          if (!senderAlias)
+            console.log(
+              `[Before hook]: User ${recipientAlias} received ${amount} CNKs, with signature: ${signature}`
+            );
+          else
+            console.log(
+              `[Before hook]: User ${senderAlias} sent${
+                pending === true ? " pending " : " "
+              }transaction of ${amount} CNKs to ${recipientAlias}, with signature: ${signature}`
+            );
+          if (callback) callback(res);
+          return true;
+        }
+        return false;
+      });
+    };
+
+    createUser({
+      alias: "W1000",
+      coinbasePermission: true,
+      callback: createdUserCallback,
+    });
+    createUser({
+      alias: "W0",
+      coinbasePermission: true,
+      callback: createdUserCallback,
+    });
+    createUser({
+      alias: "NoCoinbase",
+      coinbasePermission: false,
+      callback: createdUserCallback,
+    });
+    createUser({
+      alias: "Inactive",
+      coinbasePermission: true,
+      active: false,
+      callback: createdUserCallback,
+    });
+    createUser({
+      alias: "CantTransferW1000",
+      coinbasePermission: true,
+      transferToPermissions: {
+        [identifiers.W1000]: false,
+      },
+      callback: createdUserCallback,
+    });
+
+    setTimeout(() => {
+      createTransaction({
+        recipientAlias: "W1000",
+        amount: 1000,
+        callback: ({
+          err,
+          res,
+          recipientAlias,
+          senderAlias,
+          amount,
+          signature,
+        }) =>
+          createdTransactionCallback({
+            recipientAlias,
+            senderAlias,
+            amount,
+            signature,
+            err,
+            res,
+            callback: () =>
+              setTimeout(() => {
+                createUser({
+                  alias: "ToDeleteW1000",
+                  coinbasePermission: true,
+                  returnTo: {
+                    default: identifiers.W1000,
+                    inactive: identifiers.Inactive,
+                  },
+                  callback: createdUserCallback,
+                });
+                createTransaction({
+                  recipientAlias: "CantTransferW1000",
+                  amount: 1000,
+                  callback: ({
+                    err,
+                    res,
+                    recipientAlias,
+                    senderAlias,
+                    amount,
+                    signature,
+                  }) =>
+                    createdTransactionCallback({
+                      recipientAlias,
+                      senderAlias,
+                      amount,
+                      signature,
+                      err,
+                      res,
+                      callback: () => {
+                        setTimeout(() => {
+                          createTransaction({
+                            senderAlias: "CantTransferW1000",
+                            recipientAlias: "W0",
+                            amount: 1,
+                            callback: createdTransactionCallback,
+                          });
+                        }, 2500);
+                      },
+                    }),
+                });
+                createTransaction({
+                  recipientAlias: "W0",
+                  amount: 600,
+                  pending: true,
+                  senderAlias: "W1000",
+                  creatorAlias: "W1000",
+                  callback: ({
+                    err,
+                    res,
+                    recipientAlias,
+                    senderAlias,
+                    amount,
+                    signature,
+                    pending,
+                  }) =>
+                    createdTransactionCallback({
+                      recipientAlias,
+                      senderAlias,
+                      amount,
+                      signature,
+                      pending,
+                      err,
+                      res,
+                      callback: () => setTimeout(done, 5000),
+                    }),
+                });
+              }, 2500),
+          }),
+      });
+    }, 2500);
+  });
+  describe(`${CRYPTO_ENDPOINT} Tests`, () => {
+    describe(`GET ${CRYPTO_ENDPOINT}`, () => {
+      describe(`Successful requests`, () => {
+        describe("Get all transactions (non expanded)", () => {
+          it("Non expanded transactions should be returned", (done) => {
+            chai
+              .request(API_URL)
+              .get(`${CRYPTO_ENDPOINT}`)
+              .query({ limit: 5 })
+              .end(function (err, res) {
+                expect(res.body).to.be.an("array");
+                expect(res).to.have.status(200);
+                res.body.forEach((transaction) => {
+                  (transaction.supporting_transactions || []).forEach(
+                    (supporting_transaction) => {
+                      expect(supporting_transaction).to.be.a("string");
+                    }
+                  );
+                });
+                done();
+              });
+          });
+        });
+        describe("Get all transactions (expanded)", () => {
+          it("All transactions returned should be expanded", (done) => {
+            chai
+              .request(API_URL)
+              .get(`${CRYPTO_ENDPOINT}`)
+              .query({ expanded: true, limit: 5 })
+              .end(function (err, res) {
+                expect(res.body).to.be.an("array");
+                expect(res).to.have.status(200);
+                res.body.forEach((transaction) => {
+                  (transaction.supporting_transactions || []).forEach(
+                    (supporting_transaction) => {
+                      expect(supporting_transaction).to.be.an("object");
+                    }
+                  );
+                });
+                done();
+              });
+          });
+        });
+        describe("Get all transactions (hide pending)", () => {
+          it("All transactions except those which are pending should be returned", (done) => {
+            chai
+              .request(API_URL)
+              .get(`${CRYPTO_ENDPOINT}`)
+              .query({ limit: 5, expanded: true, hidePending: true })
+              .end(function (err, res) {
+                expect(res.body).to.be.an("array");
+                expect(res).to.have.status(200);
+                res.body.forEach((transaction) => {
+                  (transaction.supporting_transactions || []).forEach(
+                    (supporting_transaction) => {
+                      expect(supporting_transaction).to.be.an("object");
+                      if (supporting_transaction.pending) {
+                        expect(supporting_transaction.pending).to.equal(false);
+                      }
+                    }
+                  );
+                });
+                done();
+              });
+          });
+        });
+        describe("Get all transactions (hide invalid)", () => {
+          it("All transactions except those which are invalid should be returned", (done) => {
+            chai
+              .request(API_URL)
+              .get(`${CRYPTO_ENDPOINT}`)
+              .query({ limit: 5, expanded: true, hideInvalid: true })
+              .end(function (err, res) {
+                expect(res.body).to.be.an("array");
+                expect(res).to.have.status(200);
+                res.body.forEach((transaction) => {
+                  (transaction.supporting_transactions || []).forEach(
+                    (supporting_transaction) => {
+                      expect(supporting_transaction).to.be.an("object");
+                      expect(supporting_transaction.valid).to.equal(true);
+                    }
+                  );
+                });
+                done();
+              });
+          });
+        });
+      });
+    });
+    describe(`GET ${CRYPTO_ENDPOINT}/:address`, () => {
+      describe(`Transaction error validations`, () => {
+        describe("Value validation", () => {
+          it("Non existent transaction should throw an error", (done) => {
+            chai
+              .request(API_URL)
+              .get(`${CRYPTO_ENDPOINT}/${uuidv4()}`)
+              .end(function (err, res) {
+                expect(res.body.errors).to.be.an("array");
+                expect(res).to.have.status(400);
+                done();
+              });
+          });
+          it("Empty transaction signature should throw an error", (done) => {
+            chai
+              .request(API_URL)
+              .get(`${CRYPTO_ENDPOINT}/      /`)
+              .end(function (err, res) {
+                expect(res.body.errors).to.be.an("array");
+                expect(res).to.have.status(400);
+                done();
+              });
+          });
+        });
+      });
+      describe("Transaction success validations", function () {
+        before((done) => setTimeout(done), 2500);
+        it("Transaction should be retrieved successfully", (done) => {
+          chai
+            .request(API_URL)
+            .get(
+              `${CRYPTO_ENDPOINT}/${
+                createdVariables.transactions.transaction[identifiers.W1000]
+                  .coinbase.payload.signature
+              }`
+            )
+            .end(function (err, res) {
+              expect(res).to.have.status(200);
+              done();
+            });
+        });
+        it("Transaction should be retrieved and expanded successfully", (done) => {
+          chai
+            .request(API_URL)
+            .get(
+              `${CRYPTO_ENDPOINT}/${
+                createdVariables.transactions.transaction[
+                  identifiers.CantTransferW1000
+                ].W0.payload.signature
+              }`
+            )
+            .query({ expanded: true })
+            .end(function (err, res) {
+              expect(res).to.have.status(200);
+              (res.body.supporting_transactions || []).forEach(
+                (supporting_transaction) => {
+                  expect(supporting_transaction).to.be.an("object");
+                }
+              );
+              done();
+            });
+        });
+      });
+    });
+    describe(`POST ${CRYPTO_ENDPOINT}`, () => {
+      describe("Transaction errors validations", () => {
+        describe("Empty values", () => {
+          it("Empty request should throw an error", (done) => {
+            chai
+              .request(API_URL)
+              .post(`${CRYPTO_ENDPOINT}`)
+              .send({})
+              .end(function (err, res) {
+                expect(res.body.errors).to.be.an("array");
+                expect(res).to.have.status(400);
+                done();
+              });
+          });
+          it("Empty recipient should throw an error", (done) => {
+            chai
+              .request(API_URL)
+              .post(`${CRYPTO_ENDPOINT}`)
+              .send({ amount: 10, sender: "Anyone", signature: "Anything" })
+              .end(function (err, res) {
+                expect(res.body.errors).to.be.an("array");
+                expect(
+                  _.some(res.body.errors, {
+                    param: "recipient",
+                    location: "body",
+                  })
+                ).to.be.true;
+                expect(res).to.have.status(400);
+                done();
+              });
+          });
+          it("Empty amount should throw an error", (done) => {
+            createTransaction({
+              senderAlias: "Anyone",
+              recipientAlias: "Another User",
+              callback: ({ res }) => {
+                expect(res.body.errors).to.be.an("array");
+                expect(
+                  _.some(res.body.errors, { param: "amount", location: "body" })
+                ).to.be.true;
+                expect(res).to.have.status(400);
+                done();
+              },
+            });
+          });
+          it("Empty signature should throw an error", (done) => {
+            createTransaction({
+              senderAlias: "Anyone",
+              recipientAlias: "Another User",
+              amount: 10,
+              signature: "",
+              callback: ({ res }) => {
+                expect(res.body.errors).to.be.an("array");
+                expect(
+                  _.some(res.body.errors, {
+                    param: "signature",
+                    location: "body",
+                  })
+                ).to.be.true;
+                expect(res).to.have.status(400);
+                done();
+              },
+            });
+          });
+        });
+        describe("Value validation", () => {
+          it("Negative transaction amount should throw an error", (done) => {
+            createTransaction({
+              senderAlias: "Anyone",
+              recipientAlias: "Another User",
+              amount: -10,
+              callback: ({ res }) => {
+                expect(res.body.errors).to.be.an("array");
+                expect(
+                  _.some(res.body.errors, { param: "amount", location: "body" })
+                ).to.be.true;
+                expect(res).to.have.status(400);
+                done();
+              },
+            });
+          });
+          it("Valid thru transaction date without ISO 8061 format should throw an error", (done) => {
+            createTransaction({
+              senderAlias: "Anyone",
+              recipientAlias: "Another User",
+              amount: 10,
+              valid_thru: "2021-17-04",
+              callback: ({ res }) => {
+                expect(res.body.errors).to.be.an("array");
+                expect(
+                  _.some(res.body.errors, {
+                    param: "valid_thru",
+                    location: "body",
+                  })
+                ).to.be.true;
+                expect(res).to.have.status(400);
+                done();
+              },
+            });
+          });
+          it("Past valid thru transaction date should throw an error", (done) => {
+            createTransaction({
+              senderAlias: "Anyone",
+              recipientAlias: "Another User",
+              amount: 10,
+              valid_thru: "2021-04-17T03:42:03.642Z",
+              callback: ({ res }) => {
+                expect(res.body.errors).to.be.an("array");
+                expect(
+                  _.some(res.body.errors, {
+                    param: "valid_thru",
+                    location: "body",
+                  })
+                ).to.be.true;
+                expect(res).to.have.status(400);
+                done();
+              },
+            });
+          });
+        });
+        describe("Transaction validation", () => {
+          it("Already existing transaction with same signature should throw an error", (done) => {
+            chai
+              .request(API_URL)
+              .post(`${CRYPTO_ENDPOINT}`)
+              .send({
+                amount: 10,
+                recipient: identifiers.W1000,
+                signature:
+                  createdVariables.transactions.transaction[
+                    identifiers.CantTransferW1000
+                  ].W0.payload.signature,
+              })
+              .end(function (err, res) {
+                expect(res.body.errors).to.be.an("array");
+                expect(
+                  _.some(res.body.errors, {
+                    param: "signature",
+                    location: "body",
+                  })
+                ).to.be.true;
+                expect(res).to.have.status(400);
+                done();
+              });
+          });
+          it("Non existing sender should throw an error", (done) => {
+            createTransaction({
+              senderAlias: uuidv4(),
+              recipientAlias: "W1000",
+              amount: 10,
+              callback: ({ res }) => {
+                expect(res.body.errors).to.be.an("array");
+                expect(
+                  _.some(res.body.errors, { param: "sender", location: "body" })
+                ).to.be.true;
+                expect(res).to.have.status(400);
+                done();
+              },
+            });
+          });
+          it("Non existing recipient should throw an error", (done) => {
+            createTransaction({
+              senderAlias: "W1000",
+              recipientAlias: uuidv4(),
+              amount: 10,
+              callback: ({ res }) => {
+                expect(res.body.errors).to.be.an("array");
+                expect(
+                  _.some(res.body.errors, {
+                    param: "recipient",
+                    location: "body",
+                  })
+                ).to.be.true;
+                expect(res).to.have.status(400);
+                done();
+              },
+            });
+          });
+          it("Inactive recipient should throw an error", (done) => {
+            createTransaction({
+              senderAlias: "W1000",
+              recipientAlias: "Inactive",
+              amount: 1,
+              callback: ({ res }) => {
+                expect(res.body.errors).to.be.an("array");
+                expect(
+                  _.some(res.body.errors, {
+                    param: "recipient",
+                    location: "body",
+                  })
+                ).to.be.true;
+                expect(res).to.have.status(400);
+                done();
+              },
+            });
+          });
+          it("Insufficient balance should throw an error", (done) => {
+            createTransaction({
+              senderAlias: "W1000",
+              recipientAlias: "W0",
+              amount: 1e308,
+              callback: ({ res }) => {
+                expect(res.body.errors).to.be.an("array");
+                expect(
+                  _.some(res.body.errors, { param: "amount", location: "body" })
+                ).to.be.true;
+                expect(res).to.have.status(400);
+                done();
+              },
+            });
+          });
+          it("Insufficient balance due to pending transaction should throw an error", (done) => {
+            createTransaction({
+              senderAlias: "W1000",
+              recipientAlias: "W0",
+              amount: 650,
+              callback: ({ res }) => {
+                expect(res.body.errors).to.be.an("array");
+                expect(
+                  _.some(res.body.errors, { param: "amount", location: "body" })
+                ).to.be.true;
+                expect(res).to.have.status(400);
+                done();
+              },
+            });
+          });
+          it("Coinbase transaction without permissions should throw an error", (done) => {
+            createTransaction({
+              recipientAlias: "NoCoinbase",
+              amount: 650,
+              callback: ({ res }) => {
+                expect(res.body.errors).to.be.an("array");
+                expect(
+                  _.some(res.body.errors, {
+                    param: "recipient",
+                    location: "body",
+                  })
+                ).to.be.true;
+                expect(res).to.have.status(400);
+                done();
+              },
+            });
+          });
+          it("Transfer to explicitly denied recipient should throw an error", (done) => {
+            createTransaction({
+              recipientAlias: "W1000",
+              senderAlias: "CantTransferW1000",
+              amount: 100,
+              callback: ({ res }) => {
+                expect(res.body.errors).to.be.an("array");
+                expect(
+                  _.some(res.body.errors, {
+                    param: "sender",
+                    location: "body",
+                  })
+                ).to.be.true;
+                expect(res).to.have.status(400);
+                done();
+              },
+            });
+          });
+        });
+      });
+      describe("Transaction success validations", function () {
+        this.slow(15000);
+        this.timeout(20000);
+        it("Transaction should be created successfully", (done) => {
+          createTransaction({
+            amount: 1,
+            senderAlias: "W1000",
+            recipientAlias: "W0",
+            callback: ({ res }) => {
+              expect(res).to.have.status(201);
+              setTimeout(() => {
+                chai
+                  .request(API_URL)
+                  .get(`${USERS_ENDPOINT}/${identifiers.W0}`)
+                  .end(function (err, res) {
+                    expect(res).to.have.status(200);
+                    res.body.should.have.property("balance").equal(2);
+                    done();
+                  });
+              }, 3500);
+            },
+          });
+        });
+        it("Pending valid thru transaction should be created successfully", (done) => {
+          const now = new Date();
+          now.setSeconds(now.getSeconds() + 10);
+          createTransaction({
+            amount: 1,
+            senderAlias: "W1000",
+            recipientAlias: "W0",
+            valid_thru: now.toISOString(),
+            pending: true,
+            callback: ({ res }) => {
+              createdVariables.transactions.transaction[
+                identifiers.W1000
+              ].expiringTransaction = res.body;
+              expect(res).to.have.status(201);
+              setTimeout(() => {
+                chai
+                  .request(API_URL)
+                  .get(`${USERS_ENDPOINT}/${identifiers.W0}`)
+                  .end(function (err, res) {
+                    expect(res).to.have.status(200);
+                    res.body.should.have.property("balance").equal(2);
+                    done();
+                  });
+              }, 3500);
+            },
+          });
+        });
+        it("Pending transaction should not change user's balance", (done) => {
+          createTransaction({
+            amount: 1,
+            senderAlias: "W1000",
+            recipientAlias: "W0",
+            pending: true,
+            callback: ({ res }) => {
+              expect(res).to.have.status(201);
+              setTimeout(() => {
+                chai
+                  .request(API_URL)
+                  .get(`${USERS_ENDPOINT}/${identifiers.W0}`)
+                  .end(function (err, res) {
+                    expect(res).to.have.status(200);
+                    res.body.should.have.property("balance").equal(2);
+                    done();
+                  });
+              }, 3500);
+            },
+          });
+        });
+      });
+    });
+    describe(`PUT ${CRYPTO_ENDPOINT}/:address`, () => {
+      describe(`Transaction error validations`, () => {
+        describe("Value validation", () => {
+          it("Non existent transaction should throw an error", (done) => {
+            chai
+              .request(API_URL)
+              .put(`${CRYPTO_ENDPOINT}/${uuidv4()}`)
+              .end(function (err, res) {
+                expect(res.body.errors).to.be.an("array");
+                expect(res).to.have.status(400);
+                done();
+              });
+          });
+        });
+        describe("Transaction validation", () => {
+          it("Non pending transaction should throw an error", (done) => {
+            chai
+              .request(API_URL)
+              .put(
+                `${CRYPTO_ENDPOINT}/${
+                  createdVariables.transactions.transaction[identifiers.W1000]
+                    .coinbase.payload.signature
+                }`
+              )
+              .end(function (err, res) {
+                expect(res.body.errors).to.be.an("array");
+                expect(res).to.have.status(400);
+                done();
+              });
+          });
+        });
+      });
+      describe("Transaction success validations", function () {
+        this.slow(20000);
+        this.timeout(25000);
+        it("Transaction should be approved successfully", (done) => {
+          createTransaction({
+            amount: 1,
+            senderAlias: "W1000",
+            recipientAlias: "ToDeleteW1000",
+            pending: true,
+            callback: ({ res }) => {
+              expect(res).to.have.status(201);
+              const createdTransaction = res.body.payload;
+              setTimeout(() => {
+                chai
+                  .request(API_URL)
+                  .put(`${CRYPTO_ENDPOINT}/${createdTransaction.signature}`)
+                  .query({ approve: true })
+                  .end(function (err, res) {
+                    expect(res).to.have.status(200);
+                    setTimeout(() => {
+                      chai
+                        .request(API_URL)
+                        .get(
+                          `${USERS_ENDPOINT}/${createdVariables.createdUserToDeleteW1000}`
+                        )
+                        .end(function (err, res) {
+                          expect(res).to.have.status(200);
+                          res.body.should.have.property("balance").equal(1);
+                          done();
+                        });
+                    }, 3500);
+                  });
+              }, 3500);
+            },
+          });
+        });
+        it("Transaction should be rejected successfully", (done) => {
+          createTransaction({
+            amount: 1,
+            senderAlias: "W1000",
+            recipientAlias: "NoCoinbase",
+            pending: true,
+            callback: ({ res }) => {
+              expect(res).to.have.status(201);
+              const createdTransaction = res.body.payload;
+              setTimeout(() => {
+                chai
+                  .request(API_URL)
+                  .put(`${CRYPTO_ENDPOINT}/${createdTransaction.signature}`)
+                  .query({ approve: false })
+                  .end(function (err, res) {
+                    expect(res).to.have.status(200);
+                    setTimeout(() => {
+                      chai
+                        .request(API_URL)
+                        .get(`${USERS_ENDPOINT}/${identifiers.NoCoinbase}`)
+                        .end(function (err, res) {
+                          expect(res).to.have.status(200);
+                          res.body.should.have.property("balance").equal(0);
+                          done();
+                        });
+                    }, 3500);
+                  });
+              }, 3500);
+            },
+          });
+        });
+      });
+    });
+  });
+  describe(`${USERS_ENDPOINT} Tests`, () => {
+    describe(`GET ${USERS_ENDPOINT}`, () => {
+      describe(`Successful requests`, () => {
+        describe("Get all users (non expanded)", () => {
+          it("Non expanded users should be returned", (done) => {
+            chai
+              .request(API_URL)
+              .get(`${USERS_ENDPOINT}`)
+              .query({ limit: 5 })
+              .end(function (err, res) {
+                expect(res.body).to.be.an("array");
+                expect(res).to.have.status(200);
+                done();
+              });
+          });
+        });
+        describe("Get all users (expanded)", () => {
+          it("All users returned should be expanded", (done) => {
+            chai
+              .request(API_URL)
+              .get(`${USERS_ENDPOINT}`)
+              .query({ expanded: true, limit: 5 })
+              .end(function (err, res) {
+                expect(res.body).to.be.an("array");
+                /* res.body.forEach(user => {
+                  const retrievedUser = new User(user);
+                  console.log("USER LT", );
+                  (Array.from(retrievedUser.lastest_transactions)||[]).forEach(transaction => expect(transaction).to.be.an("object"))
+                  (Array.from(retrievedUser.pending_transactions)||[]).forEach(transaction => expect(transaction).to.be.an("object"))
+                }) */
+                expect(res).to.have.status(200);
+                done();
+              });
+          });
+        });
+      });
+    });
+    describe(`GET ${USERS_ENDPOINT}/:address`, () => {
+      describe(`User error validations`, () => {
+        describe("Value validation", () => {
+          it("Non existent user should throw an error", (done) => {
+            chai
+              .request(API_URL)
+              .get(`${USERS_ENDPOINT}/${uuidv4()}`)
+              .end(function (err, res) {
+                //expect(res.body.errors).to.be.an("array");
+                expect(res).to.have.status(400);
+                done();
+              });
+          });
+          it("Empty user address should throw an error", (done) => {
+            chai
+              .request(API_URL)
+              .get(`${USERS_ENDPOINT}/      /`)
+              .end(function (err, res) {
+                expect(res.body.errors).to.be.an("array");
+                expect(res).to.have.status(400);
+                done();
+              });
+          });
+        });
+      });
+      describe("User success validations", function () {
+        it("User should be retrieved successfully", (done) => {
+          chai
+            .request(API_URL)
+            .get(`${USERS_ENDPOINT}/${createdVariables.createdUserW1000}`)
+            .end(function (err, res) {
+              expect(res).to.have.status(200);
+              expect(res.body).to.be.an("object");
+              done();
+            });
+        });
+        it("User should be retrieved and expanded successfully", (done) => {
+          chai
+            .request(API_URL)
+            .get(`${USERS_ENDPOINT}/${createdVariables.createdUserW1000}`)
+            .query({ expanded: true })
+            .end(function (err, res) {
+              expect(res).to.have.status(200);
+              const retrievedUser = new User(res.body);
+              expect(res.body).to.be.an("object");
+              /*  (Array.from(retrievedUser.lastest_transactions)).forEach(transaction => expect(transaction).to.be.an("object"))
+              (Array.from(retrievedUser.pending_transactions)).forEach(transaction => expect(transaction).to.be.an("object")) */
+              done();
+            });
+        });
+      });
+    });
+    describe(`POST ${USERS_ENDPOINT}`, () => {
+      describe("User errors validations", () => {
+        describe("Empty values", () => {
+          it("Empty request should throw an error", (done) => {
+            chai
+              .request(API_URL)
+              .post(`${USERS_ENDPOINT}`)
+              .send({})
+              .end(function (err, res) {
+                expect(res.body.errors).to.be.an("array");
+                expect(res).to.have.status(400);
+                done();
+              });
+          });
+          it("Empty address should throw an error", (done) => {
+            chai
+              .request(API_URL)
+              .post(`${USERS_ENDPOINT}`)
+              .send({ public_key: uuidv4() })
+              .end(function (err, res) {
+                expect(res.body.errors).to.be.an("array");
+                expect(
+                  _.some(res.body.errors, {
+                    param: "address",
+                    location: "body",
+                  })
+                ).to.be.true;
+                expect(res).to.have.status(400);
+                done();
+              });
+          });
+          it("Empty public_key should throw an error", (done) => {
+            chai
+              .request(API_URL)
+              .post(`${USERS_ENDPOINT}`)
+              .send({ address: uuidv4() })
+              .end(function (err, res) {
+                expect(res.body.errors).to.be.an("array");
+                expect(
+                  _.some(res.body.errors, {
+                    param: "public_key",
+                    location: "body",
+                  })
+                ).to.be.true;
+                expect(res).to.have.status(400);
+                done();
+              });
+          });
+        });
+        describe("Value validation", () => {
+          it("Permission value that is not boolean should throw an error", (done) => {
+            chai
+              .request(API_URL)
+              .post(`${USERS_ENDPOINT}`)
+              .send({
+                address: uuidv4(),
+                public_key: uuidv4(),
+                permissions: { coinbase: "TRUE" },
+              })
+              .end(function (err, res) {
+                expect(res.body.errors).to.be.an("array");
+                expect(
+                  _.some(res.body.errors, {
+                    param: "permissions",
+                    location: "body",
+                  })
+                ).to.be.true;
+                expect(res).to.have.status(400);
+                done();
+              });
+          });
+          it("Nested permissions value (transfer_to) that is not boolean should throw an error", (done) => {
+            chai
+              .request(API_URL)
+              .post(`${USERS_ENDPOINT}`)
+              .send({
+                address: uuidv4(),
+                public_key: uuidv4(),
+                permissions: { transfer_to: { [identifiers.W1000]: ["true"] } },
+              })
+              .end(function (err, res) {
+                expect(res.body.errors).to.be.an("array");
+                expect(
+                  _.some(res.body.errors, {
+                    param: "permissions",
+                    location: "body",
+                  })
+                ).to.be.true;
+                expect(res).to.have.status(400);
+                done();
+              });
+          });
+          it("Return_to value that is not string should throw an error", (done) => {
+            chai
+              .request(API_URL)
+              .post(`${USERS_ENDPOINT}`)
+              .send({
+                address: uuidv4(),
+                public_key: uuidv4(),
+                permissions: { coinbase: true },
+                return_to: { default: [uuidv4()] },
+              })
+              .end(function (err, res) {
+                expect(res.body.errors).to.be.an("array");
+                expect(
+                  _.some(res.body.errors, {
+                    param: "return_to",
+                    location: "body",
+                  })
+                ).to.be.true;
+                expect(res).to.have.status(400);
+                done();
+              });
+          });
+        });
+        describe("User validation", () => {
+          it("Already existing user with same address should throw an error", (done) => {
+            chai
+              .request(API_URL)
+              .post(`${USERS_ENDPOINT}`)
+              .send({
+                address: identifiers.W1000,
+                public_key: identifiers.W1000,
+              })
+              .end(function (err, res) {
+                expect(res.body.errors).to.be.an("array");
+                expect(
+                  _.some(res.body.errors, {
+                    param: "address",
+                    location: "body",
+                  })
+                ).to.be.true;
+                expect(res).to.have.status(400);
+                done();
+              });
+          });
+          it("Return_to user that does not exist should throw an error", (done) => {
+            chai
+              .request(API_URL)
+              .post(`${USERS_ENDPOINT}`)
+              .send({
+                address: uuidv4(),
+                public_key: uuidv4(),
+                permissions: { coinbase: true },
+                return_to: { default: uuidv4() },
+              })
+              .end(function (err, res) {
+                expect(res.body.errors).to.be.an("array");
+                expect(
+                  _.some(res.body.errors, {
+                    param: "return_to",
+                    location: "body",
+                  })
+                ).to.be.true;
+                expect(res).to.have.status(400);
+                done();
+              });
+          });
+        });
+      });
+      describe("User success validations", function () {
+        this.slow(15000);
+        this.timeout(20000);
+        it("User should be created successfully", (done) => {
+          chai
+            .request(API_URL)
+            .post(`${USERS_ENDPOINT}`)
+            .send({
+              address: uuidv4(),
+              public_key: uuidv4(),
+              permissions: { coinbase: true },
+            })
+            .end(function (err, res) {
+              expect(res).to.have.status(201);
+              done();
+            });
+        });
+      });
+    });
+    describe(`PUT ${USERS_ENDPOINT}`, () => {
+      describe("User errors validations", () => {
+        describe("Value validation", () => {
+          it("Permission value that is not boolean should throw an error", (done) => {
+            chai
+              .request(API_URL)
+              .put(`${USERS_ENDPOINT}/${identifiers.W1000}`)
+              .send({
+                permissions: { coinbase: "TRUE" },
+              })
+              .end(function (err, res) {
+                expect(res.body.errors).to.be.an("array");
+                expect(
+                  _.some(res.body.errors, {
+                    param: "permissions",
+                    location: "body",
+                  })
+                ).to.be.true;
+                expect(res).to.have.status(400);
+                done();
+              });
+          });
+          it("Nested permissions value (transfer_to) that is not boolean should throw an error", (done) => {
+            chai
+              .request(API_URL)
+              .put(`${USERS_ENDPOINT}/${identifiers.W1000}`)
+              .send({
+                permissions: { transfer_to: { [identifiers.W1000]: ["true"] } },
+              })
+              .end(function (err, res) {
+                expect(res.body.errors).to.be.an("array");
+                expect(
+                  _.some(res.body.errors, {
+                    param: "permissions",
+                    location: "body",
+                  })
+                ).to.be.true;
+                expect(res).to.have.status(400);
+                done();
+              });
+          });
+          it("Return_to value that is not string should throw an error", (done) => {
+            chai
+              .request(API_URL)
+              .put(`${USERS_ENDPOINT}/${identifiers.W1000}`)
+              .send({
+                permissions: { coinbase: true },
+                return_to: { default: [uuidv4()] },
+              })
+              .end(function (err, res) {
+                expect(res.body.errors).to.be.an("array");
+                expect(
+                  _.some(res.body.errors, {
+                    param: "return_to",
+                    location: "body",
+                  })
+                ).to.be.true;
+                expect(res).to.have.status(400);
+                done();
+              });
+          });
+        });
+        describe("User validation", () => {
+          it("Non existing user should throw an error", (done) => {
+            chai
+              .request(API_URL)
+              .put(`${USERS_ENDPOINT}/${uuidv4()}`)
+              .send({
+                permissions: { coinbase: true },
+              })
+              .end(function (err, res) {
+                expect(res.body.errors).to.be.an("array");
+                expect(
+                  _.some(res.body.errors, {
+                    param: "address",
+                    location: "params",
+                  })
+                ).to.be.true;
+                expect(res).to.have.status(400);
+                done();
+              });
+          });
+          it("Return_to user that does not exist should throw an error", (done) => {
+            chai
+              .request(API_URL)
+              .put(`${USERS_ENDPOINT}/${identifiers.W1000}`)
+              .send({
+                permissions: { coinbase: true },
+                return_to: { default: uuidv4() },
+              })
+              .end(function (err, res) {
+                expect(res.body.errors).to.be.an("array");
+                expect(
+                  _.some(res.body.errors, {
+                    param: "return_to",
+                    location: "body",
+                  })
+                ).to.be.true;
+                expect(res).to.have.status(400);
+                done();
+              });
+          });
+        });
+      });
+      describe("User success validations", function () {
+        this.slow(15000);
+        this.timeout(20000);
+        it("User should be updated successfully", (done) => {
+          chai
+            .request(API_URL)
+            .put(`${USERS_ENDPOINT}/${identifiers.W1000}`)
+            .send({
+              role: "New role",
+            })
+            .end(function (err, res) {
+              expect(res).to.have.status(200);
+              done();
+            });
+        });
+      });
+    });
+    describe(`DELETE ${USERS_ENDPOINT}`, () => {
+      describe("User errors validations", () => {
+        describe("Value validation", () => {
+          it("Empty delete reason should throw an error", (done) => {
+            chai
+              .request(API_URL)
+              .delete(`${USERS_ENDPOINT}/${identifiers.ToDeleteW1000}`)
+              .send({})
+              .end(function (err, res) {
+                expect(res.body.errors).to.be.an("array");
+                expect(
+                  _.some(res.body.errors, {
+                    param: "reason",
+                    location: "body",
+                  })
+                ).to.be.true;
+                expect(res).to.have.status(400);
+                done();
+              });
+          });
+        });
+        describe("User validation", () => {
+          it("Non existing user should throw an error", (done) => {
+            chai
+              .request(API_URL)
+              .delete(`${USERS_ENDPOINT}/${uuidv4()}`)
+              .send({ reason: "default" })
+              .end(function (err, res) {
+                expect(res.body.errors).to.be.an("array");
+                expect(
+                  _.some(res.body.errors, {
+                    param: "address",
+                    location: "params",
+                  })
+                ).to.be.true;
+                expect(res).to.have.status(400);
+                done();
+              });
+          });
+          it("Non existing delete reason should throw an error", (done) => {
+            chai
+              .request(API_URL)
+              .delete(`${USERS_ENDPOINT}/${identifiers.ToDeleteW1000}`)
+              .send({
+                reason: "undefined reason",
+              })
+              .end(function (err, res) {
+                expect(res.body.errors).to.be.an("array");
+                expect(
+                  _.some(res.body.errors, {
+                    param: "reason",
+                    location: "body",
+                  })
+                ).to.be.true;
+                expect(res).to.have.status(400);
+                done();
+              });
+          });
+          it("Inactive delete reason user should throw an error", (done) => {
+            chai
+              .request(API_URL)
+              .delete(`${USERS_ENDPOINT}/${identifiers.ToDeleteW1000}`)
+              .send({
+                reason: "inactive",
+              })
+              .end(function (err, res) {
+                expect(res.body.errors).to.be.an("array");
+                expect(
+                  _.some(res.body.errors, {
+                    param: "reason",
+                    location: "body",
+                  })
+                ).to.be.true;
+                expect(res).to.have.status(400);
+                done();
+              });
+          });
+        });
+      });
+      describe("User success validations", function () {
+        this.slow(15000);
+        this.timeout(20000);
+        it("User should be deleted successfully", (done) => {
+          chai
+            .request(API_URL)
+            .delete(`${USERS_ENDPOINT}/${identifiers.ToDeleteW1000}`)
+            .send({
+              reason: "default",
+            })
+            .end(function (err, res) {
+              expect(res).to.have.status(201);
+              done();
+            });
+        });
+      });
+    });
+  });
+  describe(`${ENFORCER_ENDPOINT} Tests`, () => {
+    describe(`GET ${ENFORCER_ENDPOINT}`, () => {
+      describe("Enforcer success validations", function () {
+        it("Pending valid thru transaction should be deleted successfully", (done) => {
+          chai
+            .request(API_URL)
+            .get(`${USERS_ENDPOINT}/${identifiers.W1000}`)
+            .end(function (err, res) {
+              expect(res).to.have.status(200);
+              expect(res.body.pending_transactions)
+                .to.be.an("array")
+                .that.does.include(
+                  createdVariables.transactions.transaction[identifiers.W1000]
+                    .expiringTransaction.payload.signature
+                );
+              chai
+                .request(API_URL)
+                .get(`${ENFORCER_ENDPOINT}/`)
+                .end(function (err, res) {
+                  expect(res).to.have.status(200);
+                  setTimeout(() => {
+                    chai
+                      .request(API_URL)
+                      .get(`${USERS_ENDPOINT}/${identifiers.W1000}`)
+                      .end(function (err, res) {
+                        expect(res).to.have.status(200);
+                        expect(res.body.pending_transactions)
+                          .to.be.an("array")
+                          .that.does.not.include(
+                            createdVariables.transactions.transaction[
+                              identifiers.W1000
+                            ].expiringTransaction.payload.signature
+                          );
+                        done();
+                      });
+                  }, 3500);
+                  done();
+                });
+            });
+        });
+      });
+    });
+  });
+});

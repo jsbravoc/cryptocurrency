@@ -1,0 +1,176 @@
+# Javascript Node CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-javascript/ for more details
+#
+version: 2.1
+executors:
+  docker-publisher:
+    environment:
+      API_IMAGE: jsbravoc/crypto-api
+      TP_IMAGE: jsbravoc/crypto-tp
+    docker:
+      - image: circleci/buildpack-deps:stretch
+orbs:
+  node: circleci/node@4.2.1
+jobs:
+  test-api:
+    machine: true
+    working_directory: ~/cryptocurrency/src/app/backend
+    steps:
+      - checkout:
+            path: ~/cryptocurrency
+      - run: 
+          name: Verify git commit message
+          command: | 
+              commit_message=$(git log -1 HEAD --pretty=format:%s)
+              if [[ $commit_message == *"SKIP_CI_TEST"* ]]; then
+              curl --request POST \
+                --url https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID/cancel \
+                --header "Circle-Token: ${CIRCLE_TOKEN}"
+              fi
+      - run:
+          name: Install node@v10.24
+          command: |
+            set +x
+            source ~/.bashrc
+            nvm install 10
+            NODE_DIR=$(dirname $(which node))
+            echo "export PATH=$NODE_DIR:\$PATH" >> $BASH_ENV
+
+      - run: 
+          command: node --version
+          when: always
+      - run: npm install -g npm
+      - restore_cache:
+          keys:
+            - api-deps-{{ checksum "package-lock.json" }}
+      - run: npm install
+      - save_cache:
+          key: api-deps-{{ checksum "package-lock.json" }}
+          paths:
+            - node_modules
+      
+      - restore_cache:
+          keys:
+            - tp-deps-{{ checksum "../transaction_processor/package-lock.json" }}
+      - run: npm --prefix ../transaction_processor install
+      - save_cache:
+          key: tp-deps-{{ checksum "../transaction_processor/package-lock.json" }}
+          paths:
+            - ../transaction_processor/node_modules
+
+      - run:
+          name: Start container
+          command: |
+            set -x
+            docker-compose -f ../../../blockchain_network/docker-compose-dev/sawtooth/docker-compose.yaml up -d
+
+      - run: sleep 3
+
+      - run: 
+          name: Start transaction processor
+          command: npm --prefix ../transaction_processor run start
+          background: true
+
+      - run: sleep 3
+
+      - run: 
+          name: Run tests
+          command: npm run test-codecov && npm run coverage --token=${CODECOV_TOKEN}
+
+      - run:
+          name: Stop container
+          command: |
+            set -x
+            docker-compose -f ../../../blockchain_network/docker-compose-dev/sawtooth/docker-compose.yaml down   
+  build-api:
+    executor: docker-publisher
+    working_directory: ~/cryptocurrency/build/app/backend
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Build Docker image
+          command: |
+            docker build -t $API_IMAGE:latest .
+      - run:
+          name: Archive Docker image
+          command: docker save -o api_image.tar $API_IMAGE
+      - persist_to_workspace:
+          root: .
+          paths:
+            - ./api_image.tar
+  publish-api:
+    executor: docker-publisher
+    steps:
+      - attach_workspace:
+          at: /tmp/workspace
+      - setup_remote_docker
+      - run:
+          name: Load archived Docker image
+          command: docker load -i /tmp/workspace/api_image.tar
+      - run:
+          name: Publish Docker Image to Docker Hub
+          command: |
+            echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+            API_TAG="0.0.${CIRCLE_BUILD_NUM}"
+            docker tag $API_IMAGE:latest $API_IMAGE:$API_TAG
+            docker push $API_IMAGE:latest
+            docker push $API_IMAGE:$API_TAG
+  build-tp:
+    executor: docker-publisher
+    working_directory: ~/cryptocurrency/build/app/transaction_processor
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Build Docker image
+          command: |
+            docker build -t $TP_IMAGE:latest .
+      - run:
+          name: Archive Docker tp_image
+          command: docker save -o tp_image.tar $TP_IMAGE
+      - persist_to_workspace:
+          root: .
+          paths:
+            - ./tp_image.tar
+  publish-tp:
+    executor: docker-publisher
+    steps:
+      - attach_workspace:
+          at: /tmp/workspace
+      - setup_remote_docker
+      - run:
+          name: Load archived Docker image
+          command: docker load -i /tmp/workspace/tp_image.tar
+      - run:
+          name: Publish Docker Image to Docker Hub
+          command: |
+            echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+            TP_TAG="0.0.${CIRCLE_BUILD_NUM}"
+            docker tag $TP_IMAGE:latest $TP_IMAGE:$TP_TAG
+            docker push $TP_IMAGE:latest
+            docker push $TP_IMAGE:$TP_TAG
+
+workflows:
+  verify_and_publish:
+    jobs:
+      - test-api
+      - build-api:
+          filters:
+            branches:
+              only: main
+          requires:
+            - test-api
+      - publish-api:
+          requires:
+            - build-api
+      - build-tp:
+          filters:
+            branches:
+              only: main
+          requires:
+            - test-api
+      - publish-tp:
+          requires:
+              - build-tp

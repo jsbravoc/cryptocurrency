@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: models/Transaction.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: models/Transaction.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/* eslint-disable camelcase */
+/* eslint-disable no-param-reassign */
+const { TYPE } = require("../utils/constants");
+const BaseModel = require("./BaseModel");
+
+/**
+ * Represents a transaction of the blockchain.
+ * @constructor
+ * @param {Number} amount - The amount of the transaction.
+ * @param {String} recipient- The address of the recipient of the transaction.
+ * @param {String} [sender] - The address of the sender of the transaction.
+ * @param {String} [description] - The description of the transaction.
+ * @param {Boolean} [valid] - Boolean representing if the transaction is valid or not.
+ * @param {Date} [valid_thru] - Date till which the transaction will be valid.
+ * @param {Array} [supporting_transactions] - The supporting transactions (namely the inputs) of the transaction.
+ * @param {Boolean} [pending] - Boolean representing if the transaction is pending or not.
+ * @param {Date} [creationDate] - Date of the transaction creation.
+ * @param {String} creator - The address of the creator of the transaction.
+ */
+class Transaction extends BaseModel {
+  constructor({
+    amount,
+    recipient,
+    sender,
+    description,
+    valid = true,
+    valid_thru,
+    signature,
+    supporting_transactions,
+    pending,
+    creationDate = new Date(),
+    creator,
+    txid,
+  }) {
+    super(TYPE.TRANSACTION);
+    this.amount = amount;
+    this.recipient = recipient;
+    this.signature = signature || txid;
+    this.creationDate = creationDate;
+    this.valid = valid === null || valid === undefined ? true : valid;
+    this.creator = creator || sender || recipient;
+    if (sender !== null &amp;&amp; sender !== undefined) {
+      this.sender = sender;
+    }
+    if (description !== null &amp;&amp; description !== undefined) {
+      this.description = description;
+    }
+    if (valid_thru !== null &amp;&amp; valid_thru !== undefined) {
+      this.valid_thru = new Date(valid_thru);
+    }
+
+    if (pending !== null &amp;&amp; pending !== undefined) {
+      this.pending = pending;
+    }
+    if (
+      supporting_transactions !== null &amp;&amp;
+      supporting_transactions !== undefined
+    ) {
+      this.supporting_transactions = supporting_transactions;
+    }
+  }
+
+  checkValidity() {
+    if (new Date(this.valid_thru) &lt; new Date()) {
+      return false;
+    }
+    return true;
+  }
+
+  toSignatureObject() {
+    const { amount, recipient, sender, creator } = this;
+    const obj = { amount, recipient, sender, creator };
+    return Transaction.toSortedObject(obj);
+  }
+
+  toSignatureString() {
+    return JSON.stringify(this.toSignatureObject());
+  }
+
+  addSupportingTransaction(transactionSignature) {
+    if (
+      !this.supporting_transactions ||
+      !Array.isArray(this.supporting_transactions)
+    ) {
+      this.supporting_transactions = [];
+    }
+    this.supporting_transactions.push(transactionSignature);
+  }
+}
+
+module.exports = Transaction;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-MongoUtils.html">MongoUtils</a></li></ul><h3>Classes</h3><ul><li><a href="Asset.html">Asset</a></li><li><a href="BaseModel.html">BaseModel</a></li><li><a href="Transaction.html">Transaction</a></li><li><a href="User.html">User</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_putAsset">_putAsset</a></li><li><a href="global.html#_updateTransaction">_updateTransaction</a></li><li><a href="global.html#_updateUser">_updateUser</a></li><li><a href="global.html#buildAssetTransaction">buildAssetTransaction</a></li><li><a href="global.html#buildBatch">buildBatch</a></li><li><a href="global.html#createTransaction">createTransaction</a></li><li><a href="global.html#expandSupportingTransactions">expandSupportingTransactions</a></li><li><a href="global.html#findAllAssets">findAllAssets</a></li><li><a href="global.html#findByAddress">findByAddress</a></li><li><a href="global.html#findTransaction">findTransaction</a></li><li><a href="global.html#findUser">findUser</a></li><li><a href="global.html#getAddress">getAddress</a></li><li><a href="global.html#getSupportingTransactions">getSupportingTransactions</a></li><li><a href="global.html#getTransactionAddress">getTransactionAddress</a></li><li><a href="global.html#getTransactionByAddress">getTransactionByAddress</a></li><li><a href="global.html#getTransactions">getTransactions</a></li><li><a href="global.html#getTransferAddress">getTransferAddress</a></li><li><a href="global.html#getUserAddress">getUserAddress</a></li><li><a href="global.html#getUserByAddress">getUserByAddress</a></li><li><a href="global.html#getUsers">getUsers</a></li><li><a href="global.html#hash512">hash512</a></li><li><a href="global.html#http">http</a></li><li><a href="global.html#inputValidation">inputValidation</a></li><li><a href="global.html#normalizePort">normalizePort</a></li><li><a href="global.html#onError">onError</a></li><li><a href="global.html#onListening">onListening</a></li><li><a href="global.html#port">port</a></li><li><a href="global.html#putAsset">putAsset</a></li><li><a href="global.html#putBatch">putBatch</a></li><li><a href="global.html#server">server</a></li><li><a href="global.html#updateTransaction">updateTransaction</a></li><li><a href="global.html#validate">validate</a></li><li><a href="global.html#validateAssetExistence">validateAssetExistence</a></li><li><a href="global.html#validateExistingTransaction">validateExistingTransaction</a></li><li><a href="global.html#validatePendingTransaction">validatePendingTransaction</a></li><li><a href="global.html#validateTransactionAddress">validateTransactionAddress</a></li><li><a href="global.html#validateTransactionUpdateRequest">validateTransactionUpdateRequest</a></li><li><a href="global.html#validateUserCreation">validateUserCreation</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.6</a> on Fri May 07 2021 12:06:04 GMT-0500 (Colombia Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
