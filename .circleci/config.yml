@@ -43,19 +43,19 @@ jobs:
       - run: npm install -g npm
       - restore_cache:
           keys:
-            - api-deps-{{ checksum "package-lock.json" }}
+            - api-deps-{{ checksum "package.json" }}
       - run: npm install
       - save_cache:
-          key: api-deps-{{ checksum "package-lock.json" }}
+          key: api-deps-{{ checksum "package.json" }}
           paths:
             - node_modules
       
       - restore_cache:
           keys:
-            - tp-deps-{{ checksum "../transaction_processor/package-lock.json" }}
+            - tp-deps-{{ checksum "../transaction_processor/package.json" }}
       - run: npm --prefix ../transaction_processor install
       - save_cache:
-          key: tp-deps-{{ checksum "../transaction_processor/package-lock.json" }}
+          key: tp-deps-{{ checksum "../transaction_processor/package.json" }}
           paths:
             - ../transaction_processor/node_modules
 
