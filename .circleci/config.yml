@@ -85,14 +85,13 @@ jobs:
             docker-compose -f ../../../blockchain_network/docker-compose-dev/sawtooth/docker-compose.yaml down   
   build-api:
     executor: docker-publisher
-    working_directory: ~/cryptocurrency/build/app/backend
     steps:
       - checkout
       - setup_remote_docker
       - run:
           name: Build Docker image
           command: |
-            docker build -t $API_IMAGE:latest .
+            docker build -t $API_IMAGE:latest ~/cryptocurrency/build/app/backend
       - run:
           name: Archive Docker image
           command: docker save -o api_image.tar $API_IMAGE
@@ -119,14 +118,13 @@ jobs:
             docker push $API_IMAGE:$API_TAG
   build-tp:
     executor: docker-publisher
-    working_directory: ~/cryptocurrency/build/app/transaction_processor
     steps:
       - checkout
       - setup_remote_docker
       - run:
           name: Build Docker image
           command: |
-            docker build -t $TP_IMAGE:latest .
+            docker build -t $TP_IMAGE:latest ~/cryptocurrency/build/app/transaction_processor
       - run:
           name: Archive Docker tp_image
           command: docker save -o tp_image.tar $TP_IMAGE
