@@ -85,6 +85,7 @@ jobs:
             docker-compose -f ../../../blockchain_network/docker-compose-dev/sawtooth/docker-compose.yaml down   
   build-api:
     executor: docker-publisher
+    working_directory: ~/cryptocurrency
     steps:
       - checkout
       - setup_remote_docker
@@ -118,6 +119,7 @@ jobs:
             docker push $API_IMAGE:$API_TAG
   build-tp:
     executor: docker-publisher
+    working_directory: ~/cryptocurrency
     steps:
       - checkout
       - setup_remote_docker
@@ -144,8 +146,10 @@ jobs:
       - run:
           name: Publish Docker Image to Docker Hub
           command: |
+            TP_TAG_NUMBER=${CIRCLE_BUILD_NUM}
+            TP_TAG_NUMBER=$((TP_TAG_NUMBER - 1))
             echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
-            TP_TAG="0.0.${CIRCLE_BUILD_NUM}"
+            TP_TAG="0.0.${TP_TAG_NUMBER}"
             docker tag $TP_IMAGE:latest $TP_IMAGE:$TP_TAG
             docker push $TP_IMAGE:latest
             docker push $TP_IMAGE:$TP_TAG
