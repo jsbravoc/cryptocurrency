@@ -43,19 +43,19 @@ jobs:
       - run: npm install -g npm
       - restore_cache:
           keys:
-            - api-deps-{{ checksum "package-lock.json" }}
+            - api-deps-{{ checksum "package.json" }}
       - run: npm install
       - save_cache:
-          key: api-deps-{{ checksum "package-lock.json" }}
+          key: api-deps-{{ checksum "package.json" }}
           paths:
             - node_modules
       
       - restore_cache:
           keys:
-            - tp-deps-{{ checksum "../transaction_processor/package-lock.json" }}
+            - tp-deps-{{ checksum "../transaction_processor/package.json" }}
       - run: npm --prefix ../transaction_processor install
       - save_cache:
-          key: tp-deps-{{ checksum "../transaction_processor/package-lock.json" }}
+          key: tp-deps-{{ checksum "../transaction_processor/package.json" }}
           paths:
             - ../transaction_processor/node_modules
 
@@ -85,6 +85,7 @@ jobs:
             docker-compose -f ../../../blockchain_network/docker-compose-dev/sawtooth/docker-compose.yaml down   
   build-api:
     executor: docker-publisher
+    working_directory: ~/cryptocurrency
     steps:
       - checkout
       - setup_remote_docker
@@ -118,6 +119,7 @@ jobs:
             docker push $API_IMAGE:$API_TAG
   build-tp:
     executor: docker-publisher
+    working_directory: ~/cryptocurrency
     steps:
       - checkout
       - setup_remote_docker
@@ -144,8 +146,10 @@ jobs:
       - run:
           name: Publish Docker Image to Docker Hub
           command: |
+            TP_TAG_NUMBER=${CIRCLE_BUILD_NUM}
+            TP_TAG_NUMBER=$((TP_TAG_NUMBER - 1))
             echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
-            TP_TAG="0.0.${CIRCLE_BUILD_NUM}"
+            TP_TAG="0.0.${TP_TAG_NUMBER}"
             docker tag $TP_IMAGE:latest $TP_IMAGE:$TP_TAG
             docker push $TP_IMAGE:latest
             docker push $TP_IMAGE:$TP_TAG
