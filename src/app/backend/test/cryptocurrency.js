@@ -1054,7 +1054,9 @@ describe(`Cryptocurrency Test Suite`, () => {
               });
           });
         });
-        describe("Get all users (expanded)", () => {
+        describe("Get all users (expanded)", function () {
+          this.slow(1500);
+          this.timeout(5000);
           it("All users returned should be expanded", (done) => {
             chai
               .request(API_URL)

@@ -3,7 +3,6 @@ require("./utils/init");
 const express = require("express");
 const path = require("path");
 const cookieParser = require("cookie-parser");
-const logger = require("morgan");
 const i18next = require("i18next");
 const Backend = require("i18next-node-fs-backend");
 const i18nextMiddleware = require("i18next-express-middleware");
@@ -24,7 +23,7 @@ if (process.env.DEBUG) {
     "Express logger enabled, remove DEBUG env variable to disable it",
     SEVERITY.WARN
   );
-  app.use(logger("dev"));
+  app.use(require("morgan")("dev"));
 }
 
 i18next
