@@ -404,11 +404,17 @@ const validateTransactionAddress = [
 
 const validateTransactionSignature = (req, res, next) => {
   if (process.env.DISABLE_INTEGRITY_VALIDATION === "true") return next();
-  const { creator, signature } = req.body;
+  const { creator, sender, recipient, signature } = req.body;
   const transaction = new Transaction(req.body).toSignatureString();
   const expectedPublicKey = getPublicKey(transaction, signature);
   if (expectedPublicKey) {
-    return findByAddress(TYPE.USER, creator, false, false, res).then((user) => {
+    return findByAddress(
+      TYPE.USER,
+      creator || sender || recipient,
+      false,
+      false,
+      res
+    ).then((user) => {
       if (user.public_key !== expectedPublicKey) {
         return createError(req, res, {
           error: ERRORS.TRANSACTION.LOGIC.NON_MATCHING_KEYS,

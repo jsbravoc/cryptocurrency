@@ -4,46 +4,84 @@ const chai = require("chai");
 const should = chai.should();
 const _ = require("lodash");
 chai.use(require("chai-http"));
+const { randomBytes } = require("crypto");
 const { v4: uuidv4 } = require("uuid");
 const API_URL = require("../app");
 const User = require("../models/User");
+const Transaction = require("../models/Transaction");
 const CRYPTO_ENDPOINT = "/cryptocurrency";
 const ENFORCER_ENDPOINT = "/validate";
 const USERS_ENDPOINT = "/users";
 const { expect } = chai;
-const identifiers = {
-  W1000: uuidv4(),
-  W0: uuidv4(),
-  NoCoinbase: uuidv4(),
-  CantTransferW1000: uuidv4(),
-  ToDeleteW1000: uuidv4(),
-  Inactive: uuidv4(),
+const secp256k1 = require("secp256k1");
+const ethers = require("ethers");
+const users = {
+  W1000: new User({ address: uuidv4() }),
+  W0: new User({ address: uuidv4() }),
+  NoCoinbase: new User({ address: uuidv4() }),
+  CantTransferW1000: new User({ address: uuidv4() }),
+  ToDeleteW1000: new User({ address: uuidv4() }),
+  Inactive: new User({ address: uuidv4() }),
 };
 const createdVariables = {
-  createdUserW1000: identifiers.W1000,
-  createdUserW0: identifiers.W0,
-  createdUserNoCoinbase: identifiers.NoCoinbase,
-  createdUserCantTransferW1000: identifiers.CantTransferW1000,
-  createdUserToDeleteW1000: identifiers.ToDeleteW1000,
-  createdUserInactive: identifiers.Inactive,
   transactions: {
     user: {
-      [identifiers.W1000]: {},
-      [identifiers.W0]: {},
-      [identifiers.NoCoinbase]: {},
-      [identifiers.CantTransferW1000]: {},
-      [identifiers.ToDeleteW1000]: {},
-      [identifiers.Inactive]: {},
+      [users.W1000.address]: {},
+      [users.W0.address]: {},
+      [users.NoCoinbase.address]: {},
+      [users.CantTransferW1000.address]: {},
+      [users.ToDeleteW1000.address]: {},
+      [users.Inactive.address]: {},
     },
     transaction: {
-      [identifiers.W1000]: {},
-      [identifiers.W0]: {},
-      [identifiers.NoCoinbase]: {},
-      [identifiers.CantTransferW1000]: {},
-      [identifiers.ToDeleteW1000]: {},
-      [identifiers.Inactive]: {},
+      [users.W1000.address]: {},
+      [users.W0.address]: {},
+      [users.NoCoinbase.address]: {},
+      [users.CantTransferW1000.address]: {},
+      [users.ToDeleteW1000.address]: {},
+      [users.Inactive.address]: {},
     },
   },
+};
+
+//Note: This should be managed by the crypto wallet.
+for (const name in users) {
+  if (Object.hasOwnProperty.call(users, name)) {
+    const user = users[name];
+    let privKey;
+    do {
+      privKey = randomBytes(32);
+    } while (!secp256k1.privateKeyVerify(privKey));
+    const pubKey = secp256k1.publicKeyCreate(privKey);
+    user.public_key = Buffer.from(pubKey).toString("hex");
+    user.private_key = Buffer.from(privKey).toString("hex");
+    console.log(user);
+  }
+}
+
+//Note: This should be managed by the crypto wallet.
+const getSignature = (user, transaction) => {
+  const tx = new Transaction(transaction);
+  const objToSign = tx.toSignatureString();
+  const privateKey = user.private_key;
+  try {
+    const wrapped =
+      "\x19Ethereum Signed Message:\n" + objToSign.length + objToSign;
+    const hashSecp256 = ethers.utils.keccak256(
+      "0x" + Buffer.from(wrapped).toString("hex")
+    );
+    const resp = secp256k1.ecdsaSign(
+      Buffer.from(hashSecp256.slice(2), "hex"),
+      Buffer.from(privateKey, "hex")
+    );
+    return (
+      "0x" +
+      Buffer.from(resp.signature).toString("hex") +
+      (resp.recid + 27).toString(16)
+    );
+  } catch (error) {
+    return new Error(error.message);
+  }
 };
 
 const createUser = ({
@@ -55,10 +93,10 @@ const createUser = ({
   callback = null,
 }) => {
   const permissions = {};
-  const address = identifiers[alias];
+  const { address, public_key } = users[alias];
   const request = {
     address,
-    public_key: address,
+    public_key,
   };
 
   if (returnTo) {
@@ -98,9 +136,10 @@ const createTransaction = ({
   let senderAddress;
   let creatorAddress;
   const request = {
-    recipient: identifiers[recipientAlias] || recipientAlias,
+    recipient: users[recipientAlias]
+      ? users[recipientAlias].address
+      : recipientAlias,
     amount,
-    signature: signature === null ? uuidv4() : signature,
   };
 
   if (typeof pending === "boolean") {
@@ -110,18 +149,37 @@ const createTransaction = ({
     request.valid_thru = valid_thru;
   }
   if (senderAlias) {
-    senderAddress = identifiers[senderAlias] || senderAlias;
+    senderAddress = users[senderAlias]
+      ? users[senderAlias].address
+      : senderAlias;
     request.sender = senderAddress;
   }
   if (creatorAlias) {
-    creatorAddress = identifiers[creatorAlias] || creatorAlias;
+    creatorAddress = users[creatorAlias]
+      ? users[creatorAlias].address
+      : creatorAlias;
     request.creator = creatorAddress;
   }
+
+  let calculatedSignature;
+  if (users[creatorAlias])
+    calculatedSignature = getSignature(users[creatorAlias], request);
+  else if (users[senderAlias])
+    calculatedSignature = getSignature(users[senderAlias], request);
+  else if (users[recipientAlias])
+    calculatedSignature = getSignature(users[recipientAlias], request);
+
+  request.signature = calculatedSignature || signature || uuidv4();
+
+  //test empty signature
+  if (signature === "") request.signature = "";
+
   chai
     .request(API_URL)
     .post(`${CRYPTO_ENDPOINT}`)
     .send(request)
     .end(function (err, res) {
+      console.log(request);
       return callback({
         err,
         res,
@@ -140,7 +198,7 @@ describe(`Cryptocurrency Test Suite`, () => {
     this.timeout(20000);
 
     const createdUserCallback = ({ res, alias, callback }) => {
-      const address = identifiers[alias];
+      const address = users[alias].address;
       return expect(res).to.satisfy((res) => {
         createdVariables.transactions.user[address] = res.body;
         if (res.statusCode === 201) {
@@ -163,8 +221,10 @@ describe(`Cryptocurrency Test Suite`, () => {
       res,
       callback,
     }) => {
-      const recipientAddress = identifiers[recipientAlias];
-      const senderAddress = identifiers[senderAlias];
+      const recipientAddress = users[recipientAlias].address;
+      const senderAddress = users[senderAlias]
+        ? users[senderAlias].address
+        : undefined;
       return expect(res).to.satisfy((res) => {
         if (!senderAlias && recipientAddress)
           createdVariables.transactions.transaction[recipientAddress].coinbase =
@@ -219,7 +279,7 @@ describe(`Cryptocurrency Test Suite`, () => {
       alias: "CantTransferW1000",
       coinbasePermission: true,
       transferToPermissions: {
-        [identifiers.W1000]: false,
+        [users.W1000.address]: false,
       },
       callback: createdUserCallback,
     });
@@ -249,8 +309,8 @@ describe(`Cryptocurrency Test Suite`, () => {
                   alias: "ToDeleteW1000",
                   coinbasePermission: true,
                   returnTo: {
-                    default: identifiers.W1000,
-                    inactive: identifiers.Inactive,
+                    default: users.W1000.address,
+                    inactive: users.Inactive.address,
                   },
                   callback: createdUserCallback,
                 });
@@ -436,7 +496,7 @@ describe(`Cryptocurrency Test Suite`, () => {
             .request(API_URL)
             .get(
               `${CRYPTO_ENDPOINT}/${
-                createdVariables.transactions.transaction[identifiers.W1000]
+                createdVariables.transactions.transaction[users.W1000.address]
                   .coinbase.payload.signature
               }`
             )
@@ -451,7 +511,7 @@ describe(`Cryptocurrency Test Suite`, () => {
             .get(
               `${CRYPTO_ENDPOINT}/${
                 createdVariables.transactions.transaction[
-                  identifiers.CantTransferW1000
+                  users.CantTransferW1000.address
                 ].W0.payload.signature
               }`
             )
@@ -589,16 +649,90 @@ describe(`Cryptocurrency Test Suite`, () => {
           });
         });
         describe("Transaction validation", () => {
+          it("Transaction signature that cannot be decrypted should throw an error", (done) => {
+            chai
+              .request(API_URL)
+              .post(`${CRYPTO_ENDPOINT}`)
+              .send({
+                amount: 10,
+                recipient: users.W1000.address,
+                signature:
+                  createdVariables.transactions.transaction[
+                    users.CantTransferW1000.address
+                  ].W0.payload.signature + "1",
+              })
+              .end(function (err, res) {
+                expect(res.body.errors).to.be.an("array");
+                expect(
+                  _.some(res.body.errors, {
+                    param: "signature",
+                    location: "body",
+                  })
+                ).to.be.true;
+                expect(res).to.have.status(400);
+                done();
+              });
+          });
+          it("Transaction signature that isn't signed by creator user throw an error", (done) => {
+            let signature = getSignature(users.CantTransferW1000, {
+              amount: 10,
+              recipient: users.W1000.address,
+            });
+            chai
+              .request(API_URL)
+              .post(`${CRYPTO_ENDPOINT}`)
+              .send({
+                amount: 10,
+                recipient: users.W1000.address,
+                signature,
+              })
+              .end(function (err, res) {
+                expect(res.body.errors).to.be.an("array");
+                expect(
+                  _.some(res.body.errors, {
+                    param: "signature",
+                    location: "body",
+                  })
+                ).to.be.true;
+                expect(res).to.have.status(400);
+                done();
+              });
+          });
+          it("Transaction signature that doesn't match with its contents throw an error", (done) => {
+            let signature = getSignature(users.W1000, {
+              amount: 100,
+              recipient: users.W1000.address,
+            });
+            chai
+              .request(API_URL)
+              .post(`${CRYPTO_ENDPOINT}`)
+              .send({
+                amount: 10,
+                recipient: users.W1000.address,
+                signature,
+              })
+              .end(function (err, res) {
+                expect(res.body.errors).to.be.an("array");
+                expect(
+                  _.some(res.body.errors, {
+                    param: "signature",
+                    location: "body",
+                  })
+                ).to.be.true;
+                expect(res).to.have.status(400);
+                done();
+              });
+          });
           it("Already existing transaction with same signature should throw an error", (done) => {
             chai
               .request(API_URL)
               .post(`${CRYPTO_ENDPOINT}`)
               .send({
                 amount: 10,
-                recipient: identifiers.W1000,
+                recipient: users.W1000.address,
                 signature:
                   createdVariables.transactions.transaction[
-                    identifiers.CantTransferW1000
+                    users.CantTransferW1000.address
                   ].W0.payload.signature,
               })
               .end(function (err, res) {
@@ -744,7 +878,7 @@ describe(`Cryptocurrency Test Suite`, () => {
               setTimeout(() => {
                 chai
                   .request(API_URL)
-                  .get(`${USERS_ENDPOINT}/${identifiers.W0}`)
+                  .get(`${USERS_ENDPOINT}/${users.W0.address}`)
                   .end(function (err, res) {
                     expect(res).to.have.status(200);
                     res.body.should.have.property("balance").equal(2);
@@ -765,13 +899,13 @@ describe(`Cryptocurrency Test Suite`, () => {
             pending: true,
             callback: ({ res }) => {
               createdVariables.transactions.transaction[
-                identifiers.W1000
+                users.W1000.address
               ].expiringTransaction = res.body;
               expect(res).to.have.status(201);
               setTimeout(() => {
                 chai
                   .request(API_URL)
-                  .get(`${USERS_ENDPOINT}/${identifiers.W0}`)
+                  .get(`${USERS_ENDPOINT}/${users.W0.address}`)
                   .end(function (err, res) {
                     expect(res).to.have.status(200);
                     res.body.should.have.property("balance").equal(2);
@@ -792,7 +926,7 @@ describe(`Cryptocurrency Test Suite`, () => {
               setTimeout(() => {
                 chai
                   .request(API_URL)
-                  .get(`${USERS_ENDPOINT}/${identifiers.W0}`)
+                  .get(`${USERS_ENDPOINT}/${users.W0.address}`)
                   .end(function (err, res) {
                     expect(res).to.have.status(200);
                     res.body.should.have.property("balance").equal(2);
@@ -824,7 +958,7 @@ describe(`Cryptocurrency Test Suite`, () => {
               .request(API_URL)
               .put(
                 `${CRYPTO_ENDPOINT}/${
-                  createdVariables.transactions.transaction[identifiers.W1000]
+                  createdVariables.transactions.transaction[users.W1000.address]
                     .coinbase.payload.signature
                 }`
               )
@@ -858,9 +992,7 @@ describe(`Cryptocurrency Test Suite`, () => {
                     setTimeout(() => {
                       chai
                         .request(API_URL)
-                        .get(
-                          `${USERS_ENDPOINT}/${createdVariables.createdUserToDeleteW1000}`
-                        )
+                        .get(`${USERS_ENDPOINT}/${users.ToDeleteW1000.address}`)
                         .end(function (err, res) {
                           expect(res).to.have.status(200);
                           res.body.should.have.property("balance").equal(1);
@@ -891,7 +1023,7 @@ describe(`Cryptocurrency Test Suite`, () => {
                     setTimeout(() => {
                       chai
                         .request(API_URL)
-                        .get(`${USERS_ENDPOINT}/${identifiers.NoCoinbase}`)
+                        .get(`${USERS_ENDPOINT}/${users.NoCoinbase.address}`)
                         .end(function (err, res) {
                           expect(res).to.have.status(200);
                           res.body.should.have.property("balance").equal(0);
@@ -972,7 +1104,7 @@ describe(`Cryptocurrency Test Suite`, () => {
         it("User should be retrieved successfully", (done) => {
           chai
             .request(API_URL)
-            .get(`${USERS_ENDPOINT}/${createdVariables.createdUserW1000}`)
+            .get(`${USERS_ENDPOINT}/${users.W1000.address}`)
             .end(function (err, res) {
               expect(res).to.have.status(200);
               expect(res.body).to.be.an("object");
@@ -982,7 +1114,7 @@ describe(`Cryptocurrency Test Suite`, () => {
         it("User should be retrieved and expanded successfully", (done) => {
           chai
             .request(API_URL)
-            .get(`${USERS_ENDPOINT}/${createdVariables.createdUserW1000}`)
+            .get(`${USERS_ENDPOINT}/${users.W1000.address}`)
             .query({ expanded: true })
             .end(function (err, res) {
               expect(res).to.have.status(200);
@@ -1073,7 +1205,9 @@ describe(`Cryptocurrency Test Suite`, () => {
               .send({
                 address: uuidv4(),
                 public_key: uuidv4(),
-                permissions: { transfer_to: { [identifiers.W1000]: ["true"] } },
+                permissions: {
+                  transfer_to: { [users.W1000.address]: ["true"] },
+                },
               })
               .end(function (err, res) {
                 expect(res.body.errors).to.be.an("array");
@@ -1116,8 +1250,8 @@ describe(`Cryptocurrency Test Suite`, () => {
               .request(API_URL)
               .post(`${USERS_ENDPOINT}`)
               .send({
-                address: identifiers.W1000,
-                public_key: identifiers.W1000,
+                address: users.W1000.address,
+                public_key: users.W1000.address,
               })
               .end(function (err, res) {
                 expect(res.body.errors).to.be.an("array");
@@ -1180,7 +1314,7 @@ describe(`Cryptocurrency Test Suite`, () => {
           it("Permission value that is not boolean should throw an error", (done) => {
             chai
               .request(API_URL)
-              .put(`${USERS_ENDPOINT}/${identifiers.W1000}`)
+              .put(`${USERS_ENDPOINT}/${users.W1000.address}`)
               .send({
                 permissions: { coinbase: "TRUE" },
               })
@@ -1199,9 +1333,11 @@ describe(`Cryptocurrency Test Suite`, () => {
           it("Nested permissions value (transfer_to) that is not boolean should throw an error", (done) => {
             chai
               .request(API_URL)
-              .put(`${USERS_ENDPOINT}/${identifiers.W1000}`)
+              .put(`${USERS_ENDPOINT}/${users.W1000.address}`)
               .send({
-                permissions: { transfer_to: { [identifiers.W1000]: ["true"] } },
+                permissions: {
+                  transfer_to: { [users.W1000.address]: ["true"] },
+                },
               })
               .end(function (err, res) {
                 expect(res.body.errors).to.be.an("array");
@@ -1218,7 +1354,7 @@ describe(`Cryptocurrency Test Suite`, () => {
           it("Return_to value that is not string should throw an error", (done) => {
             chai
               .request(API_URL)
-              .put(`${USERS_ENDPOINT}/${identifiers.W1000}`)
+              .put(`${USERS_ENDPOINT}/${users.W1000.address}`)
               .send({
                 permissions: { coinbase: true },
                 return_to: { default: [uuidv4()] },
@@ -1259,7 +1395,7 @@ describe(`Cryptocurrency Test Suite`, () => {
           it("Return_to user that does not exist should throw an error", (done) => {
             chai
               .request(API_URL)
-              .put(`${USERS_ENDPOINT}/${identifiers.W1000}`)
+              .put(`${USERS_ENDPOINT}/${users.W1000.address}`)
               .send({
                 permissions: { coinbase: true },
                 return_to: { default: uuidv4() },
@@ -1284,7 +1420,7 @@ describe(`Cryptocurrency Test Suite`, () => {
         it("User should be updated successfully", (done) => {
           chai
             .request(API_URL)
-            .put(`${USERS_ENDPOINT}/${identifiers.W1000}`)
+            .put(`${USERS_ENDPOINT}/${users.W1000.address}`)
             .send({
               role: "New role",
             })
@@ -1301,7 +1437,7 @@ describe(`Cryptocurrency Test Suite`, () => {
           it("Empty delete reason should throw an error", (done) => {
             chai
               .request(API_URL)
-              .delete(`${USERS_ENDPOINT}/${identifiers.ToDeleteW1000}`)
+              .delete(`${USERS_ENDPOINT}/${users.ToDeleteW1000.address}`)
               .send({})
               .end(function (err, res) {
                 expect(res.body.errors).to.be.an("array");
@@ -1337,7 +1473,7 @@ describe(`Cryptocurrency Test Suite`, () => {
           it("Non existing delete reason should throw an error", (done) => {
             chai
               .request(API_URL)
-              .delete(`${USERS_ENDPOINT}/${identifiers.ToDeleteW1000}`)
+              .delete(`${USERS_ENDPOINT}/${users.ToDeleteW1000.address}`)
               .send({
                 reason: "undefined reason",
               })
@@ -1356,7 +1492,7 @@ describe(`Cryptocurrency Test Suite`, () => {
           it("Inactive delete reason user should throw an error", (done) => {
             chai
               .request(API_URL)
-              .delete(`${USERS_ENDPOINT}/${identifiers.ToDeleteW1000}`)
+              .delete(`${USERS_ENDPOINT}/${users.ToDeleteW1000.address}`)
               .send({
                 reason: "inactive",
               })
@@ -1380,7 +1516,7 @@ describe(`Cryptocurrency Test Suite`, () => {
         it("User should be deleted successfully", (done) => {
           chai
             .request(API_URL)
-            .delete(`${USERS_ENDPOINT}/${identifiers.ToDeleteW1000}`)
+            .delete(`${USERS_ENDPOINT}/${users.ToDeleteW1000.address}`)
             .send({
               reason: "default",
             })
@@ -1398,13 +1534,13 @@ describe(`Cryptocurrency Test Suite`, () => {
         it("Pending valid thru transaction should be deleted successfully", (done) => {
           chai
             .request(API_URL)
-            .get(`${USERS_ENDPOINT}/${identifiers.W1000}`)
+            .get(`${USERS_ENDPOINT}/${users.W1000.address}`)
             .end(function (err, res) {
               expect(res).to.have.status(200);
               expect(res.body.pending_transactions)
                 .to.be.an("array")
                 .that.does.include(
-                  createdVariables.transactions.transaction[identifiers.W1000]
+                  createdVariables.transactions.transaction[users.W1000.address]
                     .expiringTransaction.payload.signature
                 );
               chai
@@ -1415,14 +1551,14 @@ describe(`Cryptocurrency Test Suite`, () => {
                   setTimeout(() => {
                     chai
                       .request(API_URL)
-                      .get(`${USERS_ENDPOINT}/${identifiers.W1000}`)
+                      .get(`${USERS_ENDPOINT}/${users.W1000.address}`)
                       .end(function (err, res) {
                         expect(res).to.have.status(200);
                         expect(res.body.pending_transactions)
                           .to.be.an("array")
                           .that.does.not.include(
                             createdVariables.transactions.transaction[
-                              identifiers.W1000
+                              users.W1000.address
                             ].expiringTransaction.payload.signature
                           );
                         done();
