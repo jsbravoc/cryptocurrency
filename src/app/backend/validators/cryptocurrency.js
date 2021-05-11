@@ -480,8 +480,8 @@ const validateTransactionApproval = (req, res, next) => {
         return Promise.all(promises).then(([sender, recipient]) => {
           if (
             recipient &&
-            sender.public_key !== expectedPublicKey &&
-            recipient.public_key !== expectedPublicKey
+            recipient.public_key !== expectedPublicKey &&
+            sender.public_key !== expectedPublicKey
           ) {
             return createError(req, res, {
               error: ERRORS.TRANSACTION.LOGIC.NON_MATCHING_KEYS,
@@ -491,7 +491,8 @@ const validateTransactionApproval = (req, res, next) => {
                 value: req.params.signature,
               },
             });
-          } else if (sender.public_key !== expectedPublicKey) {
+          }
+          if (!recipient && sender.public_key !== expectedPublicKey) {
             return createError(req, res, {
               error: ERRORS.TRANSACTION.LOGIC.NON_MATCHING_KEYS,
               location: "query",
