@@ -476,9 +476,30 @@ const createTransaction = (
  * @post Returns the transaction in res object. If an error happens, response object has the error.
  */
 const updateTransaction = (req, res) => {
-  const approve = req.query.approve === "true" || false;
+  let approve;
+  if (req.query.approve) approve = req.query.approve === "true" || false;
+
   return findTransaction(req.params.address, false, false, res).then(
     (existingTx) => {
+      if (req.body.description) {
+        existingTx.description = req.body.description;
+      }
+      if (approve === undefined) {
+        return _updateTransaction(existingTx)
+          .then(({ responseCode }) => {
+            delete existingTx.type;
+            return res
+              .status(responseCode)
+              .json({ msg: "Transaction updated", payload: existingTx });
+          })
+          .catch((err) => {
+            logFormatted(
+              `POST /cryptocurrency | BATCH Response: ${err}`,
+              SEVERITY.ERROR
+            );
+            return res.status(500).json({ err });
+          });
+      }
       if (!approve) {
         existingTx.valid = false;
         existingTx.pending = false;

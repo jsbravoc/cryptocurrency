@@ -7,11 +7,13 @@
           "msg": "Se esperaba el parámetro {{property}}, pero no se recibió"
         },
         "MISSING_REQUIRED_INPUT": {
-          "error": "{{message}}"
+          "error": "The method required the parameter {{parameter}} but received undefined",
+          "msg": "The method required the parameter {{parameter}} but received undefined"
         },
 
         "INCORRECT_INPUT": {
-          "error": "{{message}}"
+          "error": "The method required the parameter {{parameter}} but received undefined",
+          "msg": "The method required the parameter {{parameter}} but received undefined"
         },
         "INCORRECT_INPUT_TYPE": {
           "error": "User property {{propertyName}} received an incorrect type {{receivedType}}, expected {{expectedType}}",

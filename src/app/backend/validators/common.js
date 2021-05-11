@@ -34,6 +34,7 @@ const validate = (validations) => (req, res, next) => {
 const createErrorObj = (req, { error, location, params }) => {
   const errorObj = {};
   if (error.errorCode) errorObj.errorCode = error.errorCode;
+  if (params.param) params.parameter = params.param;
   if (error.error) errorObj.error = error.error(req, params);
   if (error.msg) errorObj.msg = error.msg(req, params);
   errorObj.location = location || "body";

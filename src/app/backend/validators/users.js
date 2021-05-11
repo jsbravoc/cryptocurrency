@@ -48,7 +48,6 @@ const inputValidation = validate([
         params: {
           param: "address",
           value,
-          message: "The address of the user is required",
         },
       })
     )
@@ -63,7 +62,6 @@ const inputValidation = validate([
         params: {
           param: "public_key",
           value,
-          message: "The public key is required.",
         },
       })
     )

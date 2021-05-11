@@ -60,9 +60,14 @@ for (const name in users) {
 }
 
 //Note: This should be managed by the crypto wallet.
-const getSignature = (user, transaction) => {
-  const tx = new Transaction(transaction);
-  const objToSign = tx.toSignatureString();
+const getSignature = (user, signatureObj, isTransaction = true) => {
+  let tx;
+  let objToSign;
+  if (isTransaction) {
+    tx = new Transaction(signatureObj);
+    objToSign = tx.toSignatureString();
+  } else objToSign = JSON.stringify(signatureObj);
+
   const privateKey = user.private_key;
   try {
     const wrapped =
@@ -132,6 +137,7 @@ const createTransaction = ({
   creatorAlias = null,
   callback = null,
   valid_thru = null,
+  description = null,
 }) => {
   let senderAddress;
   let creatorAddress;
@@ -147,6 +153,9 @@ const createTransaction = ({
   }
   if (valid_thru) {
     request.valid_thru = valid_thru;
+  }
+  if (description) {
+    request.description = description;
   }
   if (senderAlias) {
     senderAddress = users[senderAlias]
@@ -698,7 +707,7 @@ describe(`Cryptocurrency Test Suite`, () => {
                 done();
               });
           });
-          it("Transaction signature that doesn't match with its contents throw an error", (done) => {
+          it("Transaction signature that doesn't match with its contents should throw an error", (done) => {
             let signature = getSignature(users.W1000, {
               amount: 100,
               recipient: users.W1000.address,
@@ -952,7 +961,9 @@ describe(`Cryptocurrency Test Suite`, () => {
               });
           });
         });
-        describe("Transaction validation", () => {
+        describe("Transaction validation", function () {
+          this.slow(9000);
+          this.timeout(12000);
           it("Non pending transaction should throw an error", (done) => {
             chai
               .request(API_URL)
@@ -967,6 +978,180 @@ describe(`Cryptocurrency Test Suite`, () => {
                 expect(res).to.have.status(400);
                 done();
               });
+          });
+          it("Approval signature that isn't signed by sender user throw an error", (done) => {
+            createTransaction({
+              amount: 1,
+              senderAlias: "W1000",
+              recipientAlias: "ToDeleteW1000",
+              pending: true,
+              callback: ({ res }) => {
+                expect(res).to.have.status(201);
+                const createdTransaction = res.body.payload;
+                setTimeout(() => {
+                  const signature = getSignature(
+                    users.ToDeleteW1000,
+                    { approve: true },
+                    false
+                  );
+                  chai
+                    .request(API_URL)
+                    .put(`${CRYPTO_ENDPOINT}/${createdTransaction.signature}`)
+                    .query({ approve: true, signature })
+                    .end(function (err, res) {
+                      expect(res.body.errors).to.be.an("array");
+                      expect(res).to.have.status(400);
+                      done();
+                    });
+                }, 3500);
+              },
+            });
+          });
+          it("Approval signature that cannot be decrypted should throw an error", (done) => {
+            createTransaction({
+              amount: 1,
+              senderAlias: "W1000",
+              recipientAlias: "ToDeleteW1000",
+              pending: true,
+              callback: ({ res }) => {
+                expect(res).to.have.status(201);
+                const createdTransaction = res.body.payload;
+                setTimeout(() => {
+                  const signature =
+                    getSignature(users.W1000, { approve: true }, false) + "1";
+
+                  chai
+                    .request(API_URL)
+                    .put(`${CRYPTO_ENDPOINT}/${createdTransaction.signature}`)
+                    .query({ approve: true, signature })
+                    .end(function (err, res) {
+                      expect(res.body.errors).to.be.an("array");
+                      expect(res).to.have.status(400);
+                      done();
+                    });
+                }, 3500);
+              },
+            });
+          });
+          it("Approval signature that doesn't match with its contents should throw an error", (done) => {
+            createTransaction({
+              amount: 1,
+              senderAlias: "W1000",
+              recipientAlias: "ToDeleteW1000",
+              pending: true,
+              callback: ({ res }) => {
+                expect(res).to.have.status(201);
+                const createdTransaction = res.body.payload;
+                setTimeout(() => {
+                  const signature = getSignature(
+                    users.W1000,
+                    { approve: false },
+                    false
+                  );
+
+                  chai
+                    .request(API_URL)
+                    .put(`${CRYPTO_ENDPOINT}/${createdTransaction.signature}`)
+                    .query({ approve: true, signature })
+                    .end(function (err, res) {
+                      expect(res.body.errors).to.be.an("array");
+                      expect(res).to.have.status(400);
+                      done();
+                    });
+                }, 3500);
+              },
+            });
+          });
+          it("Update description signature that cannot be decrypted should throw an error", (done) => {
+            createTransaction({
+              amount: 1,
+              senderAlias: "W1000",
+              recipientAlias: "ToDeleteW1000",
+              description: "A description",
+              pending: true,
+              callback: ({ res }) => {
+                expect(res).to.have.status(201);
+                const createdTransaction = res.body.payload;
+                setTimeout(() => {
+                  const signature =
+                    getSignature(
+                      users.W1000,
+                      { description: "Another description" },
+                      false
+                    ) + "1";
+
+                  chai
+                    .request(API_URL)
+                    .put(`${CRYPTO_ENDPOINT}/${createdTransaction.signature}`)
+                    .send({ description: "Another description", signature })
+                    .end(function (err, res) {
+                      expect(res.body.errors).to.be.an("array");
+                      expect(res).to.have.status(400);
+                      done();
+                    });
+                }, 3500);
+              },
+            });
+          });
+          it("Update description signature that doesn't match with its contents should throw an error", (done) => {
+            createTransaction({
+              amount: 1,
+              senderAlias: "W1000",
+              recipientAlias: "ToDeleteW1000",
+              description: "A description",
+              pending: true,
+              callback: ({ res }) => {
+                expect(res).to.have.status(201);
+                const createdTransaction = res.body.payload;
+                setTimeout(() => {
+                  const signature = getSignature(
+                    users.W1000,
+                    { description: "Another description" },
+                    false
+                  );
+
+                  chai
+                    .request(API_URL)
+                    .put(`${CRYPTO_ENDPOINT}/${createdTransaction.signature}`)
+                    .send({ description: "Different description", signature })
+                    .end(function (err, res) {
+                      expect(res.body.errors).to.be.an("array");
+                      expect(res).to.have.status(400);
+                      done();
+                    });
+                }, 3500);
+              },
+            });
+          });
+          it("Update description signature that isn't signed by creator or sender throw an error", (done) => {
+            createTransaction({
+              amount: 1,
+              senderAlias: "W1000",
+              recipientAlias: "ToDeleteW1000",
+              description: "A description",
+              pending: true,
+              callback: ({ res }) => {
+                expect(res).to.have.status(201);
+                const createdTransaction = res.body.payload;
+                setTimeout(() => {
+                  const signature = getSignature(
+                    users.ToDeleteW1000,
+                    { description: "Another description" },
+                    false
+                  );
+
+                  chai
+                    .request(API_URL)
+                    .put(`${CRYPTO_ENDPOINT}/${createdTransaction.signature}`)
+                    .send({ description: "Another description", signature })
+                    .end(function (err, res) {
+                      expect(res.body.errors).to.be.an("array");
+                      expect(res).to.have.status(400);
+                      done();
+                    });
+                }, 3500);
+              },
+            });
           });
         });
       });
@@ -983,10 +1168,16 @@ describe(`Cryptocurrency Test Suite`, () => {
               expect(res).to.have.status(201);
               const createdTransaction = res.body.payload;
               setTimeout(() => {
+                const signature = getSignature(
+                  users.W1000,
+                  { approve: true },
+                  false
+                );
+
                 chai
                   .request(API_URL)
                   .put(`${CRYPTO_ENDPOINT}/${createdTransaction.signature}`)
-                  .query({ approve: true })
+                  .query({ approve: true, signature })
                   .end(function (err, res) {
                     expect(res).to.have.status(200);
                     setTimeout(() => {
@@ -1014,10 +1205,15 @@ describe(`Cryptocurrency Test Suite`, () => {
               expect(res).to.have.status(201);
               const createdTransaction = res.body.payload;
               setTimeout(() => {
+                const signature = getSignature(
+                  users.W1000,
+                  { approve: false },
+                  false
+                );
                 chai
                   .request(API_URL)
                   .put(`${CRYPTO_ENDPOINT}/${createdTransaction.signature}`)
-                  .query({ approve: false })
+                  .query({ approve: false, signature })
                   .end(function (err, res) {
                     expect(res).to.have.status(200);
                     setTimeout(() => {
@@ -1028,6 +1224,144 @@ describe(`Cryptocurrency Test Suite`, () => {
                           expect(res).to.have.status(200);
                           res.body.should.have.property("balance").equal(0);
                           done();
+                        });
+                    }, 3500);
+                  });
+              }, 3500);
+            },
+          });
+        });
+        it("Transaction should be updated successfully", (done) => {
+          createTransaction({
+            amount: 1,
+            senderAlias: "W1000",
+            recipientAlias: "NoCoinbase",
+            pending: true,
+            callback: ({ res }) => {
+              expect(res).to.have.status(201);
+              const createdTransaction = res.body.payload;
+              setTimeout(() => {
+                const signature = getSignature(
+                  users.W1000,
+                  { description: "New description" },
+                  false
+                );
+                chai
+                  .request(API_URL)
+                  .put(`${CRYPTO_ENDPOINT}/${createdTransaction.signature}`)
+                  .send({ description: "New description", signature })
+                  .end(function (err, res) {
+                    expect(res).to.have.status(200);
+                    setTimeout(() => {
+                      chai
+                        .request(API_URL)
+                        .get(
+                          `${CRYPTO_ENDPOINT}/${createdTransaction.signature}`
+                        )
+                        .end(function (err, res) {
+                          expect(res).to.have.status(200);
+                          res.body.should.have
+                            .property("description")
+                            .equal("New description");
+                          done();
+                        });
+                    }, 3500);
+                  });
+              }, 3500);
+            },
+          });
+        });
+        it("Transaction should be approved & updated successfully", (done) => {
+          createTransaction({
+            amount: 1,
+            senderAlias: "W1000",
+            recipientAlias: "ToDeleteW1000",
+            pending: true,
+            callback: ({ res }) => {
+              expect(res).to.have.status(201);
+              const createdTransaction = res.body.payload;
+              setTimeout(() => {
+                const signature = getSignature(
+                  users.W1000,
+                  { approve: true, description: "New description" },
+                  false
+                );
+                chai
+                  .request(API_URL)
+                  .put(`${CRYPTO_ENDPOINT}/${createdTransaction.signature}`)
+                  .query({ approve: true })
+                  .send({ description: "New description", signature })
+                  .end(function (err, res) {
+                    console.log("res.bodyAU", res.body);
+                    expect(res).to.have.status(200);
+                    setTimeout(() => {
+                      chai
+                        .request(API_URL)
+                        .get(`${USERS_ENDPOINT}/${users.ToDeleteW1000.address}`)
+                        .end(function (err, res) {
+                          expect(res).to.have.status(200);
+                          res.body.should.have.property("balance").equal(2);
+                          chai
+                            .request(API_URL)
+                            .get(
+                              `${CRYPTO_ENDPOINT}/${createdTransaction.signature}`
+                            )
+                            .end(function (err, res) {
+                              expect(res).to.have.status(200);
+                              res.body.should.have
+                                .property("description")
+                                .equal("New description");
+                              done();
+                            });
+                        });
+                    }, 3500);
+                  });
+              }, 3500);
+            },
+          });
+        });
+        it("Transaction should be rejected & updated successfully", (done) => {
+          createTransaction({
+            amount: 1,
+            senderAlias: "W1000",
+            recipientAlias: "NoCoinbase",
+            pending: true,
+            callback: ({ res }) => {
+              expect(res).to.have.status(201);
+              const createdTransaction = res.body.payload;
+              setTimeout(() => {
+                const signature = getSignature(
+                  users.W1000,
+                  { approve: false, description: "New description" },
+                  false
+                );
+                chai
+                  .request(API_URL)
+                  .put(`${CRYPTO_ENDPOINT}/${createdTransaction.signature}`)
+                  .query({ approve: false })
+                  .send({ description: "New description", signature })
+                  .end(function (err, res) {
+                    console.log("res.bodyRU", res.body);
+                    expect(res).to.have.status(200);
+                    setTimeout(() => {
+                      chai
+                        .request(API_URL)
+                        .get(`${USERS_ENDPOINT}/${users.NoCoinbase.address}`)
+                        .end(function (err, res) {
+                          expect(res).to.have.status(200);
+                          res.body.should.have.property("balance").equal(0);
+                          chai
+                            .request(API_URL)
+                            .get(
+                              `${CRYPTO_ENDPOINT}/${createdTransaction.signature}`
+                            )
+                            .end(function (err, res) {
+                              expect(res).to.have.status(200);
+                              res.body.should.have
+                                .property("description")
+                                .equal("New description");
+                              done();
+                            });
                         });
                     }, 3500);
                   });

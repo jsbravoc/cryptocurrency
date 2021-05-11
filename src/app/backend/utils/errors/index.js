@@ -11,24 +11,24 @@ module.exports = Object.freeze({
         },
         MISSING_REQUIRED_INPUT: {
           errorCode: "100a",
-          error: (req, { message }) =>
+          error: (req, { parameter }) =>
             req.t("ERRORS.USER.INPUT.MISSING_REQUIRED_INPUT.error", {
-              message,
+              parameter,
             }),
-          msg: (req, { message }) =>
+          msg: (req, { parameter }) =>
             req.t("ERRORS.USER.INPUT.MISSING_REQUIRED_INPUT.msg", {
-              message,
+              parameter,
             }),
         },
         INCORRECT_INPUT: {
           errorCode: "100b",
-          error: (req, { message }) =>
+          error: (req, { parameter }) =>
             req.t("ERRORS.USER.INPUT.INCORRECT_INPUT.error", {
-              message,
+              parameter,
             }),
-          msg: (req, { message }) =>
+          msg: (req, { parameter }) =>
             req.t("ERRORS.USER.INPUT.INCORRECT_INPUT.msg", {
-              message,
+              parameter,
             }),
         },
         INCORRECT_INPUT_TYPE: {
@@ -222,24 +222,24 @@ module.exports = Object.freeze({
         },
         MISSING_REQUIRED_INPUT: {
           errorCode: "200a",
-          error: (req, { message }) =>
+          error: (req, { parameter }) =>
             req.t("ERRORS.TRANSACTION.INPUT.MISSING_REQUIRED_INPUT.error", {
-              message,
+              parameter,
             }),
-          msg: (req, { message }) =>
+          msg: (req, { parameter }) =>
             req.t("ERRORS.TRANSACTION.INPUT.MISSING_REQUIRED_INPUT.msg", {
-              message,
+              parameter,
             }),
         },
         INCORRECT_INPUT: {
           errorCode: "200b",
-          error: (req, { message }) =>
+          error: (req, { parameter }) =>
             req.t("ERRORS.TRANSACTION.INPUT.INCORRECT_INPUT.error", {
-              message,
+              parameter,
             }),
-          msg: (req, { message }) =>
+          msg: (req, { parameter }) =>
             req.t("ERRORS.TRANSACTION.INPUT.INCORRECT_INPUT.msg", {
-              message,
+              parameter,
             }),
         },
         TRANSACTION_EXISTS: {

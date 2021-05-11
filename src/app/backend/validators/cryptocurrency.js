@@ -33,7 +33,6 @@ const inputValidation = validate([
         params: {
           param: "recipient",
           value,
-          message: "The recipient of the transaction is required",
         },
       })
     )
@@ -45,12 +44,10 @@ const inputValidation = validate([
     .toFloat()
     .withMessage((value, { req }) =>
       createErrorObj(req, {
-        error: ERRORS.TRANSACTION.INPUT.MISSING_REQUIRED_INPUT,
+        error: ERRORS.TRANSACTION.INPUT.INCORRECT_INPUT,
         params: {
           param: "amount",
           value,
-          message:
-            "The amount of the transaction must be a positive float number",
         },
       })
     )
@@ -68,7 +65,6 @@ const inputValidation = validate([
         params: {
           param: "signature",
           value,
-          message: "The signature of the transaction is required",
         },
       })
     )
@@ -436,10 +432,141 @@ const validateTransactionSignature = (req, res, next) => {
     });
 };
 
+const validateTransactionApproval = (req, res, next) => {
+  if (process.env.DISABLE_INTEGRITY_VALIDATION === "true") return next();
+  const { address } = req.params;
+  const { approve } = req.query;
+  const signature = req.query.signature || req.body.signature;
+  if (approve === undefined) return next();
+  else if (signature === undefined)
+    return createError(req, res, {
+      error: ERRORS.TRANSACTION.INPUT.MISSING_REQUIRED_INPUT,
+      location: "query",
+      params: {
+        param: "signature",
+      },
+    });
+  else if (approve !== "true" && approve !== "false") {
+    return createError(req, res, {
+      error: ERRORS.TRANSACTION.INPUT.INCORRECT_INPUT,
+      location: "query",
+      params: {
+        param: "signature",
+      },
+    });
+  }
+  return findByAddress(TYPE.TRANSACTION, address, false, false, res).then(
+    (transaction) => {
+      const signatureObj = { approve: approve === "true" };
+      if (req.body.description) {
+        signatureObj.description = req.body.description;
+      }
+      const expectedPublicKey = getPublicKey(
+        JSON.stringify(signatureObj),
+        signature
+      );
+      if (expectedPublicKey) {
+        return findByAddress(
+          TYPE.USER,
+          transaction.sender,
+          false,
+          false,
+          res
+        ).then((user) => {
+          if (user.public_key !== expectedPublicKey) {
+            return createError(req, res, {
+              error: ERRORS.TRANSACTION.LOGIC.NON_MATCHING_KEYS,
+              location: "query",
+              params: {
+                param: "signature",
+                value: req.params.signature,
+              },
+            });
+          }
+          return next();
+        });
+      } else
+        return createError(req, res, {
+          error: ERRORS.TRANSACTION.LOGIC.DECRYPTING_ERROR,
+          location: "query",
+          params: {
+            param: "signature",
+            value: req.params.signature,
+          },
+        });
+    }
+  );
+};
+
+const validateTransactionUpdate = (req, res, next) => {
+  if (process.env.DISABLE_INTEGRITY_VALIDATION === "true") return next();
+  const { address } = req.params;
+  const { approve } = req.query;
+  const { description, signature } = req.body;
+  //Validated by validateTransactionApproval
+  if (approve !== undefined) return next();
+  else if (signature === undefined)
+    return createError(req, res, {
+      error: ERRORS.TRANSACTION.INPUT.MISSING_REQUIRED_INPUT,
+      location: "body",
+      params: {
+        param: "signature",
+      },
+    });
+  else if (description === undefined)
+    return createError(req, res, {
+      error: ERRORS.TRANSACTION.INPUT.MISSING_REQUIRED_INPUT,
+      location: "body",
+      params: {
+        param: "description",
+      },
+    });
+  return findByAddress(TYPE.TRANSACTION, address, false, false, res).then(
+    (transaction) => {
+      const expectedPublicKey = getPublicKey(
+        JSON.stringify({ description }),
+        signature
+      );
+      if (expectedPublicKey) {
+        const promises = [
+          findByAddress(TYPE.USER, transaction.creator, false, false, res),
+          findByAddress(TYPE.USER, transaction.sender, false, false, res),
+        ];
+        return Promise.all(promises).then(([creator, sender]) => {
+          if (
+            creator.public_key !== expectedPublicKey &&
+            sender.public_key !== expectedPublicKey
+          ) {
+            return createError(req, res, {
+              error: ERRORS.TRANSACTION.LOGIC.NON_MATCHING_KEYS,
+              params: {
+                param: "signature",
+                value: req.body.signature,
+              },
+            });
+          }
+          return next();
+        });
+      } else
+        return createError(req, res, {
+          error: ERRORS.TRANSACTION.LOGIC.DECRYPTING_ERROR,
+          params: {
+            param: "signature",
+            value: req.body.signature,
+          },
+        });
+    }
+  );
+};
+
 /**
  * Validation chain of a transaction update request
  */
-const validateTransactionUpdateRequest = [validatePendingTransaction];
+const validateTransactionUpdateRequest = [
+  validatePendingTransaction,
+  validateTransactionApproval,
+  validateTransactionUpdate,
+];
 module.exports.validateTransactionAddress = validateTransactionAddress;
 module.exports.validateTransactionUpdateRequest = validateTransactionUpdateRequest;
 module.exports.verifyPostTransaction = [

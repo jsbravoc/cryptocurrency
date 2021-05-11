@@ -7,7 +7,8 @@
           "msg": "Expected user parameter {{property}}, but received undefined"
         },
         "MISSING_REQUIRED_INPUT": {
-          "error": "{{message}}"
+          "error": "The method required the parameter {{parameter}} but received undefined",
+          "msg": "The method required the parameter {{parameter}} but received undefined"
         },
 
         "INCORRECT_INPUT": {
