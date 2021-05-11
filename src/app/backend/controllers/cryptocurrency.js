@@ -676,28 +676,6 @@ const updateTransaction = (req, res) => {
   );
 };
 
-const getTransactionHistory = async (req, res) => {
-  const page = req.query.page || 0;
-  const PAGE_SIZE = 2;
-  const mongoClient = await mongo.getClient();
-  const userCollection = mongoClient
-    .db("mydb")
-    .collection("cnk-cryptocurrency_users");
-
-  const history = [];
-  const cursor = await userCollection
-    .find({ root: req.root })
-    .sort({ block_num: -1 })
-    .skip(PAGE_SIZE * page)
-    .limit(PAGE_SIZE);
-  await new Promise((resolve) => {
-    cursor.forEach((doc) => {
-      history.push(doc);
-    }, resolve);
-  });
-  return res.json(history);
-};
-
 //#endregion
 
 module.exports.findTransaction = findTransaction;
@@ -707,4 +685,3 @@ module.exports.getTransactions = getTransactions;
 module.exports.getTransactionByAddress = getTransactionByAddress;
 module.exports.createTransaction = createTransaction;
 module.exports.updateTransaction = updateTransaction;
-module.exports.getTransactionHistory = getTransactionHistory;
