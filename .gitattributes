@@ -1,2 +1,2 @@
-/build/ linguist-generated=true
-/src/app/backend/resources/docs/ linguist-generated=true
+/build/* linguist-generated=true
+/src/app/backend/resources/docs/* linguist-generated=true
