@@ -455,6 +455,7 @@ const validateTransactionApproval = (req, res, next) => {
       },
     });
   }
+
   return findByAddress(TYPE.TRANSACTION, address, false, false, res).then(
     (transaction) => {
       const signatureObj = { approve: approve === "true" };
@@ -466,14 +467,31 @@ const validateTransactionApproval = (req, res, next) => {
         signature
       );
       if (expectedPublicKey) {
-        return findByAddress(
-          TYPE.USER,
-          transaction.sender,
-          false,
-          false,
-          res
-        ).then((user) => {
-          if (user.public_key !== expectedPublicKey) {
+        const promises = [];
+
+        promises.push(
+          findByAddress(TYPE.USER, transaction.sender, false, false, res)
+        );
+        //transaction can be rejected by recipient
+        if (approve === "false")
+          promises.push(
+            findByAddress(TYPE.USER, transaction.recipient, false, false, res)
+          );
+        return Promise.all(promises).then(([sender, recipient]) => {
+          if (
+            recipient &&
+            sender.public_key !== expectedPublicKey &&
+            recipient.public_key !== expectedPublicKey
+          ) {
+            return createError(req, res, {
+              error: ERRORS.TRANSACTION.LOGIC.NON_MATCHING_KEYS,
+              location: "query",
+              params: {
+                param: "signature",
+                value: req.params.signature,
+              },
+            });
+          } else if (sender.public_key !== expectedPublicKey) {
             return createError(req, res, {
               error: ERRORS.TRANSACTION.LOGIC.NON_MATCHING_KEYS,
               location: "query",

@@ -1292,7 +1292,6 @@ describe(`Cryptocurrency Test Suite`, () => {
                   .query({ approve: true })
                   .send({ description: "New description", signature })
                   .end(function (err, res) {
-                    console.log("res.bodyAU", res.body);
                     expect(res).to.have.status(200);
                     setTimeout(() => {
                       chai
@@ -1341,7 +1340,6 @@ describe(`Cryptocurrency Test Suite`, () => {
                   .query({ approve: false })
                   .send({ description: "New description", signature })
                   .end(function (err, res) {
-                    console.log("res.bodyRU", res.body);
                     expect(res).to.have.status(200);
                     setTimeout(() => {
                       chai
