@@ -14,7 +14,8 @@ const updateInvalidTransaction = (address, res) => {
     (transaction) => {
       if (
         transaction &&
-        (transaction.checkValidity() !== transaction.valid ||
+        ((!transaction.pending &&
+          transaction.checkValidity() !== transaction.valid) ||
           (transaction.pending && !transaction.checkValidity()))
       ) {
         transaction.valid = transaction.checkValidity();
@@ -111,12 +112,12 @@ const enforceValidTransactionsMiddleware = (req, res, next) => {
   if (req.query.users) {
     users = req.query.users.split(",");
   }
-  return updateInvalidUsersTransactions("[ENFORCER]", users, res).catch(
-    (err) => {
+  return updateInvalidUsersTransactions("[ENFORCER]", users, res)
+    .then(() => next())
+    .catch((err) => {
       logFormatted(`Enforcer failed with error`, SEVERITY.ERROR, err);
       next();
-    }
-  );
+    });
 };
 
 module.exports.updateInvalidTransaction = updateInvalidTransaction;

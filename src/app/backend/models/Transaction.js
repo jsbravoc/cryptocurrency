@@ -64,7 +64,7 @@ class Transaction extends BaseModel {
     if (this.valid_thru && new Date(this.valid_thru) < new Date()) {
       return false;
     }
-    return this.valid;
+    return true;
   }
 
   toSignatureObject() {
