@@ -37,6 +37,7 @@
     "swagger-ui-express": "^4.1.6"
   },
   "devDependencies": {
+    "better-docs": "^2.3.2",
     "chai-http": "^4.3.0",
     "codecov": "^3.8.2",
     "eslint": "^7.26.0",

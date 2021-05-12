@@ -3,7 +3,8 @@
   "recurseDepth": 10,
   "opts": {
     "recurse": true,
-    "destination": "./resources/docs"
+    "destination": "./resources/docs",
+    "template": "node_modules/better-docs"
   },
   "source": {
     "include": ["./"],

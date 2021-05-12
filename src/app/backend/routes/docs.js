@@ -34,6 +34,11 @@ require("public-ip")
       },
     ];
     router.use("/", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+    logFormatted(
+      "Warning: /api-docs should not be used in production, use NODE_ENV=production to disable it",
+      SEVERITY.LOW
+    );
+    logFormatted("Swagger-UI application launched successfully", SEVERITY.NONE);
   });
 
 module.exports = router;
