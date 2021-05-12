@@ -206,7 +206,8 @@ const getTransactions = (req, res) => {
     "GET /cryptocurrency",
     limit,
     false,
-    true
+    true,
+    res
   )
     .then((assetList) => {
       assetList = assetList.sort(

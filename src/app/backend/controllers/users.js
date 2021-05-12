@@ -67,13 +67,13 @@ const getUsers = (req, res) => {
     ? 0
     : Number(req.query.limit);
   const assetArray = [
-    findAllAssets(TYPE.USER, "GET /users", limit, true, true),
+    findAllAssets(TYPE.USER, "GET /users", limit, true, true, res),
   ];
   const expanded = req.query.expanded === "true" || false;
 
   if (expanded) {
     assetArray.push(
-      findAllAssets(TYPE.TRANSACTION, "GET /users", limit, false, true)
+      findAllAssets(TYPE.TRANSACTION, "GET /users", limit, false, true, res)
     );
   }
   return Promise.all(assetArray)
@@ -159,54 +159,59 @@ const getUserByAddress = (req, res) => {
       if (!expanded) {
         return res.status(200).json(user);
       }
-      return findAllAssets(TYPE.TRANSACTION, "GET /users", 0, false, true).then(
-        (transactionList) => {
-          let promises = [];
-          const dictionaryOfTransactions = {};
-          (transactionList || []).forEach((asset) => {
-            dictionaryOfTransactions[asset.signature] = asset;
-          });
-          promises.push(
-            (user.lastest_transactions || []).map((txid) =>
-              findTransaction(txid).then((transaction) => {
-                return expandSupportingTransactions(
-                  transaction,
-                  dictionaryOfTransactions
-                );
-              })
-            )
-          );
-
-          promises.push(
-            (user.pending_transactions || []).map((txid) =>
-              findTransaction(txid).then((transaction) => {
-                return expandSupportingTransactions(
-                  transaction,
-                  dictionaryOfTransactions
-                );
-              })
-            )
-          );
-          promises = [].concat.apply([], promises);
-          return Promise.all(promises).then((values) => {
-            values.forEach((tx) => {
-              const indexOfTx = (user.lastest_transactions || []).indexOf(
-                tx.signature
+      return findAllAssets(
+        TYPE.TRANSACTION,
+        "GET /users",
+        0,
+        false,
+        true,
+        res
+      ).then((transactionList) => {
+        let promises = [];
+        const dictionaryOfTransactions = {};
+        (transactionList || []).forEach((asset) => {
+          dictionaryOfTransactions[asset.signature] = asset;
+        });
+        promises.push(
+          (user.lastest_transactions || []).map((txid) =>
+            findTransaction(txid).then((transaction) => {
+              return expandSupportingTransactions(
+                transaction,
+                dictionaryOfTransactions
               );
-              const indexOfPendingTx = (
-                user.pending_transactions || []
-              ).indexOf(tx.signature);
-              if (indexOfTx > -1) {
-                user.lastest_transactions[indexOfTx] = tx;
-              }
-              if (indexOfPendingTx > -1) {
-                user.pending_transactions[indexOfPendingTx] = tx;
-              }
-            });
-            return res.status(200).json(user);
+            })
+          )
+        );
+
+        promises.push(
+          (user.pending_transactions || []).map((txid) =>
+            findTransaction(txid).then((transaction) => {
+              return expandSupportingTransactions(
+                transaction,
+                dictionaryOfTransactions
+              );
+            })
+          )
+        );
+        promises = [].concat.apply([], promises);
+        return Promise.all(promises).then((values) => {
+          values.forEach((tx) => {
+            const indexOfTx = (user.lastest_transactions || []).indexOf(
+              tx.signature
+            );
+            const indexOfPendingTx = (user.pending_transactions || []).indexOf(
+              tx.signature
+            );
+            if (indexOfTx > -1) {
+              user.lastest_transactions[indexOfTx] = tx;
+            }
+            if (indexOfPendingTx > -1) {
+              user.pending_transactions[indexOfPendingTx] = tx;
+            }
           });
-        }
-      );
+          return res.status(200).json(user);
+        });
+      });
     })
     .catch((err) =>
       res

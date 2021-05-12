@@ -55,15 +55,6 @@ const getTransactionAddress = (txid) =>
 const getUserAddress = (userId) =>
   PREFIX + ADDRESS_PREFIX.USER + getAddress(userId, 62);
 
-/**
- * Generates the address of a transferring process.
- *
- * @param {String} txid - Unique transferring process id.
- * @returns {String} The generated address of the transferring process.
- */
-const getTransferAddress = (txid) =>
-  PREFIX + ADDRESS_PREFIX.TRANSFER + getAddress(txid, 62);
-
 //#endregion
 
 //#region [SAWTOOTH REST API FUNCTIONS]
@@ -110,15 +101,11 @@ const findByAddress = (
         );
       addressToQuery = getUserAddress(txid);
       break;
-    default:
-      return Promise.resolve(null);
   }
   return queryState(addressToQuery).then((response) => {
     if (!response) {
       return null;
     }
-    if (Array.isArray(response))
-      response = response.find((x) => x.address === addressToQuery);
     switch (type) {
       case TYPE.TRANSACTION:
         if (res && res.locals) {
@@ -139,10 +126,7 @@ const findByAddress = (
           res.locals.user[response.address] = new User(response);
         }
         response = new User(response).toObject(removeSignature, removeType);
-
         break;
-      default:
-        return null;
     }
     return response;
   });
@@ -178,8 +162,6 @@ const findAllAssets = (
       assetName = "user";
       addressPrefix = ADDRESS_PREFIX.USER;
       break;
-    default:
-      break;
   }
   const params = {
     headers: { "Content-Type": "application/json" },
@@ -200,9 +182,6 @@ const findAllAssets = (
         )
         .map((d) => {
           let base = JSON.parse(Buffer.from(d.data, "base64"));
-          if (_.isEmpty(base)) {
-            base = null;
-          }
           switch (type) {
             case TYPE.TRANSACTION:
               if (res) {
@@ -219,8 +198,6 @@ const findAllAssets = (
                 res.locals.user[base.address] = new User(base);
               }
               return new User(base).toObject(removeSignature, removeType);
-            default:
-              break;
           }
         })
         .flatten()
@@ -288,13 +265,6 @@ const _putAsset = (type, httpMethod, source, object) => {
       asset = object.toString(true, false);
       assetAddress = getUserAddress(txid);
       break;
-
-    case TYPE.TRANSFER:
-      assetName = "Transfer";
-      break;
-
-    default:
-      break;
   }
   const assetPayload = JSON.stringify({
     func: httpMethod.toLowerCase(),
@@ -348,12 +318,6 @@ const buildAssetTransaction = (type, httpMethod, object) => {
       txid = object.address;
       asset = object.toString(true, false);
       assetAddress = getUserAddress(txid);
-      break;
-
-    case TYPE.TRANSFER:
-      break;
-
-    default:
       break;
   }
   const assetPayload = JSON.stringify({
@@ -418,15 +382,8 @@ const putBatch = (httpMethod, source, arrayOfAssets) => {
 const putAsset = (type, httpMethod, source, req, res) => {
   let asset;
   switch (type) {
-    case TYPE.TRANSACTION:
-      asset = new Transaction(req.body).toString(false, false);
-      break;
-
     case TYPE.USER:
       asset = new User(req.body);
-      break;
-
-    default:
       break;
   }
   return _putAsset(type, httpMethod, source, asset)
@@ -444,7 +401,6 @@ const putAsset = (type, httpMethod, source, req, res) => {
 module.exports.hash512 = hash512;
 module.exports.getTransactionAddress = getTransactionAddress;
 module.exports.getUserAddress = getUserAddress;
-module.exports.getTransferAddress = getTransferAddress;
 module.exports.findByAddress = findByAddress;
 module.exports.findAllAssets = findAllAssets;
 module.exports._putAsset = _putAsset;

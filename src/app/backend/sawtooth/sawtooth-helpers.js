@@ -21,11 +21,6 @@ const hash512 = (x) => crypto.createHash("sha512").update(x).digest("hex");
 
 const hash256 = (x) => crypto.createHash("sha256").update(x).digest("hex");
 
-const getAddress = (transactionFamily, varName) => {
-  const INT_KEY_NAMESPACE = hash512(transactionFamily).substring(0, 6);
-  return INT_KEY_NAMESPACE + hash512(varName).slice(-64);
-};
-
 const sign = (dataBytes, privKey) => {
   const hash = hash256(dataBytes);
   return Buffer.from(
@@ -35,8 +30,6 @@ const sign = (dataBytes, privKey) => {
     ).signature
   ).toString("hex");
 };
-
-module.exports.getAddress = getAddress;
 
 function buildTransaction(
   transactionFamily,
@@ -108,10 +101,7 @@ function buildBatch(transactions) {
   }).finish();
 }
 
-module.exports.sendTransaction = async function (
-  transactions,
-  cancelToken /* Optional */
-) {
+module.exports.sendTransaction = async function (transactions) {
   const txs = _.map(transactions, (t) => {
     const {
       transactionFamily,
@@ -135,9 +125,6 @@ module.exports.sendTransaction = async function (
     headers: { "Content-Type": "application/octet-stream" },
     timeout: process.env.SAWTOOTH_REST_TIMEOUT || 5000,
   };
-  if (cancelToken) {
-    params.cancelToken = cancelToken;
-  }
   return axios.post(
     `${process.env.SAWTOOTH_REST || `http://${LOCAL_ADDRESS}:8008`}/batches`,
     batchListBytes,
@@ -145,13 +132,10 @@ module.exports.sendTransaction = async function (
   );
 };
 
-module.exports.queryState = async function (address, cancelToken) {
+module.exports.queryState = async function (address) {
   const params = {
     headers: { "Content-Type": "application/json" },
   };
-  if (cancelToken) {
-    params.cancelToken = cancelToken;
-  }
   let response;
   try {
     response = await axios.get(

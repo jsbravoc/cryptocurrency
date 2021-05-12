@@ -111,42 +111,12 @@ const enforceValidTransactionsMiddleware = (req, res, next) => {
   if (req.query.users) {
     users = req.query.users.split(",");
   }
-  updateInvalidUsersTransactions("[ENFORCER]", users, res)
-    .then((response) => {
-      if (response) {
-        (response.payload || []).forEach(({ args }) => {
-          let { transaction } = args;
-          transaction = JSON.parse(transaction);
-          switch (transaction.type) {
-            case TYPE.TRANSACTION:
-              if (!res.locals.transaction) {
-                res.locals.transaction = {};
-              }
-              res.locals.transaction[transaction.signature] = new Transaction(
-                transaction
-              ).toObject(false, true);
-
-              break;
-            case TYPE.USER:
-              if (!res.locals.user) {
-                res.locals.user = {};
-              }
-              res.locals.user[transaction.address] = new User(
-                transaction
-              ).toObject(true, true);
-              break;
-
-            default:
-              break;
-          }
-        });
-      }
-      return next();
-    })
-    .catch((err) => {
+  return updateInvalidUsersTransactions("[ENFORCER]", users, res).catch(
+    (err) => {
       logFormatted(`Enforcer failed with error`, SEVERITY.ERROR, err);
       next();
-    });
+    }
+  );
 };
 
 module.exports.updateInvalidTransaction = updateInvalidTransaction;

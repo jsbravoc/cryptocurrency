@@ -1881,6 +1881,9 @@ describe(`Cryptocurrency Test Suite`, () => {
             .put(`${USERS_ENDPOINT}/${users.W1000.address}`)
             .send({
               role: "New role",
+              description: "Updated user",
+              permissions: { coinbase: true },
+              return_to: { default: users.NoCoinbase.address },
             })
             .end(function (err, res) {
               expect(res).to.have.status(200);
