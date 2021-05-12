@@ -944,6 +944,34 @@ describe(`Cryptocurrency Test Suite`, () => {
             },
           });
         });
+        it("Valid thru transaction should be created successfully", (done) => {
+          const now = new Date();
+          now.setSeconds(now.getSeconds() + 5);
+          createTransaction({
+            amount: 25,
+            senderAlias: "CantTransferW1000",
+            recipientAlias: "ToDeleteW1000",
+            valid_thru: now.toISOString(),
+            description: "Expiring valid transaction",
+            callback: ({ res }) => {
+              console.log("res", res);
+              createdVariables.transactions.transaction[
+                users.CantTransferW1000.address
+              ].expiringTransaction = res.body.payload;
+              expect(res).to.have.status(201);
+              setTimeout(() => {
+                chai
+                  .request(API_URL)
+                  .get(`${USERS_ENDPOINT}/${users.ToDeleteW1000.address}`)
+                  .end(function (err, res) {
+                    expect(res).to.have.status(200);
+                    res.body.should.have.property("balance").equal(25);
+                    done();
+                  });
+              }, 3500);
+            },
+          });
+        });
       });
     });
     describe(`PUT ${CRYPTO_ENDPOINT}/:address`, () => {
@@ -1185,7 +1213,10 @@ describe(`Cryptocurrency Test Suite`, () => {
                         .get(`${USERS_ENDPOINT}/${users.ToDeleteW1000.address}`)
                         .end(function (err, res) {
                           expect(res).to.have.status(200);
-                          res.body.should.have.property("balance").equal(1);
+                          //25 from valid expiring transaction
+                          res.body.should.have
+                            .property("balance")
+                            .equal(25 + 1);
                           done();
                         });
                     }, 3500);
@@ -1298,7 +1329,9 @@ describe(`Cryptocurrency Test Suite`, () => {
                         .get(`${USERS_ENDPOINT}/${users.ToDeleteW1000.address}`)
                         .end(function (err, res) {
                           expect(res).to.have.status(200);
-                          res.body.should.have.property("balance").equal(2);
+                          res.body.should.have
+                            .property("balance")
+                            .equal(25 + 1 + 1);
                           chai
                             .request(API_URL)
                             .get(
@@ -1365,6 +1398,98 @@ describe(`Cryptocurrency Test Suite`, () => {
               }, 3500);
             },
           });
+        });
+      });
+    });
+  });
+  describe(`${ENFORCER_ENDPOINT} Tests`, () => {
+    describe(`POST ${ENFORCER_ENDPOINT}`, () => {
+      describe(`POST ${ENFORCER_ENDPOINT}?users={users}`, () => {
+        describe("Enforcer success validations", function () {
+          this.slow(15000);
+          this.timeout(20000);
+          it("Pending valid thru transaction should be deleted successfully", (done) => {
+            chai
+              .request(API_URL)
+              .get(`${USERS_ENDPOINT}/${users.W1000.address}`)
+              .end(function (err, res) {
+                expect(res).to.have.status(200);
+                expect(res.body.pending_transactions)
+                  .to.be.an("array")
+                  .that.does.include(
+                    createdVariables.transactions.transaction[
+                      users.W1000.address
+                    ].expiringTransaction.signature
+                  );
+                chai
+                  .request(API_URL)
+                  .post(`${ENFORCER_ENDPOINT}`)
+                  .query({
+                    users: `${users.W1000.address},${users.W0.address}`,
+                  })
+                  .end(function (err, res) {
+                    expect(res).to.have.status(200);
+                    setTimeout(() => {
+                      chai
+                        .request(API_URL)
+                        .get(`${USERS_ENDPOINT}/${users.W1000.address}`)
+                        .end(function (err, res) {
+                          expect(res).to.have.status(200);
+                          expect(res.body.pending_transactions)
+                            .to.be.an("array")
+                            .that.does.not.include(
+                              createdVariables.transactions.transaction[
+                                users.W1000.address
+                              ].expiringTransaction.signature
+                            );
+                          done();
+                        });
+                    }, 5000);
+                  });
+              });
+          });
+        });
+      });
+      describe("Enforcer success validations", function () {
+        this.slow(20000);
+        this.timeout(30000);
+        it("Expiring lastest transactions should be deleted successfully", (done) => {
+          chai
+            .request(API_URL)
+            .get(`${USERS_ENDPOINT}/${users.ToDeleteW1000.address}`)
+            .end(function (err, res) {
+              expect(res).to.have.status(200);
+              expect(res.body.lastest_transactions)
+                .to.be.an("array")
+                .that.does.include(
+                  createdVariables.transactions.transaction[
+                    users.CantTransferW1000.address
+                  ].expiringTransaction.signature
+                );
+              chai
+                .request(API_URL)
+                .post(`${ENFORCER_ENDPOINT}`)
+                .end(function (err, res) {
+                  expect(res).to.have.status(200);
+                  setTimeout(() => {
+                    chai
+                      .request(API_URL)
+                      .get(`${USERS_ENDPOINT}/${users.ToDeleteW1000.address}`)
+                      .end(function (err, res) {
+                        expect(res).to.have.status(200);
+                        expect(res.body.lastest_transactions)
+                          .to.be.an("array")
+                          .that.does.not.include(
+                            createdVariables.transactions.transaction[
+                              users.CantTransferW1000.address
+                            ].expiringTransaction.signature
+                          );
+                        expect(res.body.balance).to.equal(2);
+                        done();
+                      });
+                  }, 8000);
+                });
+            });
         });
       });
     });
@@ -1856,52 +1981,6 @@ describe(`Cryptocurrency Test Suite`, () => {
             .end(function (err, res) {
               expect(res).to.have.status(201);
               done();
-            });
-        });
-      });
-    });
-  });
-  describe(`${ENFORCER_ENDPOINT} Tests`, () => {
-    describe(`GET ${ENFORCER_ENDPOINT}`, () => {
-      describe("Enforcer success validations", function () {
-        this.slow(15000);
-        this.timeout(20000);
-        it("Pending valid thru transaction should be deleted successfully", (done) => {
-          chai
-            .request(API_URL)
-            .get(`${USERS_ENDPOINT}/${users.W1000.address}`)
-            .end(function (err, res) {
-              expect(res).to.have.status(200);
-              expect(res.body.pending_transactions)
-                .to.be.an("array")
-                .that.does.include(
-                  createdVariables.transactions.transaction[users.W1000.address]
-                    .expiringTransaction.signature
-                );
-              chai
-                .request(API_URL)
-                .get(
-                  `${ENFORCER_ENDPOINT}?users=${users.W1000.address},${users.W0.address}`
-                )
-                .end(function (err, res) {
-                  expect(res).to.have.status(200);
-                  setTimeout(() => {
-                    chai
-                      .request(API_URL)
-                      .get(`${USERS_ENDPOINT}/${users.W1000.address}`)
-                      .end(function (err, res) {
-                        expect(res).to.have.status(200);
-                        expect(res.body.pending_transactions)
-                          .to.be.an("array")
-                          .that.does.not.include(
-                            createdVariables.transactions.transaction[
-                              users.W1000.address
-                            ].expiringTransaction.signature
-                          );
-                        done();
-                      });
-                  }, 5000);
-                });
             });
         });
       });

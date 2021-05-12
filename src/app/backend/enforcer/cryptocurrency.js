@@ -82,6 +82,10 @@ const updateInvalidUsersTransactions = (source, users = null, res) => {
       promiseOfUsers.push(findByAddress(TYPE.USER, user, false, false, res));
     });
   } else {
+    logFormatted(
+      "Warning: Enforcer called without users query parameter, increasing load significantly",
+      SEVERITY.WARN
+    );
     promiseOfUsers.push(
       findAllAssets(TYPE.USER, source, undefined, false, false, res)
     );

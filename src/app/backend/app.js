@@ -13,8 +13,13 @@ const app = express();
 const apiAddress = `http://${require("ip").address()}:${
   process.env.PORT || "3000"
 }`;
-
-console.clear();
+if (process.env.CLEAR_STARTING_LOGS === "true") {
+  logFormatted("Clearing the console in 5 seconds", SEVERITY.BOLD);
+  setTimeout(() => {
+    console.clear();
+    logFormatted("Console cleared successfully", SEVERITY.BOLD);
+  }, 5000);
+}
 if (process.env.HIDE_ENV_VARIABLES !== "true") {
   logFormatted(
     "Warning: Printing .env variables, use HIDE_ENV_VARIABLES=true to hide them",
@@ -24,12 +29,16 @@ if (process.env.HIDE_ENV_VARIABLES !== "true") {
 }
 logFormatted(`Server available at ${apiAddress}`, SEVERITY.URL);
 
-if (process.env.DEBUG) {
+if (process.env.DEBUG === "true") {
   logFormatted(
     "Express logger enabled, remove DEBUG env variable to disable it",
     SEVERITY.WARN
   );
-  app.use(require("morgan")("dev"));
+  app.use(
+    require("morgan")("dev", {
+      skip: () => process.env.NODE_ENV === "test",
+    })
+  );
 }
 
 i18next
