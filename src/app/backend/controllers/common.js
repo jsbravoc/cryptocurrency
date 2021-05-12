@@ -162,7 +162,7 @@ const findByAddress = (
 const findAllAssets = (
   type,
   source,
-  limit = 20,
+  limit = 0,
   removeSignature = false,
   removeType = false,
   res = null
