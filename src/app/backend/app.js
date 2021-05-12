@@ -15,7 +15,13 @@ const apiAddress = `http://${require("ip").address()}:${
 }`;
 
 console.clear();
-logFormatted("Loaded environment variables", SEVERITY.BOLD, result.parsed);
+if (process.env.HIDE_ENV_VARIABLES !== "true") {
+  logFormatted(
+    "Warning: Printing .env variables, use HIDE_ENV_VARIABLES=true to hide them",
+    SEVERITY.LOW
+  );
+  logFormatted("Loaded environment variables", SEVERITY.BOLD, result.parsed);
+}
 logFormatted(`Server available at ${apiAddress}`, SEVERITY.URL);
 
 if (process.env.DEBUG) {
@@ -37,7 +43,7 @@ i18next
     preload: ["en", "es"],
   });
 
-const jsDocs = path.join(__dirname, "resources/docs");
+const jsDocs = path.join(__dirname, "/resources/docs/");
 
 app.use(express.static(jsDocs));
 app.use(i18nextMiddleware.handle(i18next));
@@ -45,10 +51,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
-app.use("/api-docs", require("./routes/docs"));
+if (process.env.NODE_ENV !== "production") {
+  app.use("/api-docs", require("./routes/docs"));
+  app.use("/docs", require("./routes"));
+}
 app.use("/cryptocurrency", require("./routes/cryptocurrency"));
 app.use("/users", require("./routes/users"));
 app.use("/validate", require("./routes/enforcer"));
-app.use("/*", require("./routes"));
 
 module.exports = app;

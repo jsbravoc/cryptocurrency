@@ -1,2 +1,2 @@
-/*! cryptocurrency 2021-05-11 */
-const express=require("express"),router=express.Router();router.get("/",(e,r)=>{r.sendFile("../resources/docs/index.html",{root:__dirname})}),module.exports=router;
+/*! cryptocurrency 2021-05-12 */
+const express=require("express"),router=express.Router(),{logFormatted,SEVERITY}=require("../utils/logger");router.get("/",(e,r)=>{logFormatted("GET /docs successfully served",SEVERITY.NONE),r.sendFile("../resources/docs/index.html",{root:__dirname})}),module.exports=router;

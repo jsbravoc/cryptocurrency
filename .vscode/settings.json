@@ -25,7 +25,7 @@
         "**/node_modules": true,
         "**/public": true,
         "**/build": false,
-        "**/.husky": true,
+        "**/.husky": false,
         "**/ledger_sync": true
     },
     "git.ignoreLimitWarning": true

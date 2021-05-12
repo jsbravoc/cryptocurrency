@@ -1,3 +1,3 @@
 #!/usr/bin/env node
-/*! cryptocurrency 2021-05-11 */
+/*! cryptocurrency 2021-05-12 */
 const http=require("http"),app=require("../app"),normalizePort=r=>{var e=parseInt(r,10);return Number.isNaN(e)?r:0<=e&&e},port=normalizePort(process.env.PORT||"3000");app.set("port",port);const server=http.createServer(app),onError=r=>{if("listen"!==r.syscall)throw r;var e="string"==typeof port?`Pipe ${port}`:`Port ${port}`;switch(r.code){case"EACCES":console.error(`${e} requires elevated privileges`),process.exit(1);break;case"EADDRINUSE":console.error(`${e} is already in use`),process.exit(1);break;default:throw r}};server.listen(port),server.on("error",onError);

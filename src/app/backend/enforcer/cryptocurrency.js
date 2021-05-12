@@ -9,36 +9,54 @@ const {
 const { TYPE, HTTP_METHODS } = require("../utils/constants");
 const { logFormatted, SEVERITY } = require("../utils/logger");
 
-const updateInvalidTransaction = (address) => {
-  return findByAddress(TYPE.TRANSACTION, address).then((transaction) => {
-    if (transaction && transaction.checkValidity() !== transaction.valid) {
-      transaction.valid = transaction.checkValidity();
-      return {
-        transactionObj: transaction,
-        assetObj: buildAssetTransaction(
-          TYPE.TRANSACTION,
-          HTTP_METHODS.PUT,
-          transaction
-        ),
-      };
+const updateInvalidTransaction = (address, res) => {
+  return findByAddress(TYPE.TRANSACTION, address, false, false, res).then(
+    (transaction) => {
+      if (
+        transaction &&
+        (transaction.checkValidity() !== transaction.valid ||
+          (transaction.pending && !transaction.checkValidity()))
+      ) {
+        transaction.valid = transaction.checkValidity();
+        return {
+          transactionObj: transaction,
+          assetObj: buildAssetTransaction(
+            TYPE.TRANSACTION,
+            HTTP_METHODS.PUT,
+            transaction
+          ),
+        };
+      }
+      return null;
     }
-    return null;
-  });
+  );
 };
 
-const updateInvalidUserTransactions = (address) => {
-  return findByAddress(TYPE.USER, address).then((user) => {
+const updateInvalidUserTransactions = (address, res) => {
+  return findByAddress(TYPE.USER, address, false, false, res).then((user) => {
     const promises = [];
     const arrayOfTransactions = [];
     let requiresUpdate = false;
     if (user) {
       (user.lastest_transactions || []).forEach((transaction) => {
         promises.push(
-          updateInvalidTransaction(transaction).then((response) => {
+          updateInvalidTransaction(transaction, res).then((response) => {
             if (response) {
               const { transactionObj, assetObj } = response;
               requiresUpdate = true;
               user.removeInvalidTransaction(transactionObj);
+              arrayOfTransactions.push(assetObj);
+            }
+          })
+        );
+      });
+      (user.pending_transactions || []).forEach((transaction) => {
+        promises.push(
+          updateInvalidTransaction(transaction, res).then((response) => {
+            if (response) {
+              const { assetObj } = response;
+              requiresUpdate = true;
+              user.removePendingTransaction(transaction);
               arrayOfTransactions.push(assetObj);
             }
           })
@@ -56,12 +74,23 @@ const updateInvalidUserTransactions = (address) => {
   });
 };
 
-const updateInvalidUsersTransactions = (source) => {
+const updateInvalidUsersTransactions = (source, users = null, res) => {
   const promises = [];
-  return findAllAssets(TYPE.USER, source).then((users) => {
+  const promiseOfUsers = [];
+  if (Array.isArray(users) && users.length > 0) {
     users.forEach((user) => {
-      user.address &&
-        promises.push(updateInvalidUserTransactions(user.address, source));
+      promiseOfUsers.push(findByAddress(TYPE.USER, user, false, false, res));
+    });
+  } else {
+    promiseOfUsers.push(
+      findAllAssets(TYPE.USER, source, undefined, false, false, res)
+    );
+  }
+  return Promise.all(promiseOfUsers).then((users) => {
+    const userList = [].concat.apply([], users);
+    userList.forEach((user) => {
+      if (user.address)
+        promises.push(updateInvalidUserTransactions(user.address, res));
     });
     return Promise.all(promises).then((arrayOfMultipleTransactions) => {
       const flattenedArray = [].concat.apply([], arrayOfMultipleTransactions);
@@ -73,8 +102,12 @@ const updateInvalidUsersTransactions = (source) => {
   });
 };
 
-const enforceValidTransactionsMiddleware = (req, res, next) =>
-  updateInvalidUsersTransactions("[ENFORCER]")
+const enforceValidTransactionsMiddleware = (req, res, next) => {
+  let users;
+  if (req.query.users) {
+    users = req.query.users.split(",");
+  }
+  updateInvalidUsersTransactions("[ENFORCER]", users, res)
     .then((response) => {
       if (response) {
         (response.payload || []).forEach(({ args }) => {
@@ -110,6 +143,7 @@ const enforceValidTransactionsMiddleware = (req, res, next) =>
       logFormatted(`Enforcer failed with error`, SEVERITY.ERROR, err);
       next();
     });
+};
 
 module.exports.updateInvalidTransaction = updateInvalidTransaction;
 module.exports.updateInvalidUserTransactions = updateInvalidUserTransactions;

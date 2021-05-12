@@ -55,7 +55,6 @@ for (const name in users) {
     const pubKey = secp256k1.publicKeyCreate(privKey);
     user.public_key = Buffer.from(pubKey).toString("hex");
     user.private_key = Buffer.from(privKey).toString("hex");
-    console.log(user);
   }
 }
 
@@ -188,7 +187,6 @@ const createTransaction = ({
     .post(`${CRYPTO_ENDPOINT}`)
     .send(request)
     .end(function (err, res) {
-      console.log(request);
       return callback({
         err,
         res,
@@ -899,17 +897,18 @@ describe(`Cryptocurrency Test Suite`, () => {
         });
         it("Pending valid thru transaction should be created successfully", (done) => {
           const now = new Date();
-          now.setSeconds(now.getSeconds() + 10);
+          now.setSeconds(now.getSeconds() + 5);
           createTransaction({
             amount: 1,
             senderAlias: "W1000",
             recipientAlias: "W0",
             valid_thru: now.toISOString(),
             pending: true,
+            description: "Expiring transaction",
             callback: ({ res }) => {
               createdVariables.transactions.transaction[
                 users.W1000.address
-              ].expiringTransaction = res.body;
+              ].expiringTransaction = res.body.payload;
               expect(res).to.have.status(201);
               setTimeout(() => {
                 chai
@@ -1865,6 +1864,8 @@ describe(`Cryptocurrency Test Suite`, () => {
   describe(`${ENFORCER_ENDPOINT} Tests`, () => {
     describe(`GET ${ENFORCER_ENDPOINT}`, () => {
       describe("Enforcer success validations", function () {
+        this.slow(15000);
+        this.timeout(20000);
         it("Pending valid thru transaction should be deleted successfully", (done) => {
           chai
             .request(API_URL)
@@ -1875,11 +1876,13 @@ describe(`Cryptocurrency Test Suite`, () => {
                 .to.be.an("array")
                 .that.does.include(
                   createdVariables.transactions.transaction[users.W1000.address]
-                    .expiringTransaction.payload.signature
+                    .expiringTransaction.signature
                 );
               chai
                 .request(API_URL)
-                .get(`${ENFORCER_ENDPOINT}/`)
+                .get(
+                  `${ENFORCER_ENDPOINT}?users=${users.W1000.address},${users.W0.address}`
+                )
                 .end(function (err, res) {
                   expect(res).to.have.status(200);
                   setTimeout(() => {
@@ -1893,12 +1896,11 @@ describe(`Cryptocurrency Test Suite`, () => {
                           .that.does.not.include(
                             createdVariables.transactions.transaction[
                               users.W1000.address
-                            ].expiringTransaction.payload.signature
+                            ].expiringTransaction.signature
                           );
                         done();
                       });
-                  }, 3500);
-                  done();
+                  }, 5000);
                 });
             });
         });
