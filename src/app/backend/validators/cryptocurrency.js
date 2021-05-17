@@ -589,10 +589,11 @@ const validateTransactionUpdateRequest = [
 module.exports.validateTransactionAddress = validateTransactionAddress;
 module.exports.validateTransactionUpdateRequest = validateTransactionUpdateRequest;
 module.exports.verifyPostTransaction = [
+  /* Transactions signatures don't collide anymore.
   (req, res, next) =>
     validateExistingTransaction(req, res, next, req.body.signature, false, {
       location: "body",
-    }),
+    }), */
   verifyPostTransaction,
   validateTransactionSignature,
 ];
