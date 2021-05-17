@@ -32,15 +32,16 @@ services:
 
 
   crypto-tp:
-    image: jsbravoc/crypto-tp
+    image: jsbravoc/crypto-tp:latest
     container_name: crypto-tp
     depends_on:
         - validator
     environment:
         - VALIDATOR=tcp://validator:4004
 
+# start the validator with an empty genesis batch
   crypto-api:
-    image: jsbravoc/crypto-api
+    image: jsbravoc/crypto-api:latest
     container_name: crypto-api
     expose:
         - 3000
@@ -53,18 +54,10 @@ services:
         - SAWTOOTH_PRIVATE_KEY=0x7f664d71e4200b4a2989558d1f6006d0dac9771a36a546b1a47c384ec9c4f04b
         - SAWTOOTH_REST=http://rest-api:8008
         - SAWTOOTH_REST_TIMEOUT=5000
-        - VALIDATOR_HOST_BK=tcp://localhost:4004
-        - MONGO_URI="mongodb://root:example@localhost:27017/mydb"
-        - KAFKA_CONSUMER="localhost:9093"
-        - KAFKA_PRODUCER="localhost:9093"
-        - RETHINK_HOST=localhost
-        - RETHINK_PORT=28020
-        - RETHINK_USER="admin"
-        - RETHINK_PASSWORD=""
+        - VALIDATOR_HOST=tcp://validator:4004
         - ENABLE_LOGGING=true
         - DISABLE_INTEGRITY_VALIDATION=true
         - HIDE_ENV_VARIABLES=true
-        - JWT_SECRET="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmb28iOiJiYXIiLCJpYXQiOjE2MTU2NTE5ODJ9.Fr8AAvMHdi9at7qUX5WdJevaQrnJnMM5CMhxOFW4820"
 
   settings-tp:
     image: hyperledger/sawtooth-settings-tp:1.2.6

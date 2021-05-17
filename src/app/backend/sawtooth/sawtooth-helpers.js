@@ -8,10 +8,7 @@ axios.defaults.timeout = 10 * 1000;
 /* const { CancelToken } = require("axios"); */
 
 const privateKey = Buffer.from(
-  (
-    process.env.SAWTOOTH_PRIVATE_KEY ||
-    "0x7f664d71e4200b4a2989558d1f6006d0dac9771a36a546b1a47c384ec9c4f04b"
-  ).slice(2),
+  process.env.SAWTOOTH_PRIVATE_KEY.slice(2),
   "hex"
 );
 const publicKey = secp256k1.publicKeyCreate(privateKey);
@@ -126,7 +123,7 @@ module.exports.sendTransaction = async function (transactions) {
     timeout: process.env.SAWTOOTH_REST_TIMEOUT || 5000,
   };
   return axios.post(
-    `${process.env.SAWTOOTH_REST || `http://${LOCAL_ADDRESS}:8008`}/batches`,
+    `${process.env.SAWTOOTH_REST}/batches`,
     batchListBytes,
     params
   );
@@ -139,7 +136,7 @@ module.exports.queryState = async function (address) {
   let response;
   try {
     response = await axios.get(
-      `http://localhost:8008/state/${address}`,
+      `http://${process.env.SAWTOOTH_REST}/state/${address}`,
       params
     );
   } catch (error) {
@@ -153,96 +150,3 @@ module.exports.queryState = async function (address) {
   const stateValue = JSON.parse(base.toString("utf8"));
   return stateValue;
 };
-
-/* const { Stream } = require("sawtooth-sdk/messaging/stream");
-const {
-  Message,
-  EventList,
-  EventSubscription,
-  EventFilter,
-  // StateChangeList,
-  ClientEventsSubscribeRequest,
-  ClientEventsSubscribeResponse,
-} = require("sawtooth-sdk/protobuf");
-const { logFormatted } = require("../utils/logger"); */
-const { LOCAL_ADDRESS } = require("../utils/constants");
-/* 
-const PREFIX = hash512("intkey").substring(0, 6);
-const NULL_BLOCK_ID = "0000000000000000";
-
-const VALIDATOR_HOST =
-  process.env.VALIDATOR_HOST || `tcp://${LOCAL_ADDRESS}:4004`; */
-// const VALIDATOR_HOST = 'tcp://localhost:4004';
-/* logFormatted(`Connecting to validator at ${VALIDATOR_HOST}`);
-const stream = new Stream(VALIDATOR_HOST);
-
-module.exports.subscribeToSawtoothEvents = () =>
-  new Promise((resolve) => {
-    stream.connect(() => {
-      stream.onReceive(handleEvent);
-      subscribe().then(resolve);
-      console.log("Connected");
-    });
-  });
-
-const handleEvent = (msg) => {
-  // const mmm = EventList.decode(msg.content).events
-  // console.log('events', mmm);
-  if (msg.messageType === Message.MessageType.CLIENT_EVENTS) {
-    const { events } = EventList.decode(msg.content);
-    // console.log(events)
-    _.forEach(events, (e) => {
-      if (e.eventType == "myevent") {
-        // console.log(e)
-        // console.log('EVENT - data:', Buffer.from(e.data, 'utf8').toString('utf8'))
-      } else if (e.eventType === "sawtooth/block-commit") {
-        // console.log(e);
-      } else if (e.eventType === "sawtooth/state-delta") {
-        // let a = protobuf.StateChangeList.decode(e.data);
-        // console.log(a.stateChanges[0].value.toString('utf8'));
-      }
-    });
-    // deltas.handle(getBlock(events), getChanges(events))
-  } else {
-    console.warn("Received message of unknown type:", msg.messageType);
-  }
-};
-
-const subscribe = () => {
-  const blockSub = EventSubscription.create({
-    eventType: "sawtooth/block-commit",
-  });
-  const deltaSub = EventSubscription.create({
-    eventType: "sawtooth/state-delta",
-    filters: [
-      EventFilter.create({
-        key: "address",
-        matchString: `^${PREFIX}.*`,
-        filterType: EventFilter.FilterType.REGEX_ANY,
-      }),
-    ],
-  });
-
-  const mySub = EventSubscription.create({
-    eventType: "myevent",
-  });
-
-  return stream
-    .send(
-      Message.MessageType.CLIENT_EVENTS_SUBSCRIBE_REQUEST,
-      ClientEventsSubscribeRequest.encode({
-        lastKnownBlockIds: [NULL_BLOCK_ID],
-        subscriptions: [blockSub, deltaSub, mySub],
-      }).finish()
-    )
-    .then((response) => ClientEventsSubscribeResponse.decode(response))
-    .then((decoded) => {
-      const status = _.findKey(
-        ClientEventsSubscribeResponse.Status,
-        (val) => val === decoded.status
-      );
-      if (status !== "OK") {
-        throw new Error(`Validator responded with status "${status}"`);
-      }
-    });
-}; */
