@@ -1,5 +1,3 @@
-const Transaction = require("../models/Transaction");
-const User = require("../models/User");
 const {
   findByAddress,
   findAllAssets,
@@ -33,13 +31,18 @@ const updateInvalidTransaction = (address, res) => {
   );
 };
 
-const updateInvalidUserTransactions = (address, res) => {
+const updateInvalidUserTransactions = (address, transactions, res) => {
   return findByAddress(TYPE.USER, address, false, false, res).then((user) => {
     const promises = [];
     const arrayOfTransactions = [];
     let requiresUpdate = false;
     if (user) {
-      (user.lastest_transactions || []).forEach((transaction) => {
+      (Array.isArray(transactions) && transactions.length > 0
+        ? (user.lastest_transactions || []).filter(
+            (x) => transactions.indexOf(x) > -1
+          )
+        : user.lastest_transactions || []
+      ).forEach((transaction) => {
         promises.push(
           updateInvalidTransaction(transaction, res).then((response) => {
             if (response) {
@@ -51,7 +54,12 @@ const updateInvalidUserTransactions = (address, res) => {
           })
         );
       });
-      (user.pending_transactions || []).forEach((transaction) => {
+      (Array.isArray(transactions) && transactions.length > 0
+        ? (user.pending_transactions || []).filter(
+            (x) => transactions.indexOf(x) > -1
+          )
+        : user.pending_transactions || []
+      ).forEach((transaction) => {
         promises.push(
           updateInvalidTransaction(transaction, res).then((response) => {
             if (response) {
@@ -75,7 +83,12 @@ const updateInvalidUserTransactions = (address, res) => {
   });
 };
 
-const updateInvalidUsersTransactions = (source, users = null, res) => {
+const updateInvalidUsersTransactions = (
+  source,
+  users = null,
+  transactions = null,
+  res
+) => {
   const promises = [];
   const promiseOfUsers = [];
   if (Array.isArray(users) && users.length > 0) {
@@ -95,7 +108,9 @@ const updateInvalidUsersTransactions = (source, users = null, res) => {
     const userList = [].concat.apply([], users);
     userList.forEach((user) => {
       if (user.address)
-        promises.push(updateInvalidUserTransactions(user.address, res));
+        promises.push(
+          updateInvalidUserTransactions(user.address, transactions, res)
+        );
     });
     return Promise.all(promises).then((arrayOfMultipleTransactions) => {
       const flattenedArray = [].concat.apply([], arrayOfMultipleTransactions);
@@ -109,10 +124,14 @@ const updateInvalidUsersTransactions = (source, users = null, res) => {
 
 const enforceValidTransactionsMiddleware = (req, res, next) => {
   let users;
+  let transactions;
   if (req.query.users) {
     users = req.query.users.split(",");
   }
-  return updateInvalidUsersTransactions("[ENFORCER]", users, res)
+  if (req.query.transactions) {
+    transactions = req.query.transactions.split(",");
+  }
+  return updateInvalidUsersTransactions("[ENFORCER]", users, transactions, res)
     .then(() => next())
     .catch((err) => {
       logFormatted(`Enforcer failed with error`, SEVERITY.ERROR, err);
