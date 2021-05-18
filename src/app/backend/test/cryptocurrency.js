@@ -375,7 +375,7 @@ describe(`Cryptocurrency Test Suite`, () => {
                       pending,
                       err,
                       res,
-                      callback: () => done(),
+                      callback: () => setTimeout(done, 5000),
                     }),
                 });
               }, 2500),
