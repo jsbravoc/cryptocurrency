@@ -206,6 +206,7 @@ describe(`Cryptocurrency Test Suite`, () => {
 
     const createdUserCallback = ({ res, alias, callback }) => {
       const address = users[alias].address;
+      console.log(res.body);
       return expect(res).to.satisfy((res) => {
         createdVariables.transactions.user[address] = res.body;
         if (res.statusCode === 201) {
@@ -374,7 +375,7 @@ describe(`Cryptocurrency Test Suite`, () => {
                       pending,
                       err,
                       res,
-                      callback: () => setTimeout(done, 5000),
+                      callback: () => done(),
                     }),
                 });
               }, 2500),

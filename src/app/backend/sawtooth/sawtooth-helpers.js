@@ -136,7 +136,7 @@ module.exports.queryState = async function (address) {
   let response;
   try {
     response = await axios.get(
-      `http://${process.env.SAWTOOTH_REST}/state/${address}`,
+      `${process.env.SAWTOOTH_REST}/state/${address}`,
       params
     );
   } catch (error) {
