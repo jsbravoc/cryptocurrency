@@ -13,13 +13,17 @@ const { logFormatted } = require("./utils/logger");
 // }
 // console.log(process.env.VALIDATOR);
 
-const transactionProcessor = new TransactionProcessor(process.env.VALIDATOR);
+const transactionProcessor = new TransactionProcessor(
+  process.env.VALIDATOR_HOST
+);
 
 transactionProcessor.addHandler(new (TPKeyHandler(TPHandler))());
 
 transactionProcessor.start();
 
-logFormatted(`Transaction processor available at ${process.env.VALIDATOR}`);
+logFormatted(
+  `Transaction processor available at ${process.env.VALIDATOR_HOST}`
+);
 
 //Gracefull shutdown with nodemon
 process.once("SIGUSR2", function () {
