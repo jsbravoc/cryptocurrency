@@ -14,7 +14,7 @@ const { logFormatted } = require("./utils/logger");
 // console.log(process.env.VALIDATOR);
 
 const transactionProcessor = new TransactionProcessor(
-  process.env.VALIDATOR || "tcp://localhost:4004"
+  process.env.VALIDATOR_HOST
 );
 
 transactionProcessor.addHandler(new (TPKeyHandler(TPHandler))());
@@ -22,9 +22,7 @@ transactionProcessor.addHandler(new (TPKeyHandler(TPHandler))());
 transactionProcessor.start();
 
 logFormatted(
-  `Transaction processor available at ${
-    process.env.VALIDATOR || "tcp://localhost:4004"
-  }`
+  `Transaction processor available at ${process.env.VALIDATOR_HOST}`
 );
 
 //Gracefull shutdown with nodemon

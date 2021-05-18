@@ -168,9 +168,7 @@ const findAllAssets = (
   };
   return axios
     .get(
-      `${
-        process.env.SAWTOOTH_REST || `http://${LOCAL_ADDRESS}:8008`
-      }/state?address=${PREFIX + addressPrefix}${
+      `${process.env.SAWTOOTH_REST}/state?address=${PREFIX + addressPrefix}${
         limit !== 0 ? `&limit=${limit}` : ""
       }`,
       params
