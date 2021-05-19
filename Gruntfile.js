@@ -38,7 +38,7 @@ module.exports = function (grunt) {
           {
             expand: true,
             cwd: "src/app/backend",
-            src: ["*.js", "!*.min.js"],
+            src: ["*.js", "!*.min.js", "!ecosystem.config.js"],
             dest: "build/app/backend",
             ext: ".js",
           },
@@ -192,7 +192,7 @@ module.exports = function (grunt) {
           {
             expand: true,
             cwd: "src/app/transaction_processor",
-            src: ["*.js", "!*.min.js"],
+            src: ["*.js", "!*.min.js", "!ecosystem.config.js"],
             dest: "build/app/transaction_processor",
             ext: ".js",
           },
@@ -245,6 +245,13 @@ module.exports = function (grunt) {
           },
           {
             expand: true,
+            cwd: "src/app/backend",
+            src: "ecosystem.config.js",
+            dest: "build/app/backend/",
+            filter: "isFile",
+          },
+          {
+            expand: true,
             cwd: "src/app/backend/resources/",
             src: ["**"],
             dest: "build/app/backend/resources",
@@ -274,6 +281,13 @@ module.exports = function (grunt) {
             expand: true,
             cwd: "src/app/transaction_processor",
             src: "Dockerfile",
+            dest: "build/app/transaction_processor/",
+            filter: "isFile",
+          },
+          {
+            expand: true,
+            cwd: "src/app/transaction_processor",
+            src: "ecosystem.config.js",
             dest: "build/app/transaction_processor/",
             filter: "isFile",
           },
