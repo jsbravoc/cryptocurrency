@@ -1,2 +1,16 @@
 fixes:
   - "::src/app/backend" 
+
+coverage:
+    status:
+        project:
+          default:
+            # basic
+            target: 90%
+            threshold: 1%
+            if_ci_failed: error
+            informational: False
+            only_pulls: false
+    patch:
+      default:
+        target: 90%  # new contributions should have a coverage at least equal to target
