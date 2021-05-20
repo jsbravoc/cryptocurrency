@@ -22,7 +22,7 @@ transactionProcessor.addHandler(new (TPKeyHandler(TPHandler))());
 transactionProcessor.start();
 
 logFormatted(
-  `Transaction processor available at ${process.env.VALIDATOR_HOST}`
+  `Transaction processor registered to ${process.env.VALIDATOR_HOST}`
 );
 
 //Gracefull shutdown with nodemon

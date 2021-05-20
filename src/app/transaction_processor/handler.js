@@ -18,8 +18,6 @@ const TP_NAMESPACE = getAddress(TRANSACTION_FAMILY, 6);
 const getTransactionAddress = (name) =>
   `${TP_NAMESPACE}00${getAddress(name, 62)}`;
 const getUserAddress = (name) => `${TP_NAMESPACE}01${getAddress(name, 62)}`;
-const getTransferAddress = (asset) =>
-  `${TP_NAMESPACE}02${getAddress(asset, 62)}`;
 
 const addressIntKey = (key, addressType) => {
   switch (addressType) {
@@ -27,18 +25,11 @@ const addressIntKey = (key, addressType) => {
       return getTransactionAddress(key);
     case "USER":
       return getUserAddress(key);
-    case "TRANSFER":
-      return getTransferAddress(key);
-    default:
-      return "";
   }
 };
 addressIntKey.keysCanCollide = true;
 
-const getContext = (
-  [transactionContext, userContext, transferContext],
-  transaction
-) => {
+const getContext = ([transactionContext, userContext], transaction) => {
   let parsedTransaction;
   try {
     parsedTransaction = JSON.parse(transaction);
@@ -61,8 +52,6 @@ const getContext = (
       return transactionContext;
     case TYPE.USER:
       return userContext;
-    case TYPE.TRANSFER:
-      return transferContext;
     default:
       logFormatted(
         "Error at getContext - Transaction type was not defined",
@@ -74,32 +63,26 @@ const getContext = (
 };
 
 const handlers = {
-  async delete(
-    [transactionContext, userContext, transferContext],
-    { transaction, txid }
-  ) {
+  async delete([transactionContext, userContext], { transaction, txid }) {
     logFormatted("Handling delete transaction", SEVERITY.NOTIFY, {
       transaction,
       txid,
     });
     const contextHandler = getContext(
-      [transactionContext, userContext, transferContext],
+      [transactionContext, userContext],
       transaction
     );
     const { id, input, output } = JSON.parse(transaction);
     await contextHandler.putState(txid, output);
   },
-  async post(
-    [transactionContext, userContext, transferContext],
-    { transaction, txid }
-  ) {
+  async post([transactionContext, userContext], { transaction, txid }) {
     logFormatted("Handling post transaction", SEVERITY.NOTIFY, {
       transaction,
       txid,
     });
 
     const contextHandler = getContext(
-      [transactionContext, userContext, transferContext],
+      [transactionContext, userContext],
       transaction
     );
     const { type, ...transactionObject } = JSON.parse(transaction);
@@ -111,17 +94,14 @@ const handlers = {
       transactionObject
     );
   },
-  async put(
-    [transactionContext, userContext, transferContext],
-    { transaction, txid }
-  ) {
+  async put([transactionContext, userContext], { transaction, txid }) {
     logFormatted("Handling put transaction", SEVERITY.NOTIFY, {
       transaction,
       txid,
     });
 
     const contextHandler = getContext(
-      [transactionContext, userContext, transferContext],
+      [transactionContext, userContext],
       transaction
     );
     const { type, ...transactionObject } = JSON.parse(transaction);
@@ -140,5 +120,5 @@ module.exports = {
   TP_VERSION,
   TP_NAMESPACE,
   handlers,
-  addresses: { getTransactionAddress, getUserAddress, getTransferAddress },
+  addresses: { getTransactionAddress, getUserAddress },
 };

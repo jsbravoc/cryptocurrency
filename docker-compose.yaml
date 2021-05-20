@@ -37,7 +37,7 @@ services:
     depends_on:
         - validator
     environment:
-        - VALIDATOR=tcp://validator:4004
+        - VALIDATOR_HOST=tcp://validator:4004
 
 # start the validator with an empty genesis batch
   crypto-api:
