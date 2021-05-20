@@ -1,0 +1,95 @@
+version: '3.3'
+
+services:
+
+#Sawtooth----------------------------------
+
+  validator:
+    image: hyperledger/sawtooth-validator:1.2.6
+    container_name: sawtooth-validator-default
+    expose:
+        - 4004
+    ports:
+        - "4004:4004"
+    # start the validator with an empty genesis batch
+    entrypoint: "bash -c \"\
+        sawadm keygen && \
+        sawtooth keygen my_key && \
+        sawset genesis -k /root/.sawtooth/keys/my_key.priv && \
+        sawset proposal create \
+            -k /root/.sawtooth/keys/my_key.priv \
+            sawtooth.consensus.algorithm.name=Devmode \
+            sawtooth.consensus.algorithm.version=0.1 \
+            -o config.batch && \
+        sawadm genesis config-genesis.batch config.batch && \
+        sawtooth-validator -vv \
+            --endpoint tcp://validator:8800 \
+            --bind component:tcp://eth0:4004 \
+            --bind network:tcp://eth0:8800 \
+            --bind consensus:tcp://eth0:5050 \
+            --scheduler serial \
+        \""
+
+
+  crypto-tp:
+    image: jsbravoc/crypto-tp:latest
+    container_name: crypto-tp
+    depends_on:
+        - validator
+    environment:
+        - VALIDATOR=tcp://validator:4004
+
+# start the validator with an empty genesis batch
+  crypto-api:
+    image: jsbravoc/crypto-api:latest
+    container_name: crypto-api
+    expose:
+        - 3000
+    ports:
+        - '3000:3000'
+    depends_on:
+        - validator
+        - crypto-tp
+    environment:
+        - SAWTOOTH_PRIVATE_KEY=0x7f664d71e4200b4a2989558d1f6006d0dac9771a36a546b1a47c384ec9c4f04b
+        - SAWTOOTH_REST=http://rest-api:8008
+        - SAWTOOTH_REST_TIMEOUT=5000
+        - VALIDATOR_HOST=tcp://validator:4004
+        - ENABLE_LOGGING=true
+        - DISABLE_INTEGRITY_VALIDATION=true
+        - HIDE_ENV_VARIABLES=true
+
+  settings-tp:
+    image: hyperledger/sawtooth-settings-tp:1.2.6
+    container_name: sawtooth-settings-tp-default
+    depends_on:
+      - validator
+    entrypoint: settings-tp -vv -C tcp://validator:4004
+
+  
+
+  devmode-engine:
+    image: hyperledger/sawtooth-devmode-engine-rust:1.2.4
+    container_name: sawtooth-devmode-engine-rust-default
+    depends_on:
+      - validator
+    entrypoint: devmode-engine-rust -C tcp://validator:5050
+
+  rest-api:
+    image: hyperledger/sawtooth-rest-api:1.2.6
+    container_name: sawtooth-rest-api-default
+    ports:
+      - "8008:8008"
+    depends_on:
+      - validator
+    entrypoint: sawtooth-rest-api -C tcp://validator:4004 --bind rest-api:8008
+
+  shell:
+    image: hyperledger/sawtooth-shell:1.2.6
+    container_name: sawtooth-shell-default
+    depends_on:
+      - rest-api
+    entrypoint: "bash -c \"\
+        sawtooth keygen && \
+        tail -f /dev/null \
+        \""

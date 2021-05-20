@@ -1,6 +1,5 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-await-in-loop */
-const mongo = require("../database/utils/mongo");
 
 const { SEVERITY, logFormatted } = require("../utils/logger");
 const Transaction = require("../models/Transaction");

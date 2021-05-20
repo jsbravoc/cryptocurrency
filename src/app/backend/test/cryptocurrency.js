@@ -206,6 +206,7 @@ describe(`Cryptocurrency Test Suite`, () => {
 
     const createdUserCallback = ({ res, alias, callback }) => {
       const address = users[alias].address;
+      console.log(res.body);
       return expect(res).to.satisfy((res) => {
         createdVariables.transactions.user[address] = res.body;
         if (res.statusCode === 201) {
@@ -430,19 +431,14 @@ describe(`Cryptocurrency Test Suite`, () => {
             chai
               .request(API_URL)
               .get(`${CRYPTO_ENDPOINT}`)
-              .query({ limit: 5, expanded: true, hidePending: true })
+              .query({ limit: 5, hidePending: true })
               .end(function (err, res) {
                 expect(res.body).to.be.an("array");
                 expect(res).to.have.status(200);
                 res.body.forEach((transaction) => {
-                  (transaction.supporting_transactions || []).forEach(
-                    (supporting_transaction) => {
-                      expect(supporting_transaction).to.be.an("object");
-                      if (supporting_transaction.pending) {
-                        expect(supporting_transaction.pending).to.equal(false);
-                      }
-                    }
-                  );
+                  if (transaction.pending !== undefined) {
+                    expect(transaction.pending).to.equal(false);
+                  }
                 });
                 done();
               });
@@ -453,17 +449,12 @@ describe(`Cryptocurrency Test Suite`, () => {
             chai
               .request(API_URL)
               .get(`${CRYPTO_ENDPOINT}`)
-              .query({ limit: 5, expanded: true, hideInvalid: true })
+              .query({ limit: 5, hideInvalid: true })
               .end(function (err, res) {
                 expect(res.body).to.be.an("array");
                 expect(res).to.have.status(200);
                 res.body.forEach((transaction) => {
-                  (transaction.supporting_transactions || []).forEach(
-                    (supporting_transaction) => {
-                      expect(supporting_transaction).to.be.an("object");
-                      expect(supporting_transaction.valid).to.equal(true);
-                    }
-                  );
+                  expect(transaction.valid).to.equal(true);
                 });
                 done();
               });
@@ -497,7 +488,6 @@ describe(`Cryptocurrency Test Suite`, () => {
         });
       });
       describe("Transaction success validations", function () {
-        before((done) => setTimeout(done), 2500);
         it("Transaction should be retrieved successfully", (done) => {
           chai
             .request(API_URL)
@@ -730,6 +720,7 @@ describe(`Cryptocurrency Test Suite`, () => {
                 done();
               });
           });
+          /*  Transactions signatures don't collide anymore.
           it("Already existing transaction with same signature should throw an error", (done) => {
             chai
               .request(API_URL)
@@ -753,7 +744,7 @@ describe(`Cryptocurrency Test Suite`, () => {
                 expect(res).to.have.status(400);
                 done();
               });
-          });
+          }); */
           it("Non existing sender should throw an error", (done) => {
             createTransaction({
               senderAlias: uuidv4(),
@@ -954,7 +945,6 @@ describe(`Cryptocurrency Test Suite`, () => {
             valid_thru: now.toISOString(),
             description: "Expiring valid transaction",
             callback: ({ res }) => {
-              console.log("res", res);
               createdVariables.transactions.transaction[
                 users.CantTransferW1000.address
               ].expiringTransaction = res.body.payload;
@@ -1404,6 +1394,112 @@ describe(`Cryptocurrency Test Suite`, () => {
   });
   describe(`${ENFORCER_ENDPOINT} Tests`, () => {
     describe(`POST ${ENFORCER_ENDPOINT}`, () => {
+      describe(`POST ${ENFORCER_ENDPOINT}?users={users}&transactions={transactions}`, () => {
+        describe("Enforcer success validations", function () {
+          this.slow(20000);
+          this.timeout(25000);
+          it("Expiring lastest transactions should be deleted successfully", (done) => {
+            const now = new Date();
+            now.setSeconds(now.getSeconds() + 2);
+            createTransaction({
+              amount: 1,
+              senderAlias: "W1000",
+              recipientAlias: "W0",
+              valid_thru: now.toISOString(),
+              description: "Expiring valid transaction",
+              callback: ({ res }) => {
+                createdVariables.transactions.transaction[
+                  users.W1000.address
+                ].expiringTransactionToW0 = res.body.payload;
+                expect(res).to.have.status(201);
+                setTimeout(() => {
+                  chai
+                    .request(API_URL)
+                    .post(`${ENFORCER_ENDPOINT}`)
+                    .query({
+                      users: `${users.W0.address}`,
+                      transactions: `${
+                        createdVariables.transactions.transaction[
+                          users.W1000.address
+                        ].expiringTransactionToW0.signature
+                      }`,
+                    })
+                    .end(function (err, res) {
+                      expect(res).to.have.status(200);
+                      setTimeout(() => {
+                        chai
+                          .request(API_URL)
+                          .get(`${USERS_ENDPOINT}/${users.W0.address}`)
+                          .end(function (err, res) {
+                            expect(res).to.have.status(200);
+                            expect(res.body.lastest_transactions)
+                              .to.be.an("array")
+                              .that.does.not.include(
+                                createdVariables.transactions.transaction[
+                                  users.W1000.address
+                                ].expiringTransactionToW0.signature
+                              );
+                            res.body.should.have.property("balance").equal(2);
+                            done();
+                          });
+                      }, 5000);
+                    });
+                }, 2500);
+              },
+            });
+          });
+          it("Non expiring lastest transactions should not be deleted", (done) => {
+            const now = new Date();
+            now.setSeconds(now.getSeconds() + 60);
+            createTransaction({
+              amount: 1,
+              senderAlias: "W1000",
+              recipientAlias: "W0",
+              valid_thru: now.toISOString(),
+              description: "Expiring valid transaction",
+              callback: ({ res }) => {
+                createdVariables.transactions.transaction[
+                  users.W1000.address
+                ].nonExpiringTransactionToW0 = res.body.payload;
+                expect(res).to.have.status(201);
+                setTimeout(() => {
+                  chai
+                    .request(API_URL)
+                    .post(`${ENFORCER_ENDPOINT}`)
+                    .query({
+                      users: `${users.W0.address}`,
+                      transactions: `${
+                        createdVariables.transactions.transaction[
+                          users.W1000.address
+                        ].nonExpiringTransactionToW0.signature
+                      }`,
+                    })
+                    .end(function (err, res) {
+                      expect(res).to.have.status(200);
+                      setTimeout(() => {
+                        chai
+                          .request(API_URL)
+                          .get(`${USERS_ENDPOINT}/${users.W0.address}`)
+                          .end(function (err, res) {
+                            expect(res).to.have.status(200);
+                            expect(res.body.lastest_transactions)
+                              .to.be.an("array")
+                              .that.does.include(
+                                createdVariables.transactions.transaction[
+                                  users.W1000.address
+                                ].nonExpiringTransactionToW0.signature
+                              );
+                            res.body.should.have.property("balance").equal(3);
+                            done();
+                          });
+                      }, 5000);
+                    });
+                }, 2500);
+              },
+            });
+          });
+        });
+      });
       describe(`POST ${ENFORCER_ENDPOINT}?users={users}`, () => {
         describe("Enforcer success validations", function () {
           this.slow(15000);
@@ -1487,7 +1583,7 @@ describe(`Cryptocurrency Test Suite`, () => {
                         expect(res.body.balance).to.equal(2);
                         done();
                       });
-                  }, 8000);
+                  }, 5000);
                 });
             });
         });
