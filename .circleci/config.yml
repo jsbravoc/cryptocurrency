@@ -96,7 +96,7 @@ jobs:
       - run: chmod +x semtag
       - run: ./semtag --version
       - add_ssh_keys:
-        fingerprints: "03:10:83:41:c2:2b:b2:33:43:13:37:aa:e9:47:72:e7"
+          fingerprints: "03:10:83:41:c2:2b:b2:33:43:13:37:aa:e9:47:72:e7"
       - run: echo export SEMVER_VERSION=$(./semtag getcurrent) >> "$BASH_ENV"
       - run: echo $SEMVER_VERSION
       - run:
@@ -118,7 +118,7 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker:
-        docker_layer_caching: true
+          docker_layer_caching: true
       - run:
           name: Build Docker image
           command: |
@@ -153,7 +153,7 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker:
-        docker_layer_caching: true
+          docker_layer_caching: true
       - run:
           name: Build Docker image
           command: |
