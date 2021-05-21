@@ -1,2 +1,2 @@
-/*! cryptocurrency 2021-05-20 */
+/*! cryptocurrency 2021-05-21 */
 String.prototype.toProperCase=function(){return this.replace(/\w\S*/g,function(r){return r.charAt(0).toUpperCase()+r.substr(1).toLowerCase()})};

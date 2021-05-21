@@ -102,13 +102,13 @@ jobs:
       - run:
           command: |
             if [[ "${CIRCLE_BRANCH}" == "main" ]]; then
-              ./semtag final -s patch
+              ./semtag candidate -s patch
               echo New tag on ${CIRCLE_BRANCH}: $(./semtag getcurrent)
             fi
       - run:
           command: |
             if [[ "${CIRCLE_BRANCH}" != "main" ]]; then
-              ./semtag candidate -s patch
+              ./semtag alpha -s patch
               echo New tag on ${CIRCLE_BRANCH}: $(./semtag getcurrent)
             fi
 

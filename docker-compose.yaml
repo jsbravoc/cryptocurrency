@@ -55,8 +55,8 @@ services:
         - SAWTOOTH_REST=http://rest-api:8008
         - SAWTOOTH_REST_TIMEOUT=5000
         - VALIDATOR_HOST=tcp://validator:4004
-        - ENABLE_LOGGING=true
-        - DISABLE_INTEGRITY_VALIDATION=true
+        - ENABLE_LOGGING=false
+        - DISABLE_INTEGRITY_VALIDATION=false
         - HIDE_ENV_VARIABLES=true
 
   settings-tp:

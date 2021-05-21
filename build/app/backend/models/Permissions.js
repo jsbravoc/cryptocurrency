@@ -1,2 +1,2 @@
-/*! cryptocurrency 2021-05-20 */
+/*! cryptocurrency 2021-05-21 */
 class Permissions{constructor(s){for(const o in s)Object.hasOwnProperty.call(s,o)&&(this[o]=s[o])}}module.exports=Permissions;
