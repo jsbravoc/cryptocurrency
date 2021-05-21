@@ -92,12 +92,7 @@ jobs:
           command: |
             set -x
             docker-compose -f ../../../blockchain_network/docker-compose-dev/sawtooth/docker-compose.yaml down   
-  build-api:
-    executor: docker-publisher
-    working_directory: ~/cryptocurrency
-    steps:
-      - checkout
-      - setup_remote_docker
+      
       - run: chmod +x semtag
       - run: ./semtag --version
       - add_ssh_keys:
@@ -116,6 +111,14 @@ jobs:
               ./semtag candidate -s patch
               echo New tag on ${CIRCLE_BRANCH}: $(./semtag getcurrent)
             fi
+
+  build-api:
+    executor: docker-publisher
+    working_directory: ~/cryptocurrency
+    steps:
+      - checkout
+      - setup_remote_docker:
+        docker_layer_caching: true
       - run:
           name: Build Docker image
           command: |
@@ -140,7 +143,7 @@ jobs:
           name: Publish Docker Image to Docker Hub
           command: |
             echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
-            API_TAG="0.0.${CIRCLE_BUILD_NUM}"
+            API_TAG="${SEMVER_VERSION}"
             docker tag $API_IMAGE:latest $API_IMAGE:$API_TAG
             docker push $API_IMAGE:latest
             docker push $API_IMAGE:$API_TAG
@@ -149,7 +152,8 @@ jobs:
     working_directory: ~/cryptocurrency
     steps:
       - checkout
-      - setup_remote_docker
+      - setup_remote_docker:
+        docker_layer_caching: true
       - run:
           name: Build Docker image
           command: |
@@ -173,10 +177,8 @@ jobs:
       - run:
           name: Publish Docker Image to Docker Hub
           command: |
-            TP_TAG_NUMBER=${CIRCLE_BUILD_NUM}
-            TP_TAG_NUMBER=$((TP_TAG_NUMBER - 1))
             echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
-            TP_TAG="0.0.${TP_TAG_NUMBER}"
+            TP_TAG="${SEMVER_VERSION}"
             docker tag $TP_IMAGE:latest $TP_IMAGE:$TP_TAG
             docker push $TP_IMAGE:latest
             docker push $TP_IMAGE:$TP_TAG
