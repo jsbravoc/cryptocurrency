@@ -23,10 +23,10 @@ jobs:
           name: Verify git commit message
           command: | 
               commit_message=$(git log -1 HEAD --pretty=format:%s)
-              if [[ $commit_message == *"SKIP_CI_TEST"* ]]; then
+              if [ $commit_message == *"SKIP_CI_TEST"* ]; then
               curl --request POST \
                 --url https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID/cancel \
-                --header "Circle-Token: ${CIRCLE_TOKEN}"
+                --header "Circle-Token: ${CIRCLE_TOKEN}" &
               fi
       - run:
           name: Install node@v10.24
@@ -94,17 +94,17 @@ jobs:
       - run: echo export SEMVER_VERSION=$(./semtag getcurrent) >> "$BASH_ENV"
       - run: echo $SEMVER_VERSION
       - run:
-        command: |
-          if [ "${CIRCLE_BRANCH}" == "main" ]; then
-            ./semtag final -s patch
-            echo New tag on ${CIRCLE_BRANCH}: $(./semtag getcurrent)
-          fi
-    - run:
-        command: |
-          if [ "${CIRCLE_BRANCH}" != "main" ]; then
-            ./semtag candidate -s patch
-            echo New tag on ${CIRCLE_BRANCH}: $(./semtag getcurrent)
-          fi
+          command: |
+            if [ "${CIRCLE_BRANCH}" == "main" ]; then
+              ./semtag final -s patch
+              echo New tag on ${CIRCLE_BRANCH}: $(./semtag getcurrent)
+            fi
+      - run:
+          command: |
+            if [ "${CIRCLE_BRANCH}" != "main" ]; then
+              ./semtag candidate -s patch
+              echo New tag on ${CIRCLE_BRANCH}: $(./semtag getcurrent)
+            fi
       - run:
           name: Build Docker image
           command: |
