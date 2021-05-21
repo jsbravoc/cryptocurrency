@@ -91,6 +91,8 @@ jobs:
       - setup_remote_docker
       - run: chmod +x semtag
       - run: ./semtag --version
+      - add_ssh_keys:
+        fingerprints: "03:10:83:41:c2:2b:b2:33:43:13:37:aa:e9:47:72:e7"
       - run: echo export SEMVER_VERSION=$(./semtag getcurrent) >> "$BASH_ENV"
       - run: echo $SEMVER_VERSION
       - run:
