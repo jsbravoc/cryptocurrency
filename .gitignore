@@ -120,10 +120,5 @@ dist
 /src/app/ledger_sync
 /src/app/secp256k1_playground
 /src/app/remove_docker_files.sh
-grunt
-!Gruntfile.js
-!/build/**
-!/blockchain_network/**
-!README.md
-!CODEOWNERS
+/src/app/backend/reports
 node_modules/

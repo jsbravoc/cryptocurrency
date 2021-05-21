@@ -6,7 +6,7 @@
     "start": "node ./bin/www.js",
     "test": "NODE_ENV=test ENABLE_LOGGING=false HIDE_ENV_VARIABLES=false DEBUG=true CLEAR_STARTING_LOGS=true mocha -s 350 --require ./test/hooks.js --exit",
     "coverage": "codecov",
-    "test-codecov": "nyc --reporter=lcov npm test",
+    "test-codecov": "NODE_ENV=test ENABLE_LOGGING=false HIDE_ENV_VARIABLES=false DEBUG=true CLEAR_STARTING_LOGS=true ./node_modules/.bin/nyc ./node_modules/.bin/mocha -s 350 --require ./test/hooks.js --exit --reporter mocha-junit-reporter --reporter-options mochaFile=reports/mocha/test-results.xml",
     "docs": "./node_modules/jsdoc/jsdoc.js -c ./.jsdoc.conf.json"
   },
   "jest": {
@@ -44,6 +44,7 @@
     "eslint-config-prettier": "^8.3.0",
     "jsdoc": "^3.6.6",
     "mocha": "^8.4.0",
+    "mocha-junit-reporter": "^2.0.0",
     "nyc": "^15.1.0",
     "uuid": "^8.3.2"
   }

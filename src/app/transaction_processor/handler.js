@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const crypto = require("crypto");
 
 const { InvalidTransaction } = require("sawtooth-sdk/processor/exceptions");
@@ -72,7 +73,7 @@ const handlers = {
       [transactionContext, userContext],
       transaction
     );
-    const { id, input, output } = JSON.parse(transaction);
+    const { output } = JSON.parse(transaction);
     await contextHandler.putState(txid, output);
   },
   async post([transactionContext, userContext], { transaction, txid }) {

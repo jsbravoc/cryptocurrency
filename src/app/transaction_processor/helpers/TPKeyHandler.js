@@ -9,8 +9,6 @@ const {
   InvalidTransaction,
   InternalError,
 } = require("sawtooth-sdk/processor/exceptions");
-const { ethers } = require("ethers");
-const secp256k1 = require("secp256k1");
 
 async function getRawState(context, addressRaw, timeout) {
   let possibleAddressValues = await context.getState([addressRaw], timeout);
@@ -114,21 +112,6 @@ async function deleteState(context, address, key, timeout) {
   }
 }
 
-function getPublicKey(payload, signature) {
-  const wrapped = "\x19Ethereum Signed Message:\n" + payload.length + payload;
-  const hashSecp256 = ethers.utils.keccak256(
-    "0x" + Buffer.from(wrapped).toString("hex")
-  );
-  const pubKey = secp256k1.ecdsaRecover(
-    Uint8Array.from(Buffer.from(signature.slice(2, -2), "hex")),
-    parseInt(signature.slice(-2), 16) - 27,
-    Buffer.from(hashSecp256.slice(2), "hex"),
-    true
-  );
-
-  return Buffer.from(pubKey).toString("hex");
-}
-
 module.exports = function ({
   TP_FAMILY,
   TP_VERSION,
@@ -152,9 +135,6 @@ module.exports = function ({
 
         func = payload.func;
         args = payload.args;
-
-        let { txid, transaction } = args;
-        //publicKey = getPublicKey(transaction, txid);
       } catch (err) {
         throw new InvalidTransaction("Bad transaction Format");
       }

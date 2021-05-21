@@ -76,7 +76,16 @@ jobs:
 
       - run: 
           name: Run tests
-          command: npm run test-codecov && npm run coverage --token=${CODECOV_TOKEN}
+          command: npm run test-codecov
+
+      - store_test_results:
+          path: ../reports/mocha
+      - store_artifacts:
+          path: ../reports/mocha
+
+      - run: 
+          name: Upload coverage to codecov
+          command: npm run coverage --token=${CODECOV_TOKEN}
 
       - run:
           name: Stop container
