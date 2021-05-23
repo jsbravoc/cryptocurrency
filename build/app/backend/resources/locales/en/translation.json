@@ -27,8 +27,8 @@
           "msg": "User with address {{address}} does not exist"
         },
         "NO_TRANSACTIONS": {
-          "error": "User with address {{address}} does not have any lastest_transactions",
-          "msg": "User with address {{address}} does not have any lastest_transactions"
+          "error": "User with address {{address}} does not have any latest_transactions",
+          "msg": "User with address {{address}} does not have any latest_transactions"
         },
         "INSUFFICIENT_FUNDS": {
           "error": "User with address {{address}} does not have enough funds to create this transaction",

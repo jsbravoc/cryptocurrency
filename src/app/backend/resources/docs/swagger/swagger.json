@@ -874,7 +874,7 @@
           "format": "string",
           "example": 3.800772969568567e46
         },
-        "lastest_transactions": {
+        "latest_transactions": {
           "$ref": "#/definitions/ArrayOfExtendedTransactions"
         }
       }

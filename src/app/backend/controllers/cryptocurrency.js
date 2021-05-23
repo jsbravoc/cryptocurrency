@@ -76,7 +76,7 @@ const getSupportingTransactions = (transaction, res = null) => {
         let pendingAmount = amount;
         let usedTransactions = [];
         const validTransactionsPromises = [];
-        (existingSender.lastest_transactions || []).forEach((txid) =>
+        (existingSender.latest_transactions || []).forEach((txid) =>
           validTransactionsPromises.push(
             findTransaction(txid, false, true, res)
           )

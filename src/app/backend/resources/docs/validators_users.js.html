@@ -156,7 +156,7 @@ const inputValidation = validate([
   body("description").optional({ checkFalsy: true, checkNull: true }).trim(),
   body("role").optional({ checkFalsy: true, checkNull: true }).trim(),
   body("balance").customSanitizer(() => 0),
-  body("lastest_transactions").customSanitizer(() => []),
+  body("latest_transactions").customSanitizer(() => []),
   body("pending_transactions").customSanitizer(() => []),
 ]);
 

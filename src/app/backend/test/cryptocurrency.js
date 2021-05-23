@@ -1432,7 +1432,7 @@ describe(`Cryptocurrency Test Suite`, () => {
                           .get(`${USERS_ENDPOINT}/${users.W0.address}`)
                           .end(function (err, res) {
                             expect(res).to.have.status(200);
-                            expect(res.body.lastest_transactions)
+                            expect(res.body.latest_transactions)
                               .to.be.an("array")
                               .that.does.not.include(
                                 createdVariables.transactions.transaction[
@@ -1482,7 +1482,7 @@ describe(`Cryptocurrency Test Suite`, () => {
                           .get(`${USERS_ENDPOINT}/${users.W0.address}`)
                           .end(function (err, res) {
                             expect(res).to.have.status(200);
-                            expect(res.body.lastest_transactions)
+                            expect(res.body.latest_transactions)
                               .to.be.an("array")
                               .that.does.include(
                                 createdVariables.transactions.transaction[
@@ -1555,7 +1555,7 @@ describe(`Cryptocurrency Test Suite`, () => {
             .get(`${USERS_ENDPOINT}/${users.ToDeleteW1000.address}`)
             .end(function (err, res) {
               expect(res).to.have.status(200);
-              expect(res.body.lastest_transactions)
+              expect(res.body.latest_transactions)
                 .to.be.an("array")
                 .that.does.include(
                   createdVariables.transactions.transaction[
@@ -1573,7 +1573,7 @@ describe(`Cryptocurrency Test Suite`, () => {
                       .get(`${USERS_ENDPOINT}/${users.ToDeleteW1000.address}`)
                       .end(function (err, res) {
                         expect(res).to.have.status(200);
-                        expect(res.body.lastest_transactions)
+                        expect(res.body.latest_transactions)
                           .to.be.an("array")
                           .that.does.not.include(
                             createdVariables.transactions.transaction[
@@ -1619,7 +1619,7 @@ describe(`Cryptocurrency Test Suite`, () => {
                 /* res.body.forEach(user => {
                   const retrievedUser = new User(user);
                   console.log("USER LT", );
-                  (Array.from(retrievedUser.lastest_transactions)||[]).forEach(transaction => expect(transaction).to.be.an("object"))
+                  (Array.from(retrievedUser.latest_transactions)||[]).forEach(transaction => expect(transaction).to.be.an("object"))
                   (Array.from(retrievedUser.pending_transactions)||[]).forEach(transaction => expect(transaction).to.be.an("object"))
                 }) */
                 expect(res).to.have.status(200);
@@ -1674,7 +1674,7 @@ describe(`Cryptocurrency Test Suite`, () => {
               expect(res).to.have.status(200);
               const retrievedUser = new User(res.body);
               expect(res.body).to.be.an("object");
-              /*  (Array.from(retrievedUser.lastest_transactions)).forEach(transaction => expect(transaction).to.be.an("object"))
+              /*  (Array.from(retrievedUser.latest_transactions)).forEach(transaction => expect(transaction).to.be.an("object"))
               (Array.from(retrievedUser.pending_transactions)).forEach(transaction => expect(transaction).to.be.an("object")) */
               done();
             });

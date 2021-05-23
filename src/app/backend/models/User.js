@@ -26,7 +26,7 @@ class User extends BaseModel {
     public_key,
     return_to,
     permissions,
-    lastest_transactions,
+    latest_transactions,
     pending_transactions,
   }) {
     super(TYPE.USER);
@@ -37,7 +37,7 @@ class User extends BaseModel {
     this.balance = balance || 0;
     this.active = typeof active === "boolean" ? active : true;
     this.return_to = return_to || {};
-    this.lastest_transactions = lastest_transactions || [];
+    this.latest_transactions = latest_transactions || [];
     this.pending_transactions = pending_transactions || [];
     this.permissions = new Permissions(permissions);
     if (signature) this.signature = signature;
@@ -45,7 +45,7 @@ class User extends BaseModel {
   }
 
   removeInvalidTransaction(transaction) {
-    const indexOfTransaction = this.lastest_transactions.indexOf(
+    const indexOfTransaction = this.latest_transactions.indexOf(
       transaction.signature
     );
     if (indexOfTransaction <= -1) {
@@ -53,7 +53,7 @@ class User extends BaseModel {
     }
     const { amount } = transaction;
     this.balance -= amount;
-    this.lastest_transactions.splice(indexOfTransaction, 1);
+    this.latest_transactions.splice(indexOfTransaction, 1);
   }
 
   removePendingTransaction(transactionSignature) {
@@ -76,14 +76,14 @@ class User extends BaseModel {
     transactionSignature,
     validTransaction = true
   ) {
-    if (!Array.isArray(this.lastest_transactions)) {
-      this.lastest_transactions = [];
+    if (!Array.isArray(this.latest_transactions)) {
+      this.latest_transactions = [];
     }
     switch (userType) {
       case USER_TYPE.SENDER:
         if (validTransaction) {
           // eslint-disable-next-line no-case-declarations
-          const indexOfTransaction = this.lastest_transactions.indexOf(
+          const indexOfTransaction = this.latest_transactions.indexOf(
             transactionSignature
           );
           if (indexOfTransaction <= -1) {
@@ -92,7 +92,7 @@ class User extends BaseModel {
             );
           }
           this.balance -= amount;
-          this.lastest_transactions.splice(indexOfTransaction, 1);
+          this.latest_transactions.splice(indexOfTransaction, 1);
         } else {
           this.pending_transactions.push(transactionSignature);
         }
@@ -100,7 +100,7 @@ class User extends BaseModel {
       case USER_TYPE.RECIPIENT:
         if (validTransaction) {
           this.balance += amount;
-          this.lastest_transactions.push(transactionSignature);
+          this.latest_transactions.push(transactionSignature);
         } else {
           this.pending_transactions.push(transactionSignature);
         }

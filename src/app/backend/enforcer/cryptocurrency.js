@@ -38,10 +38,10 @@ const updateInvalidUserTransactions = (address, transactions, res) => {
     let requiresUpdate = false;
     if (user) {
       (Array.isArray(transactions) && transactions.length > 0
-        ? (user.lastest_transactions || []).filter(
+        ? (user.latest_transactions || []).filter(
             (x) => transactions.indexOf(x) > -1
           )
-        : user.lastest_transactions || []
+        : user.latest_transactions || []
       ).forEach((transaction) => {
         promises.push(
           updateInvalidTransaction(transaction, res).then((response) => {

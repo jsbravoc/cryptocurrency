@@ -218,8 +218,8 @@ const verifyPostTransaction = (req, res, next) => {
           },
         });
       } else if (
-        !Array.isArray(senderUser.lastest_transactions) ||
-        senderUser.lastest_transactions.length === 0
+        !Array.isArray(senderUser.latest_transactions) ||
+        senderUser.latest_transactions.length === 0
       ) {
         return createError(req, res, {
           error: ERRORS.USER.INPUT.NO_TRANSACTIONS,
@@ -234,7 +234,7 @@ const verifyPostTransaction = (req, res, next) => {
         let actualBalance = 0;
         let returnedError = false;
         const lastestTxPromises = [];
-        (senderUser.lastest_transactions || []).forEach((txid) => {
+        (senderUser.latest_transactions || []).forEach((txid) => {
           lastestTxPromises.push(
             findByAddress(TYPE.TRANSACTION, txid, false, false, res).then(
               (supportingTransaction) => {

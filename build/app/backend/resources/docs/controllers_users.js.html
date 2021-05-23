@@ -176,7 +176,7 @@ const getUsers = (req, res) => {
       let promises = [];
       (userList || []).forEach((user) => {
         promises.push(
-          (user.lastest_transactions || []).map((txid) =>
+          (user.latest_transactions || []).map((txid) =>
             findTransaction(txid).then((transaction) =>
               expandSupportingTransactions(
                 transaction,
@@ -204,14 +204,14 @@ const getUsers = (req, res) => {
         Promise.all(promises).then((values) => {
           (values || []).forEach((tx) => {
             userList.forEach((user) => {
-              const indexOfTx = (user.lastest_transactions || []).indexOf(
+              const indexOfTx = (user.latest_transactions || []).indexOf(
                 tx.signature
               );
               const indexOfPendingTx = (
                 user.pending_transactions || []
               ).indexOf(tx.signature);
               if (indexOfTx > -1) {
-                user.lastest_transactions[indexOfTx] = tx;
+                user.latest_transactions[indexOfTx] = tx;
               }
               if (indexOfPendingTx > -1) {
                 user.pending_transactions[indexOfPendingTx] = tx;
@@ -260,7 +260,7 @@ const getUserByAddress = (req, res) => {
           dictionaryOfTransactions[asset.signature] = asset;
         });
         promises.push(
-          (user.lastest_transactions || []).map((txid) =>
+          (user.latest_transactions || []).map((txid) =>
             findTransaction(txid).then((transaction) => {
               return expandSupportingTransactions(
                 transaction,
@@ -283,14 +283,14 @@ const getUserByAddress = (req, res) => {
         promises = [].concat.apply([], promises);
         return Promise.all(promises).then((values) => {
           values.forEach((tx) => {
-            const indexOfTx = (user.lastest_transactions || []).indexOf(
+            const indexOfTx = (user.latest_transactions || []).indexOf(
               tx.signature
             );
             const indexOfPendingTx = (user.pending_transactions || []).indexOf(
               tx.signature
             );
             if (indexOfTx > -1) {
-              user.lastest_transactions[indexOfTx] = tx;
+              user.latest_transactions[indexOfTx] = tx;
             }
             if (indexOfPendingTx > -1) {
               user.pending_transactions[indexOfPendingTx] = tx;
@@ -334,7 +334,7 @@ const deleteUser = (req, res) => {
   return findUser(req.params.address, true, true, res).then((existingUser) => {
     const recipient = existingUser.return_to[reason];
     const promises = [];
-    (existingUser.lastest_transactions || []).forEach((txid) => {
+    (existingUser.latest_transactions || []).forEach((txid) => {
       promises.push(findTransaction(txid));
     });
     return Promise.all(promises).then((arrayOfTransactions) => {
