@@ -12,6 +12,7 @@ executors:
       - image: circleci/buildpack-deps:stretch
 orbs:
   node: circleci/node@4.2.1
+  persist-env: christeredvartsen/persist-env@0.1.0
 jobs:
   test-api:
     machine: true
@@ -97,20 +98,25 @@ jobs:
       - run: ../../../semtag --version
       - add_ssh_keys:
           fingerprints: "03:10:83:41:c2:2b:b2:33:43:13:37:aa:e9:47:72:e7"
-      - run: echo export SEMVER_VERSION=$(../../../semtag getcurrent) >> "$BASH_ENV"
-      - run: echo $SEMVER_VERSION
       - run:
+          name: Get candidate semver
           command: |
             if [[ "${CIRCLE_BRANCH}" == "main" ]]; then
               ../../../semtag candidate -s patch
               echo New tag on ${CIRCLE_BRANCH}: $(../../../semtag getcurrent)
             fi
       - run:
+          name: Get alpha semver
           command: |
             if [[ "${CIRCLE_BRANCH}" != "main" ]]; then
               ../../../semtag alpha -s patch
               echo New tag on ${CIRCLE_BRANCH}: $(../../../semtag getcurrent)
             fi
+      - run: echo export SEMVER_VERSION=$(../../../semtag getcurrent) >> "$BASH_ENV"
+      - persist-env/set-env-var:
+          var-name: SEMVER
+          var-value: $SEMVER_VERSION
+      - persist-env/persist-env
 
   build-api:
     executor: docker-publisher
@@ -139,11 +145,12 @@ jobs:
       - run:
           name: Load archived Docker image
           command: docker load -i /tmp/workspace/api_image.tar
+      - persist-env/attach-env
       - run:
           name: Publish Docker Image to Docker Hub
           command: |
             echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
-            API_TAG="${SEMVER_VERSION}"
+            API_TAG="${SEMVER}"
             docker tag $API_IMAGE:latest $API_IMAGE:$API_TAG
             docker push $API_IMAGE:latest
             docker push $API_IMAGE:$API_TAG
@@ -174,11 +181,12 @@ jobs:
       - run:
           name: Load archived Docker image
           command: docker load -i /tmp/workspace/tp_image.tar
+      - persist-env/attach-env
       - run:
           name: Publish Docker Image to Docker Hub
           command: |
             echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
-            TP_TAG="${SEMVER_VERSION}"
+            TP_TAG="${SEMVER}"
             docker tag $TP_IMAGE:latest $TP_IMAGE:$TP_TAG
             docker push $TP_IMAGE:latest
             docker push $TP_IMAGE:$TP_TAG
