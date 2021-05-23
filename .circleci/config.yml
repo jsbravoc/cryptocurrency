@@ -77,12 +77,16 @@ jobs:
 
       - run: 
           name: Run tests
-          command: npm run test-codecov
+          command: npm run test-junit
 
       - store_test_results:
-          path: ../reports/mocha
+          path: ./reports/mocha
       - store_artifacts:
-          path: ../reports/mocha
+          path: ./reports/mocha
+
+      - run: 
+          name: Report code coverage
+          command: npm run test-codecov
 
       - run: 
           name: Upload coverage to codecov
