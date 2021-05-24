@@ -4,77 +4,78 @@
       "INPUT": {
         "NO_INPUT": {
           "error": "Expected user parameter {{property}}, but received undefined",
-          "msg": "Expected user parameter {{property}}, but received undefined"
+          "msg": "Expected user parameter {{property}}, but did not receive it"
         },
         "MISSING_REQUIRED_INPUT": {
-          "error": "The method required the parameter {{parameter}} but received undefined",
-          "msg": "The method required the parameter {{parameter}} but received undefined"
+          "error": "The method required the parameter {{parameter}}, but received undefined",
+          "msg": "The method required the parameter {{parameter}}, but did not receive it"
         },
 
         "INCORRECT_INPUT": {
-          "error": "{{message}}"
+          "error": "The property {{propertyName}} received is invalid",
+          "msg": "The property {{propertyName}} received is invalid"
         },
         "INCORRECT_INPUT_TYPE": {
           "error": "User property {{propertyName}} received an incorrect type {{receivedType}}, expected {{expectedType}}",
-          "msg": "User property {{propertyName}} received an incorrect type {{receivedType}}}, expected {{expectedType}}"
+          "msg": "The property {{propertyName}} received is invalid"
         },
         "USER_EXISTS": {
           "error": "User with address {{address}} already exists",
-          "msg": "User with address {{address}} already exists"
+          "msg": "The user already exists"
         },
         "USER_DOES_NOT_EXIST": {
           "error": "User with address {{address}} does not exist",
-          "msg": "User with address {{address}} does not exist"
+          "msg": "The user {{address}} does not exist"
         },
         "NO_TRANSACTIONS": {
           "error": "User with address {{address}} does not have any latest_transactions",
-          "msg": "User with address {{address}} does not have any latest_transactions"
+          "msg": "The user has no transactions registered"
         },
         "INSUFFICIENT_FUNDS": {
           "error": "User with address {{address}} does not have enough funds to create this transaction",
-          "msg": "User with address {{address}} does not have enough funds to create this transaction"
+          "msg": "User does not have sufficient funds to create this transaction"
         },
         "INSUFFICIENT_FUNDS_PENDING_TRANSACTIONS": {
           "error": "User with address {{address}} does not have enough funds to create this transaction. User's pending transaction sum up to {{amountPending}} CNKs, thus the available balance is {{{actualBalance}} CNKs",
-          "msg": "User with address {{address}} does not have enough funds to create this transaction. User's pending transaction sum up to {{amountPending}} CNKs, thus the available balance is {{{actualBalance}} CNKs"
+          "msg": "The user does not have sufficient funds to create this transaction. The user's pending transactions total {{amountPending}} CNKs, so the available balance is {{{currentBalance}} CNKs"
         },
         "INSUFFICIENT_FUNDS_UNEXPECTED_BALANCE": {
           "error": "User with address {{address}} does not have enough funds to create this transaction. User's lastest transactions reflect a balance of {{actualBalance}}",
-          "msg": "User with address {{address}} does not have enough funds to create this transaction. User's lastest transactions reflect a balance of {{actualBalance}}"
+          "msg": "User has insufficient funds to create this transaction. The user's last transactions reflect a balance of {{actualBalance}}"
         },
         "UNDEFINED_RETURN_TO_REASON": {
           "error": "User with address {{address}} does not have a return to address that matches the reason {{reason}}",
-          "msg": "User with address {{address}} does not have a return to address that matches the reason {{reason}}"
+          "msg": "User does not have a resource return address registered for the {{reason}} operation."
         }
       },
       "LOGIC": {
         "USER_IS_NOT_ACTIVE": {
           "error": "User with address {{address}} is not active",
-          "msg": "User with address {{address}} is not active"
+          "msg": "User {{address}} is not active"
         },
         "USER_DOES_NOT_HAVE_PERMISSIONS": {
           "error": "User with address {{address}} does not have {{requiredPermission}} permission",
-          "msg": "User with address {{address}} does not have {{requiredPermission}} permission"
+          "msg": "The user does not have permissions for this operation. Please contact the administrator for more information"
         },
         "USER_DOES_NOT_HAVE_TRANSFER_PERMISSIONS": {
           "error": "User with address {{address}} does not have transfer_to permission to {{recipient}}",
-          "msg": "User with address {{address}} does not have transfer_to permission to {{recipient}}"
+          "msg": "The user does not have permissions for this operation. Please contact the administrator for more information"
         },
         "NONEXISTENT_LASTEST_TRANSACTION": {
           "error": "User with address {{address}}'s lastest transaction with signature {{transactionSignature}} does not exist",
-          "msg": "User with address {{address}}'s lastest transaction with signature {{transactionSignature}} does not exist"
+          "msg": "The transaction with signature {{transactionSignature}} is not part of the transactions registered for the user. Please contact the administrator for more information"
         },
         "NONEXISTENT_PENDING_TRANSACTION": {
           "error": "User with address {{address}}'s pending transaction with signature {{transactionSignature}} does not exist",
-          "msg": "User with address {{address}}'s pending transaction with signature {{transactionSignature}} does not exist"
+          "msg": "The pending transaction with signature {{transactionSignature}} is not part of the transactions registered for the user. Please contact the administrator for more information"
         },
         "INCORRECT_RECIPIENT_LASTEST_TRANSACTION": {
           "error": "User with address {{address}}'s lastest transaction with signature {{transactionSignature}} does not belong to them",
-          "msg": "User with address {{address}}'s lastest transaction with signature {{transactionSignature}} does not belong to them"
+          "msg": "The transaction with signature {{transactionSignature}} is not part of the transactions registered for the user. Please contact the administrator for more information"
         },
         "NO_RETURN_TO_ADDRESSES": {
           "error": "User with address {{address}} does not have any return to addresses",
-          "msg": "User with address {{address}} does not have any return to addresses"
+          "msg": "The user has no resource return address registered. Please contact the administrator for more information"
         }
       }
     },
@@ -82,7 +83,7 @@
       "INPUT": {
         "NO_INPUT": {
           "error": "Expected transaction parameter {{property}}, but received undefined",
-          "msg": "Expected transaction parameter {{property}}, but received undefined"
+          "msg": "The {{property}} parameter was expected, but did not received it"
         },
         "MISSING_REQUIRED_INPUT": {
           "error": "{{message}}"
@@ -92,27 +93,41 @@
         },
         "TRANSACTION_EXISTS": {
           "error": "Transaction with signature {{signature}} already exists",
-          "msg": "Transaction with signature {{signature}} already exists"
+          "msg": "The transaction already exists"
         },
         "TRANSACTION_DOES_NOT_EXIST": {
           "error": "Transaction with signature {{signature}} does not exist",
-          "msg": "Transaction with signature {{signature}} does not exist"
+          "msg": "The transaction does not exist"
         },
         "TRANSACTION_IS_NOT_PENDING": {
           "error": "Transaction with signature {{signature}} is not pending, thus it cannot be updated",
-          "msg": "Transaction with signature {{signature}} is not pending, thus it cannot be updated"
+          "msg": "The transaction is not pending, and therefore cannot be updated"
         }
       },
       "LOGIC": {
         "NON_MATCHING_KEYS": {
           "error": "Transaction's signature cannot be decrypted with creator's public key",
-          "msg": "Transaction's signature cannot be decrypted with creator's public key"
+          "msg": "The user does not have permissions on this transaction. Please contact the administrator for more information"
         },
         "DECRYPTING_ERROR": {
           "error": "Transaction's object cannot be decrypted",
-          "msg": "Transaction's object cannot be decrypted"
+          "msg": "There was an error validating the transaction. Please contact the administrator for more information"
         }
       }
     }
+  },
+  "MESSAGES": {
+    "SUCCESSFUL_REQUEST": {
+      "USER": {
+        "UPDATE": "The user has been successfully updated",
+        "CREATION": "The user has been successfully created"
+      },
+      "TRANSACTION": {
+        "UPDATE": "The transaction has been successfully updated",
+        "CREATION": "The transaction has been successfully created"
+      }
+    },
+    "SAWTOOTH_UNAVAILABLE": "Hyperledger Sawtooth REST API is temporarily unavailable",
+    "CHANGE_TRANSACTION_DESCRIPTION": "Resulting change of the transaction {{signature}}. Input transaction sum is {{input}}, created transaction amount is {{amount}}, thus the change is {{change}}"
   }
 }

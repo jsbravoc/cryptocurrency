@@ -3,78 +3,78 @@
     "USER": {
       "INPUT": {
         "NO_INPUT": {
-          "error": "Expected user parameter {{property}}, but received undefined",
+          "error": "Se esperaba el parámetro de usuario {{property}}, pero no se recibió",
           "msg": "Se esperaba el parámetro {{property}}, pero no se recibió"
         },
         "MISSING_REQUIRED_INPUT": {
-          "error": "The method required the parameter {{parameter}} but received undefined",
-          "msg": "The method required the parameter {{parameter}} but received undefined"
+          "error": "El método requería el parámetro {{parameter}} pero se recibió undefined",
+          "msg": "El método requería el parámetro {{parameter}} pero se recibió undefined"
         },
 
         "INCORRECT_INPUT": {
-          "error": "The method required the parameter {{parameter}} but received undefined",
-          "msg": "The method required the parameter {{parameter}} but received undefined"
+          "error": "La propiedad {{propertyName}} recibida es inválida",
+          "msg": "La propiedad {{propertyName}} recibida es inválida"
         },
         "INCORRECT_INPUT_TYPE": {
-          "error": "User property {{propertyName}} received an incorrect type {{receivedType}}, expected {{expectedType}}",
+          "error": "La propiedad del usuario {{propertyName}} recibió un tipo incorrecto {{receivedType}}, esperado {{expectedType}}",
           "msg": "La propiedad {{propertyName}} recibida es inválida"
         },
         "USER_EXISTS": {
-          "error": "User with address {{address}} already exists",
+          "error": "El usuario con la dirección {{address}} ya existe",
           "msg": "El usuario ya existe"
         },
         "USER_DOES_NOT_EXIST": {
-          "error": "User with address {{address}} does not exist",
+          "error": "El usuario con la dirección {{address}} no existe",
           "msg": "El usuario {{address}} no existe"
         },
         "NO_TRANSACTIONS": {
-          "error": "User with address {{address}} does not have any latest_transactions",
+          "error": "El usuario con dirección {{address}} no tiene ninguna latest_transactions",
           "msg": "El usuario no tiene transacciones registradas"
         },
         "INSUFFICIENT_FUNDS": {
-          "error": "User with address {{address}} does not have enough funds to create this transaction",
+          "error": "El usuario con dirección {{address}} no tiene fondos suficientes para crear esta transacción",
           "msg": "El usuario no tiene fondos suficientes para crear esta transacción"
         },
         "INSUFFICIENT_FUNDS_PENDING_TRANSACTIONS": {
-          "error": "User with address {{address}} does not have enough funds to create this transaction. User's pending transaction sum up to {{amountPending}} CNKs, thus the available balance is {{{actualBalance}} CNKs",
+          "error": "El usuario con dirección {{address}} no tiene fondos suficientes para crear esta transacción. Las transacciones pendientes del usuario suman {{amountPending}} CNKs, por lo que el saldo disponible es {{actualBalance}} CNKs",
           "msg": "El usuario no tiene fondos suficientes para crear esta transacción. Las transacciones pendientes del usuario suman {{amountPending}} CNKs, por lo que el saldo disponible es {{{actualBalance}} CNKs"
         },
         "INSUFFICIENT_FUNDS_UNEXPECTED_BALANCE": {
-          "error": "User with address {{address}} does not have enough funds to create this transaction. User's lastest transactions reflect a balance of {{actualBalance}}",
+          "error": "El usuario con dirección {{address}} no tiene fondos suficientes para crear esta transacción. Las últimas transacciones del usuario reflejan un saldo de {{actualBalance}}",
           "msg": "El usuario no tiene fondos suficientes para crear esta transacción. Las últimas transacciones del usuario reflejan un saldo de {{actualBalance}}"
         },
         "UNDEFINED_RETURN_TO_REASON": {
-          "error": "User with address {{address}} does not have a return to address that matches the reason {{reason}}",
+          "error": "El usuario con dirección {{address}} no tiene una dirección de retorno que coincida con el motivo {{reason}}",
           "msg": "El usuario no tiene registrada una dirección de retorno de recursos para la operación de {{reason}}"
         }
       },
       "LOGIC": {
         "USER_IS_NOT_ACTIVE": {
-          "error": "User with address {{address}} is not active",
+          "error": "El usuario con dirección {{address}} no está activo",
           "msg": "El usuario {{address}} no está activo"
         },
         "USER_DOES_NOT_HAVE_PERMISSIONS": {
-          "error": "User with address {{address}} does not have {{requiredPermission}} permission",
+          "error": "El usuario con la dirección {{address}} no tiene el permiso {{requiredPermission}}",
           "msg": "El usuario no tiene permisos para esta operación. Por favor, contacte al administrador para más información."
         },
         "USER_DOES_NOT_HAVE_TRANSFER_PERMISSIONS": {
-          "error": "User with address {{address}} does not have transfer_to permission to {{recipient}}",
+          "error": "El usuario con la dirección {{address}} no tiene permiso de transferencia_a {{recipient}}",
           "msg": "El usuario no tiene permisos para esta operación. Por favor, contacte al administrador para más información."
         },
         "NONEXISTENT_LASTEST_TRANSACTION": {
-          "error": "User with address {{address}}'s lastest transaction with signature {{transactionSignature}} does not exist",
+          "error": "La última transacción del usuario con dirección {{address}} con firma {{transactionSignature}} no existe",
           "msg": "La transacción con firma {{transactionSignature}} no hace parte de las transacciones registradas para el usuario. Por favor, contacte al administrador para más información."
         },
         "NONEXISTENT_PENDING_TRANSACTION": {
-          "error": "User with address {{address}}'s pending transaction with signature {{transactionSignature}} does not exist",
+          "error": "La transacción pendiente del usuario con dirección {{address}} con firma {{transactionSignature}} no existe",
           "msg": "La transacción pendiente con firma {{transactionSignature}} no hace parte de las transacciones registradas para el usuario. Por favor, contacte al administrador para más información."
         },
         "INCORRECT_RECIPIENT_LASTEST_TRANSACTION": {
-          "error": "User with address {{address}}'s lastest transaction with signature {{transactionSignature}} does not belong to them",
+          "error": "La última transacción del usuario con dirección {{dress}} con firma {{transactionSignature}} no le pertenece",
           "msg": "La transacción con firma {{transactionSignature}} no hace parte de las transacciones registradas para el usuario. Por favor, contacte al administrador para más información."
         },
         "NO_RETURN_TO_ADDRESSES": {
-          "error": "User with address {{address}} does not have any return to addresses",
+          "error": "El usuario con dirección {{address}} no tiene ninguna dirección de retorno de recursos",
           "msg": "El usuario no tiene registrada ninguna dirección de retorno de recursos. Por favor, contacte al administrador para más información."
         }
       }
@@ -82,7 +82,7 @@
     "TRANSACTION": {
       "INPUT": {
         "NO_INPUT": {
-          "error": "Expected transaction parameter {{property}}, but received undefined",
+          "error": "Se esperaba el parámetro de transacción {{propiedad}}, pero se ha recibido indefinido",
           "msg": "Se esperaba el parámetro {{property}}, pero no se recibió"
         },
         "MISSING_REQUIRED_INPUT": {
@@ -92,28 +92,42 @@
           "error": "{{message}}"
         },
         "TRANSACTION_EXISTS": {
-          "error": "Transaction with signature {{signature}} already exists",
+          "error": "La transacción con la firma {{signature}} ya existe",
           "msg": "La transacción ya existe"
         },
         "TRANSACTION_DOES_NOT_EXIST": {
-          "error": "Transaction with signature {{signature}} does not exist",
+          "error": "La transacción con la firma {{signature}} no existe",
           "msg": "La transacción no existe"
         },
         "TRANSACTION_IS_NOT_PENDING": {
-          "error": "Transaction with signature {{signature}} is not pending, thus it cannot be updated",
+          "error": "La transacción con la firma {{signature}} no está pendiente, por lo que no se puede actualizar",
           "msg": "La transacción no está pendiente, y por ende no se puede actualizar"
         }
       },
       "LOGIC": {
         "NON_MATCHING_KEYS": {
-          "error": "Transaction's signature cannot be decrypted with creator's public key",
+          "error": "No se puede descifrar la firma de la transacción con la clave pública del creador",
           "msg": "El usuario no tiene permisos sobre esta transacción. Por favor, contacte al administrador para más información."
         },
         "DECRYPTING_ERROR": {
-          "error": "Transaction's object cannot be decrypted",
+          "error": "El objeto de la transacción no puede ser descifrado",
           "msg": "Hubo un error al validar la transacción. Por favor, contacte al administrador para más información."
         }
       }
     }
+  },
+  "MESSAGES": {
+    "SUCCESSFUL_REQUEST": {
+      "USER": {
+        "UPDATE": "El usuario se ha actualizado correctamente",
+        "CREATION": "El usuario se ha creado correctamente"
+      },
+      "TRANSACTION": {
+        "UPDATE": "La transacción se ha actualizado correctamente",
+        "CREATION": "La transacción se ha creado correctamente"
+      }
+    },
+    "SAWTOOTH_UNAVAILABLE": "El REST API de Hyperledger Sawtooth no está disponible temporalmente",
+    "CHANGE_TRANSACTION_DESCRIPTION": "Vueltas resultantes de la transacción {{signature}}. Las transacciones de entrada suman {{input}}, la transacción creada es de {{amount}}, por tanto, las vueltas son de {{change}}"
   }
 }

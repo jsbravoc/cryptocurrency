@@ -326,7 +326,7 @@ const getTransactions = (req, res) => {
     .catch((err) =>
       res
         .status(503)
-        .json({ msg: "Sawtooth service unavailable", error: { ...err } })
+        .json({ msg: req.t("MESSAGES.SAWTOOTH_UNAVAILABLE"), error: { ...err } })
     );
 };
 
@@ -352,7 +352,7 @@ const getTransactionByAddress = (req, res) => {
     .catch((err) =>
       res
         .status(503)
-        .json({ msg: "Sawtooth service unavailable", error: { ...err } })
+        .json({ msg: req.t("MESSAGES.SAWTOOTH_UNAVAILABLE"), error: { ...err } })
     );
 };
 

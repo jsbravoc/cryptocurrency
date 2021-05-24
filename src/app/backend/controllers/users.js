@@ -141,7 +141,10 @@ const getUsers = (req, res) => {
     .catch((err) =>
       res
         .status(503)
-        .json({ msg: "Sawtooth service unavailable", error: { ...err } })
+        .json({
+          msg: req.t("MESSAGES.SAWTOOTH_UNAVAILABLE"),
+          error: { ...err },
+        })
     );
 };
 
@@ -216,7 +219,10 @@ const getUserByAddress = (req, res) => {
     .catch((err) =>
       res
         .status(503)
-        .json({ msg: "Sawtooth service unavailable", error: { ...err } })
+        .json({
+          msg: req.t("MESSAGES.SAWTOOTH_UNAVAILABLE"),
+          error: { ...err },
+        })
     );
 };
 
