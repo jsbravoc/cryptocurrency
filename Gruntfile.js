@@ -1,6 +1,11 @@
+"use strict";
 const loadTasks = require("load-grunt-tasks");
 
 module.exports = function (grunt) {
+  // Load the plugin that provides the "uglify" task.
+  grunt.loadNpmTasks("grunt-contrib-copy");
+  grunt.loadNpmTasks("grunt-contrib-uglify");
+  grunt.loadNpmTasks("grunt-string-replace");
   loadTasks(grunt);
   const configObject = {
     pkg: grunt.file.readJSON("package.json"),
@@ -23,16 +28,13 @@ module.exports = function (grunt) {
       ],
     },
     uglify: {},
+    "string-replace": {},
   };
   // Project configuration.
   grunt.initConfig(configObject);
 
   grunt.task.registerTask("minifyJS", () => {
     const config = {
-      options: {
-        banner:
-          '/*! <%= pkg.name %> <%= grunt.template.today("yyyy-mm-dd") %> */',
-      },
       all_vendor_js: {
         files: [
           {
@@ -252,9 +254,9 @@ module.exports = function (grunt) {
           },
           {
             expand: true,
-            cwd: "src/app/backend/resources/",
+            cwd: "src/app/backend/resources/locales",
             src: ["**"],
-            dest: "build/app/backend/resources",
+            dest: "build/app/backend/resources/locales/",
           },
           {
             expand: true,
@@ -298,10 +300,36 @@ module.exports = function (grunt) {
     grunt.config("copy", config);
     grunt.task.run(["copy"]);
   });
+  grunt.task.registerTask("replaceBuildScript", () => {
+    const config = {
+      inline: {
+        files: [
+          {
+            src: "build/app/backend/package.json",
+            dest: "build/app/backend/package.json",
+            filter: "isFile",
+          },
+        ],
+        options: {
+          replacements: [
+            // place files inline example
+            {
+              pattern: `node ./bin/www.js`,
+              replacement: "NODE_ENV=production node ./bin/www.js",
+            },
+          ],
+        },
+      },
+    };
 
-  // Load the plugin that provides the "uglify" task.
-  grunt.loadNpmTasks("grunt-contrib-copy");
-  grunt.loadNpmTasks("grunt-contrib-uglify");
+    grunt.config("string-replace", config);
+    grunt.task.run(["string-replace"]);
+  });
+
   // Default task(s).
-  grunt.registerTask("default", ["minifyJS", "copyDependencies"]);
+  grunt.registerTask("default", [
+    "minifyJS",
+    "copyDependencies",
+    "replaceBuildScript",
+  ]);
 };
