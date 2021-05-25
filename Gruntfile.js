@@ -198,13 +198,6 @@ module.exports = function (grunt) {
             dest: "build/app/transaction_processor",
             ext: ".js",
           },
-          {
-            expand: true,
-            cwd: "src/app/backend/test",
-            src: ["*.js", "!*.min.js"],
-            dest: "build/app/backend/test",
-            ext: ".js",
-          },
         ],
       },
     };
