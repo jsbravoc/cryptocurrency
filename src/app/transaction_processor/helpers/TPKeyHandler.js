@@ -1,6 +1,6 @@
 "use strict";
 
-const _ = require("underscore");
+const _ = require("lodash");
 const { TransactionHandler } = require("sawtooth-sdk/processor/handler");
 //https://sawtooth.hyperledger.org/faq/transaction-processing/#my-tp-throws-an-exception-of-type-internalerror-but-the-apply-method-gets-stuck-in-an-endless-loop
 //InternalErrors are transient errors, are retried,
