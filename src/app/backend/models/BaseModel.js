@@ -1,18 +1,19 @@
 const _ = require("lodash");
 /**
- * Represents a basic object of an asset, used in @see User, @see Transaction as an inheritable object.
+ * Represents a basic object of an asset, used in {@link User}, {@link Transaction} as an inheritable object.
  * @constructor
- * @param {String} type - The typoe of the object @see Constants.
+ * @param {TYPE} type - The type of the object @see {@link TYPE}.
  */
 class BaseModel {
   constructor(type) {
     this.type = type;
   }
 
-  addSignature(signature) {
-    this.signature = signature;
-  }
-
+  /**
+   * Returns the object as a JSON dictionary (without BaseModel.prototype).
+   *
+   * @return {Object} JSON object containing the properties and values of the object.
+   */
   toDictionary() {
     const dictionary = {};
     Object.keys(this)
@@ -25,6 +26,14 @@ class BaseModel {
     return dictionary;
   }
 
+  /**
+   * Returns a copy of the object.
+   *
+   * @param {Boolean} [removeSignature=false] - If true, the resulting object will not have the signature property.
+   * @param {Boolean} [removeType=true] - If true, the resulting object will not have the type property.
+   *
+   * @return {Object} JSON object containing the properties and values of the object.
+   */
   toObject(removeSignature = false, removeType = true) {
     const copy = _.cloneDeep(this);
     if (removeSignature) delete copy.signature;
@@ -32,12 +41,28 @@ class BaseModel {
     return copy;
   }
 
+  /**
+   * Returns the object received as parameter as an ordered (property-wise) object.
+   *
+   * @static
+   * @param {Object} obj - Object whose properties will be sorted and returned.
+   *
+   * @return {Object} JSON object containing the properties and values of the object.
+   */
   static toSortedObject(obj) {
     return Object.keys(obj)
       .sort()
       .reduce((r, k) => ((r[k] = obj[k]), r), {});
   }
 
+  /**
+   * Returns the object as a JSON-stringified string.
+   *
+   * @param {Boolean} [removeSignature=false] - If true, the JSON-stringified object will not have the signature property.
+   * @param {Boolean} [removeType=true] - If true, the JSON-stringified object will not have the type property.
+   *
+   * @return {String} JSON-stringified object.
+   */
   toString(removeSignature = false, removeType = true) {
     const dictionary = this.toDictionary();
     if (removeSignature) delete dictionary.signature;

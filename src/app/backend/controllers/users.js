@@ -1,3 +1,7 @@
+/** Users controller functionality
+ * @module controllers/users
+ */
+
 const { SEVERITY, logFormatted } = require("../utils/logger");
 
 const { HTTP_METHODS, TYPE } = require("../utils/constants");
@@ -24,8 +28,8 @@ const Transaction = require("../models/Transaction");
  * @param {String} address - Address of the user.
  * @param {Boolean} [removeSignature] - Boolean that indicates if the signature should be removed.
  * @param {Boolean} [removeType] - Boolean that indicates if the type should be removed.
- * @param {Object} [res] - Express.js response object, used to access locals.
- * @return {Promise} Promise containing the user object or null if not found.
+ * @param {Response} [res] - Express.js response object, used to access locals.
+ * @return {Promise<User|null>} Promise containing the user object or null if not found.
  */
 const findUser = (
   address,
@@ -38,6 +42,8 @@ const findUser = (
  * Updates a user in the blockchain.
  *
  * @param {User} user - The user to update.
+ * @param {Response} res - Express.js response object, used to access locals.
+ * @param {String} [source] - Source function that invoked the request.
  * @return {Promise} Promise of the sawtooth REST API request response.
  */
 // eslint-disable-next-line no-unused-vars
@@ -58,8 +64,8 @@ const _updateUser = (user, res, source = "[LOCAL USER UPDATE]") =>
 /**
  * Finds and returns all (or up to limit query parameter) users.
  *
- * @param {Object} req - Express request object.
- * @param {Object} res - Response object to handle Express request.
+ * @param {Request} req - Express request object.
+ * @param {Response} res - Response object to handle Express request.
  * @post Returns array of users in res object. If an error happens, response object has the error.
  */
 const getUsers = (req, res) => {
@@ -139,20 +145,18 @@ const getUsers = (req, res) => {
       }
     })
     .catch((err) =>
-      res
-        .status(503)
-        .json({
-          msg: req.t("MESSAGES.SAWTOOTH_UNAVAILABLE"),
-          error: { ...err },
-        })
+      res.status(503).json({
+        msg: req.t("MESSAGES.SAWTOOTH_UNAVAILABLE"),
+        error: { ...err },
+      })
     );
 };
 
 /**
  * Finds and returns the user with address = req.params.address
  *
- * @param {Object} req - Express request object.
- * @param {Object} res - Response object to handle Express request.
+ * @param {Request} req - Express request object.
+ * @param {Response} res - Response object to handle Express request.
  * @post Returns the user in res object. If an error happens, response object has the error.
  */
 const getUserByAddress = (req, res) => {
@@ -217,12 +221,10 @@ const getUserByAddress = (req, res) => {
       });
     })
     .catch((err) =>
-      res
-        .status(503)
-        .json({
-          msg: req.t("MESSAGES.SAWTOOTH_UNAVAILABLE"),
-          error: { ...err },
-        })
+      res.status(503).json({
+        msg: req.t("MESSAGES.SAWTOOTH_UNAVAILABLE"),
+        error: { ...err },
+      })
     );
 };
 

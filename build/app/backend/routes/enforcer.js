@@ -1,2 +1,1 @@
-/*! cryptocurrency 2021-05-23 */
-const express=require("express"),router=express.Router(),{enforceValidTransactionsMiddleware}=require("../enforcer/cryptocurrency");router.get("/",enforceValidTransactionsMiddleware,(e,r)=>r.status(200).json({msg:"Ok"})),router.post("/",enforceValidTransactionsMiddleware,(e,r)=>r.status(200).json({msg:"Ok"})),module.exports=router;
+const express=require("express"),router=express.Router(),{enforceValidTransactionsMiddleware}=require("../enforcer/cryptocurrency");router.post("/",enforceValidTransactionsMiddleware,(e,r)=>r.status(200).json({msg:"Ok"})),module.exports=router;

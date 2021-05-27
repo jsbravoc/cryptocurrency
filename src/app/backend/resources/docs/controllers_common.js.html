@@ -68,7 +68,7 @@
             
             <nav>
                 
-                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Modules</h3><ul><li><a href="module-MongoUtils.html">MongoUtils</a></li></ul><h3>Classes</h3><ul><li><a href="Asset.html">Asset</a></li><li><a href="BaseModel.html">BaseModel</a></li><li><a href="Transaction.html">Transaction</a></li><li><a href="User.html">User</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_putAsset">_putAsset</a></li><li><a href="global.html#_updateTransaction">_updateTransaction</a></li><li><a href="global.html#_updateUser">_updateUser</a></li><li><a href="global.html#buildAssetTransaction">buildAssetTransaction</a></li><li><a href="global.html#buildBatch">buildBatch</a></li><li><a href="global.html#createTransaction">createTransaction</a></li><li><a href="global.html#expandSupportingTransactions">expandSupportingTransactions</a></li><li><a href="global.html#findAllAssets">findAllAssets</a></li><li><a href="global.html#findByAddress">findByAddress</a></li><li><a href="global.html#findTransaction">findTransaction</a></li><li><a href="global.html#findUser">findUser</a></li><li><a href="global.html#getAddress">getAddress</a></li><li><a href="global.html#getSupportingTransactions">getSupportingTransactions</a></li><li><a href="global.html#getTransactionAddress">getTransactionAddress</a></li><li><a href="global.html#getTransactionByAddress">getTransactionByAddress</a></li><li><a href="global.html#getTransactions">getTransactions</a></li><li><a href="global.html#getUserAddress">getUserAddress</a></li><li><a href="global.html#getUserByAddress">getUserByAddress</a></li><li><a href="global.html#getUsers">getUsers</a></li><li><a href="global.html#hash512">hash512</a></li><li><a href="global.html#http">http</a></li><li><a href="global.html#inputValidation">inputValidation</a></li><li><a href="global.html#normalizePort">normalizePort</a></li><li><a href="global.html#onError">onError</a></li><li><a href="global.html#port">port</a></li><li><a href="global.html#putAsset">putAsset</a></li><li><a href="global.html#putBatch">putBatch</a></li><li><a href="global.html#server">server</a></li><li><a href="global.html#updateTransaction">updateTransaction</a></li><li><a href="global.html#validate">validate</a></li><li><a href="global.html#validateAssetExistence">validateAssetExistence</a></li><li><a href="global.html#validateExistingTransaction">validateExistingTransaction</a></li><li><a href="global.html#validatePendingTransaction">validatePendingTransaction</a></li><li><a href="global.html#validateTransactionAddress">validateTransactionAddress</a></li><li><a href="global.html#validateTransactionUpdateRequest">validateTransactionUpdateRequest</a></li><li><a href="global.html#validateUserCreation">validateUserCreation</a></li></ul></div>
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Modules</h3><ul><li><a href="module-controllers_common.html">controllers/common</a></li><li><a href="module-controllers_cryptocurrency.html">controllers/cryptocurrency</a></li><li><a href="module-controllers_users.html">controllers/users</a></li><li><a href="module-enforcer_cryptocurrency.html">enforcer/cryptocurrency</a></li><li><a href="module-routers_cryptocurrency.html">routers/cryptocurrency</a></li><li><a href="module-routers_enforcer.html">routers/enforcer</a></li><li><a href="module-routers_users.html">routers/users</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-routers_cryptocurrency-cryptoRouter.html">cryptoRouter</a></li><li><a href="module-routers_enforcer-enforcerRouter.html">enforcerRouter</a></li><li><a href="module-routers_users-usersRouter.html">usersRouter</a></li></ul><h3>Classes</h3><ul><li><a href="Asset.html">Asset</a></li><li><a href="BaseModel.html">BaseModel</a></li><li><a href="Permissions.html">Permissions</a></li><li><a href="Transaction.html">Transaction</a></li><li><a href="User.html">User</a></li></ul><h3>Global</h3><ul><li><a href="global.html#http">http</a></li><li><a href="global.html#HTTP_METHODS">HTTP_METHODS</a></li><li><a href="global.html#inputValidation">inputValidation</a></li><li><a href="global.html#normalizePort">normalizePort</a></li><li><a href="global.html#onError">onError</a></li><li><a href="global.html#port">port</a></li><li><a href="global.html#server">server</a></li><li><a href="global.html#TYPE">TYPE</a></li><li><a href="global.html#USER_TYPE">USER_TYPE</a></li><li><a href="global.html#validate">validate</a></li><li><a href="global.html#validateAssetExistence">validateAssetExistence</a></li><li><a href="global.html#validateExistingTransaction">validateExistingTransaction</a></li><li><a href="global.html#validatePendingTransaction">validatePendingTransaction</a></li><li><a href="global.html#validateTransactionAddress">validateTransactionAddress</a></li><li><a href="global.html#validateTransactionUpdateRequest">validateTransactionUpdateRequest</a></li><li><a href="global.html#validateUserCreation">validateUserCreation</a></li></ul></div>
                 
             </nav>
         </div>
@@ -85,7 +85,10 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>/* eslint-disable camelcase */
+            <pre class="prettyprint source linenums"><code>/** Common controller functionality
+ * @module controllers/common
+ */
+
 const _ = require("lodash");
 const crypto = require("crypto");
 const { default: axios } = require("axios");
@@ -94,7 +97,6 @@ const {
   HTTP_METHODS,
   TYPE,
   TRANSACTION_FAMILY,
-  LOCAL_ADDRESS,
 } = require("../utils/constants");
 const { SEVERITY, logFormatted } = require("../utils/logger");
 
@@ -149,12 +151,12 @@ const getUserAddress = (userId) =>
 /**
  * Finds and returns an asset in the blockchain.
  *
- * @param {String} type - Type of asset, such as TRANSACTION or USER ( @see TYPE ).
+ * @param {TYPE} type - Type of asset, such as TRANSACTION or USER ({@link TYPE}).
  * @param {String} txid - Asset unique identification (before calculated address).
  * @param {Boolean} [removeSignature] - Boolean that indicates if the signature should be removed.
  * @param {Boolean} [removeType] - Boolean that indicates if the type should be removed.
- * @param {Object} [res] - Express.js response object, used to access locals.
- * @return {Promise} Promise of the asset if found or null if not found.
+ * @param {Response} [res] - Express.js response object, used to access locals.
+ * @return {Promise&lt;Transaction|User|null>} Promise of the asset if found or null if not found.
  */
 const findByAddress = (
   type,
@@ -222,13 +224,13 @@ const findByAddress = (
 /**
  * Finds and returns all assets of a type.
  * @pre A request to an endpoint of an asset is made. The endpoint must be GET /{asset}
- * @param {String} type - Type of asset, such as TRANSACTION or USER ( @see TYPE ).
+ * @param {String} type - Type of asset, such as TRANSACTION or USER (@see {@link TYPE}).
  * @param {String} source - Endpoint source that invoked function (used for logging).
  * @param {Number} [limit] - Maximum number of assets to return.
  * @param {Boolean} [removeSignature] - Boolean that indicates if the signature should be removed.
  * @param {Boolean} [removeType] - Boolean that indicates if the type should be removed.
- * @param {Object} [res] - Express.js response object, used to access locals.
- * @returns {Promise} - Promise of the assets returned.
+ * @param {Response} [res] - Express.js response object, used to access locals.
+ * @returns {Promise&lt;Array&lt;Transaction|User>|Error>} - Promise of the assets returned.
  */
 const findAllAssets = (
   type,
@@ -324,11 +326,11 @@ const buildBatch = ({ inputs, outputs, payload }, ...args) => {
 /**
  * Puts an asset in the blockchain.
  *
- * @param {String} type - Type of asset, such as TRANSACTION or USER ( @see TYPE ).
- * @param {String} httpMethod - PUT or POST (defined in TYPE constants).
+ * @param {TYPE} type - Type of asset, such as TRANSACTION or USER (@see {@link TYPE}).
+ * @param {HTTP_METHODS} httpMethod - PUT or POST (defined in @see {@link HTTP_METHODS} constants).
  * @param {String} source - Endpoint source that invoked function (used for logging).
- * @param {BaseModel} object - Asset object.
- * @returns {Promise}  Promise of the batch post request. If successfully resolved, contains responseCode, msg, payload
+ * @param {User|Transaction} object - Asset object.
+ * @returns {Promise&lt;{ responseCode, msg, payload }| Error >}  Promise of the batch post request. If successfully resolved, contains responseCode, msg, payload
  */
 const _putAsset = (type, httpMethod, source, object) => {
   let asset;
@@ -382,9 +384,9 @@ const _putAsset = (type, httpMethod, source, object) => {
 /**
  * Builds a transaction of an asset (User, Transaction, etc).
  *
- * @param {String} type - Type of asset, such as TRANSACTION or USER ( @see TYPE ).
- * @param {String} httpMethod - PUT or POST ( @see HTTP_METHODS ).
- * @param {BaseModel} object - Asset object ( @see Transaction , @see User )
+ * @param {String} type - Type of asset, such as TRANSACTION or USER (@see {@link TYPE}).
+ * @param {HTTP_METHODS} httpMethod - PUT or POST (@see {@link HTTP_METHODS}).
+ * @param {User|Transaction} object - Asset object, such as {@link User}, {@link Transaction}.
  * @returns {Asset} Asset (namely a transaction) of the Sawtooth REST API.
  */
 const buildAssetTransaction = (type, httpMethod, object) => {
@@ -420,10 +422,10 @@ const buildAssetTransaction = (type, httpMethod, object) => {
 /**
  * Puts a batch of assets into the blockchain.
  *
- * @param {String} httpMethod - PUT or POST ( @see HTTP_METHODS ).
+ * @param {HTTP_METHODS} httpMethod - PUT or POST (@see {@link HTTP_METHODS}).
  * @param {String} source - Endpoint source that invoked function (used for logging).
  * @param {Object} arrayOfAssets - Array of assets to be inserted into the blockchain.
- * @returns {Promise} Promise of the batch post request. If successfully resolved, contains responseCode, msg, payload
+ * @returns {Promise&lt;{ responseCode, msg, payload }| Error >} Promise of the batch post request. If successfully resolved, contains responseCode, msg, payload
  */
 const putBatch = (httpMethod, source, arrayOfAssets) => {
   const batch = buildBatch(...arrayOfAssets);
@@ -456,13 +458,12 @@ const putBatch = (httpMethod, source, arrayOfAssets) => {
 /**
  * Puts an asset in the blockchain.
  *
- * @param {String} type - Type of asset, such as TRANSACTION or USER ( @see TYPE ).
- * @param {String} httpMethod - PUT or POST ( @see HTTP_METHODS ).
+ * @param {String} type - Type of asset, such as TRANSACTION or USER (@see {@link TYPE}).
+ * @param {HTTP_METHODS} httpMethod - PUT or POST (@see {@link HTTP_METHODS}).
  * @param {String} source - Endpoint source that invoked function (used for logging).
- * @param {Object} req - Http request object.
- * @param {Object} res - Response object to handle Express request.
- * @return {Promise} Promise of the Sawtooth REST API request response.
- * @throws {Error} If Sawtooth REST API rejects the request.
+ * @param {Request} req - Http request object.
+ * @param {Response} res - Response object to handle Express request.
+ * @return {Promise&lt;{ responseCode, msg, payload }| Error >} Promise of the Sawtooth REST API request response.
  */
 const putAsset = (type, httpMethod, source, req, res) => {
   let asset;
@@ -503,7 +504,7 @@ module.exports.putAsset = putAsset;
             
             <footer class="footer">
                 <div class="content has-text-centered">
-                    <p>Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.6</a></p>
+                    <p>Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a></p>
                     <p class="sidebar-created-by">
                         <a href="https://github.com/SoftwareBrothers/better-docs" target="_blank">BetterDocs theme</a> provided with <i class="fas fa-heart"></i> by 
                         <a href="http://softwarebrothers.co" target="_blank">SoftwareBrothers - JavaScript Development Agency</a>

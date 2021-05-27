@@ -11,7 +11,7 @@ const SEVERITY = {
 };
 
 // Disable console.log in production
-if (!process.env.ENABLE_LOGGING || process.env.ENABLE_LOGGING !== "true") {
+if (process.env.ENABLE_LOGGING !== "true") {
   console.log = function () {};
 }
 

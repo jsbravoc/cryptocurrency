@@ -1,5 +1,5 @@
 {
-  "plugins": [],
+  "plugins": ["plugins/markdown", "plugins/summarize"],
   "recurseDepth": 10,
   "opts": {
     "recurse": true,

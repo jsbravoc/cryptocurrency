@@ -1,6 +1,7 @@
 module.exports = [
   {
-    script: "bin/www.js",
+    script: "npm",
+    args: "start",
     name: "crypto-api",
     exec_mode: "cluster",
     instances: "max",

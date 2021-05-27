@@ -68,7 +68,7 @@
             
             <nav>
                 
-                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Modules</h3><ul><li><a href="module-MongoUtils.html">MongoUtils</a></li></ul><h3>Classes</h3><ul><li><a href="Asset.html">Asset</a></li><li><a href="BaseModel.html">BaseModel</a></li><li><a href="Transaction.html">Transaction</a></li><li><a href="User.html">User</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_putAsset">_putAsset</a></li><li><a href="global.html#_updateTransaction">_updateTransaction</a></li><li><a href="global.html#_updateUser">_updateUser</a></li><li><a href="global.html#buildAssetTransaction">buildAssetTransaction</a></li><li><a href="global.html#buildBatch">buildBatch</a></li><li><a href="global.html#createTransaction">createTransaction</a></li><li><a href="global.html#expandSupportingTransactions">expandSupportingTransactions</a></li><li><a href="global.html#findAllAssets">findAllAssets</a></li><li><a href="global.html#findByAddress">findByAddress</a></li><li><a href="global.html#findTransaction">findTransaction</a></li><li><a href="global.html#findUser">findUser</a></li><li><a href="global.html#getAddress">getAddress</a></li><li><a href="global.html#getSupportingTransactions">getSupportingTransactions</a></li><li><a href="global.html#getTransactionAddress">getTransactionAddress</a></li><li><a href="global.html#getTransactionByAddress">getTransactionByAddress</a></li><li><a href="global.html#getTransactions">getTransactions</a></li><li><a href="global.html#getUserAddress">getUserAddress</a></li><li><a href="global.html#getUserByAddress">getUserByAddress</a></li><li><a href="global.html#getUsers">getUsers</a></li><li><a href="global.html#hash512">hash512</a></li><li><a href="global.html#http">http</a></li><li><a href="global.html#inputValidation">inputValidation</a></li><li><a href="global.html#normalizePort">normalizePort</a></li><li><a href="global.html#onError">onError</a></li><li><a href="global.html#port">port</a></li><li><a href="global.html#putAsset">putAsset</a></li><li><a href="global.html#putBatch">putBatch</a></li><li><a href="global.html#server">server</a></li><li><a href="global.html#updateTransaction">updateTransaction</a></li><li><a href="global.html#validate">validate</a></li><li><a href="global.html#validateAssetExistence">validateAssetExistence</a></li><li><a href="global.html#validateExistingTransaction">validateExistingTransaction</a></li><li><a href="global.html#validatePendingTransaction">validatePendingTransaction</a></li><li><a href="global.html#validateTransactionAddress">validateTransactionAddress</a></li><li><a href="global.html#validateTransactionUpdateRequest">validateTransactionUpdateRequest</a></li><li><a href="global.html#validateUserCreation">validateUserCreation</a></li></ul></div>
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Modules</h3><ul><li><a href="module-controllers_common.html">controllers/common</a></li><li><a href="module-controllers_cryptocurrency.html">controllers/cryptocurrency</a></li><li><a href="module-controllers_users.html">controllers/users</a></li><li><a href="module-enforcer_cryptocurrency.html">enforcer/cryptocurrency</a></li><li><a href="module-routers_cryptocurrency.html">routers/cryptocurrency</a></li><li><a href="module-routers_enforcer.html">routers/enforcer</a></li><li><a href="module-routers_users.html">routers/users</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-routers_cryptocurrency-cryptoRouter.html">cryptoRouter</a></li><li><a href="module-routers_enforcer-enforcerRouter.html">enforcerRouter</a></li><li><a href="module-routers_users-usersRouter.html">usersRouter</a></li></ul><h3>Classes</h3><ul><li><a href="Asset.html">Asset</a></li><li><a href="BaseModel.html">BaseModel</a></li><li><a href="Permissions.html">Permissions</a></li><li><a href="Transaction.html">Transaction</a></li><li><a href="User.html">User</a></li></ul><h3>Global</h3><ul><li><a href="global.html#http">http</a></li><li><a href="global.html#HTTP_METHODS">HTTP_METHODS</a></li><li><a href="global.html#inputValidation">inputValidation</a></li><li><a href="global.html#normalizePort">normalizePort</a></li><li><a href="global.html#onError">onError</a></li><li><a href="global.html#port">port</a></li><li><a href="global.html#server">server</a></li><li><a href="global.html#TYPE">TYPE</a></li><li><a href="global.html#USER_TYPE">USER_TYPE</a></li><li><a href="global.html#validate">validate</a></li><li><a href="global.html#validateAssetExistence">validateAssetExistence</a></li><li><a href="global.html#validateExistingTransaction">validateExistingTransaction</a></li><li><a href="global.html#validatePendingTransaction">validatePendingTransaction</a></li><li><a href="global.html#validateTransactionAddress">validateTransactionAddress</a></li><li><a href="global.html#validateTransactionUpdateRequest">validateTransactionUpdateRequest</a></li><li><a href="global.html#validateUserCreation">validateUserCreation</a></li></ul></div>
                 
             </nav>
         </div>
@@ -85,7 +85,11 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>const { SEVERITY, logFormatted } = require("../utils/logger");
+            <pre class="prettyprint source linenums"><code>/** Users controller functionality
+ * @module controllers/users
+ */
+
+const { SEVERITY, logFormatted } = require("../utils/logger");
 
 const { HTTP_METHODS, TYPE } = require("../utils/constants");
 const {
@@ -111,8 +115,8 @@ const Transaction = require("../models/Transaction");
  * @param {String} address - Address of the user.
  * @param {Boolean} [removeSignature] - Boolean that indicates if the signature should be removed.
  * @param {Boolean} [removeType] - Boolean that indicates if the type should be removed.
- * @param {Object} [res] - Express.js response object, used to access locals.
- * @return {Promise} Promise containing the user object or null if not found.
+ * @param {Response} [res] - Express.js response object, used to access locals.
+ * @return {Promise&lt;User|null>} Promise containing the user object or null if not found.
  */
 const findUser = (
   address,
@@ -125,6 +129,8 @@ const findUser = (
  * Updates a user in the blockchain.
  *
  * @param {User} user - The user to update.
+ * @param {Response} res - Express.js response object, used to access locals.
+ * @param {String} [source] - Source function that invoked the request.
  * @return {Promise} Promise of the sawtooth REST API request response.
  */
 // eslint-disable-next-line no-unused-vars
@@ -145,8 +151,8 @@ const _updateUser = (user, res, source = "[LOCAL USER UPDATE]") =>
 /**
  * Finds and returns all (or up to limit query parameter) users.
  *
- * @param {Object} req - Express request object.
- * @param {Object} res - Response object to handle Express request.
+ * @param {Request} req - Express request object.
+ * @param {Response} res - Response object to handle Express request.
  * @post Returns array of users in res object. If an error happens, response object has the error.
  */
 const getUsers = (req, res) => {
@@ -226,17 +232,18 @@ const getUsers = (req, res) => {
       }
     })
     .catch((err) =>
-      res
-        .status(503)
-        .json({ msg: req.t("MESSAGES.SAWTOOTH_UNAVAILABLE"), error: { ...err } })
+      res.status(503).json({
+        msg: req.t("MESSAGES.SAWTOOTH_UNAVAILABLE"),
+        error: { ...err },
+      })
     );
 };
 
 /**
  * Finds and returns the user with address = req.params.address
  *
- * @param {Object} req - Express request object.
- * @param {Object} res - Response object to handle Express request.
+ * @param {Request} req - Express request object.
+ * @param {Response} res - Response object to handle Express request.
  * @post Returns the user in res object. If an error happens, response object has the error.
  */
 const getUserByAddress = (req, res) => {
@@ -301,9 +308,10 @@ const getUserByAddress = (req, res) => {
       });
     })
     .catch((err) =>
-      res
-        .status(503)
-        .json({ msg: req.t("MESSAGES.SAWTOOTH_UNAVAILABLE"), error: { ...err } })
+      res.status(503).json({
+        msg: req.t("MESSAGES.SAWTOOTH_UNAVAILABLE"),
+        error: { ...err },
+      })
     );
 };
 
@@ -381,7 +389,7 @@ module.exports.deleteUser = deleteUser;
             
             <footer class="footer">
                 <div class="content has-text-centered">
-                    <p>Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.6</a></p>
+                    <p>Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a></p>
                     <p class="sidebar-created-by">
                         <a href="https://github.com/SoftwareBrothers/better-docs" target="_blank">BetterDocs theme</a> provided with <i class="fas fa-heart"></i> by 
                         <a href="http://softwarebrothers.co" target="_blank">SoftwareBrothers - JavaScript Development Agency</a>

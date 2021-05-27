@@ -1,5 +1,19 @@
-const express = require("express");
+/** Express router providing user related routes
+ * @module routers/users
+ * @requires express
+ */
 
+/**
+ * express module
+ * @const
+ */
+const express = require("express");
+/**
+ * Express.js router to mount user-related functions on.
+ * @type {object}
+ * @const
+ * @namespace usersRouter
+ */
 const router = express.Router();
 const {
   createUser,
@@ -16,19 +30,63 @@ const {
   validateUserDelete,
 } = require("../validators/users");
 
-/* GET users listing. */
+/**
+ * Route to retrieve users from the blockchain.
+ * @name get/users
+ * @function
+ * @memberof module:routers/users~usersRouter
+ * @inner
+ * @param {String} path - Express path
+ * @param {Function} callback - Express middleware.
+ */
 router.get("/", getUsers);
 
-/* GET users listing. */
+/**
+ * Route to create a user from the blockchain.
+ * @name post/users
+ * @function
+ * @memberof module:routers/users~usersRouter
+ * @inner
+ * @param {String} path - Express path
+ * @param {Array} validationChain - Express middleware validation chain.
+ * @param {Function} callback - Express middleware.
+ */
 router.post("/", [...validateUserCreation], createUser);
 
-/* GET users listing. */
+/**
+ * Route to retrieve a user from the blockchain.
+ * @name get/users/:address
+ * @function
+ * @memberof module:routers/users~usersRouter
+ * @inner
+ * @param {String} path - Express path
+ * @param {Array} validationChain - Express middleware validation chain.
+ * @param {Function} callback - Express middleware.
+ */
 router.get("/:address", [...validateUserRetrieval], getUserByAddress);
 
-/* GET users listing. */
+/**
+ * Route to update a user from the blockchain.
+ * @name put/users/:address
+ * @function
+ * @memberof module:routers/users~usersRouter
+ * @inner
+ * @param {String} path - Express path
+ * @param {Array} validationChain - Express middleware validation chain.
+ * @param {Function} callback - Express middleware.
+ */
 router.put("/:address", [...validateUserUpdate], updateUser);
 
-/* GET users listing. */
+/**
+ * Route to inactivate (disable) a user from the blockchain.
+ * @name delete/users/:address
+ * @function
+ * @memberof module:routers/users~usersRouter
+ * @inner
+ * @param {String} path - Express path
+ * @param {Array} validationChain - Express middleware validation chain.
+ * @param {Function} callback - Express middleware.
+ */
 router.delete("/:address", [...validateUserDelete], deleteUser);
 
 module.exports = router;

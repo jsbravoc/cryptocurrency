@@ -1,3 +1,6 @@
+/** Enforcer controller functionality
+ * @module enforcer/cryptocurrency
+ */
 const {
   findByAddress,
   findAllAssets,
@@ -7,6 +10,14 @@ const {
 const { TYPE, HTTP_METHODS } = require("../utils/constants");
 const { logFormatted, SEVERITY } = require("../utils/logger");
 
+/**
+ * Returns the updated transaction object & asset in case its validity has changed.
+ * This mainly handles expiring transactions (with valid_thru property).
+ *
+ * @param {String} address - Address of the transaction.
+ * @param {Response} res- Express.js response object, used to access locals.
+ * @return {Promise<{transactionObj: Transaction, assetObj: Asset}|null>}} Promise containing the asset and the updated transaction object if its validity has changed.
+ */
 const updateInvalidTransaction = (address, res) => {
   return findByAddress(TYPE.TRANSACTION, address, false, false, res).then(
     (transaction) => {
@@ -31,6 +42,15 @@ const updateInvalidTransaction = (address, res) => {
   );
 };
 
+/**
+ * Returns a list of transactions to update to a user specified.
+ * This mainly handles expiring transactions (with valid_thru property).
+ *
+ * @param {String} address - Address of the user.
+ * @param {Array<String>} transactions - Array of known transactions that must be updated (used to limit blockchain queries to the minimum).
+ * @param {Response} res- Express.js response object, used to access locals.
+ * @return {Promise<Array<Asset>>} Promise containing a list of assets to post to the blockchain.
+ */
 const updateInvalidUserTransactions = (address, transactions, res) => {
   return findByAddress(TYPE.USER, address, false, false, res).then((user) => {
     const promises = [];
@@ -83,6 +103,18 @@ const updateInvalidUserTransactions = (address, transactions, res) => {
   });
 };
 
+/**
+ * Updates the (now) invalid transactions in the Blockchain.
+ * This mainly handles expiring transactions (with valid_thru property).
+ * NOTE: users & transactions parameters **should** be passed. If not, the function will search for invalid transaction in all the transactions of all the users.
+ * This call increment the processing time exponentially, and (if enough users & transactions exists), may break the REST API. (Devmode Algorithm at least).
+ *
+ * @param {String} source - String description of the initializer of the request, used for logging.
+ * @param  {Array<String>} [users] - Array of known users to hold (now) invalid transactions.
+ * @param {Array<String>} [transactions] - Array of known transactions that must be updated (used to limit blockchain queries to the minimum).
+ * @param {Response} res- Express.js response object, used to access locals.
+ * @return {Promise<Error | {responseCode, msg, payload}>} Promise containing the response of the Sawtooth REST API call.
+ */
 const updateInvalidUsersTransactions = (
   source,
   users = null,
@@ -122,6 +154,16 @@ const updateInvalidUsersTransactions = (
   });
 };
 
+/**
+ * Verifies and updates invalid user transactions.
+ *
+ * @param {Request} req - Express request object.
+ * @param {Response} res - Response object to handle Express request.
+ * @param {Function} next - Express.js next callback.
+ * @param {String} [req.query.users] - Comma separated list of addresses of users to validate.
+ * @param {String} [req.query.transactions] - Comma separated list of addresses of transactions to update.
+ * @post Updates req.query.transactions invalid transactions of the users defined in req.query.users.
+ */
 const enforceValidTransactionsMiddleware = (req, res, next) => {
   let users;
   let transactions;

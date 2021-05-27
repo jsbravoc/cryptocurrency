@@ -49,12 +49,9 @@ i18next
       loadPath: __dirname + "/resources/locales/{{lng}}/{{ns}}.json",
     },
     fallbackLng: "es",
-    preload: ["en", "es"],
+    preload: ["es", "en"],
   });
 
-const jsDocs = path.join(__dirname, "/resources/docs/");
-
-app.use(express.static(jsDocs));
 app.use(i18nextMiddleware.handle(i18next));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -62,10 +59,14 @@ app.use(cookieParser());
 
 if (process.env.NODE_ENV !== "production") {
   app.use("/api-docs", require("./routes/docs"));
-  app.use("/docs", require("./routes"));
+  const jsDocs = path.join(__dirname, "/resources/docs/");
+  app.use("/docs", express.static(jsDocs));
 }
+
 app.use("/cryptocurrency", require("./routes/cryptocurrency"));
+
 app.use("/users", require("./routes/users"));
+
 app.use("/validate", require("./routes/enforcer"));
 
 module.exports = app;

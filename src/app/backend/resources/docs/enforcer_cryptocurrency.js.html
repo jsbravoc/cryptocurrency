@@ -1,0 +1,303 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title> enforcer/cryptocurrency.js</title>
+
+  <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="./build/entry.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,400,700|Inconsolata,700" rel="stylesheet">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+  <link type="text/css" rel="stylesheet" href="https://jmblog.github.io/color-themes-for-google-code-prettify/themes/tomorrow-night.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/app.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/iframe.css">
+  <link type="text/css" rel="stylesheet" href="">
+  <script async defer src="https://buttons.github.io/buttons.js"></script>
+
+  
+</head>
+
+
+
+<body class="layout small-header">
+    <div id="stickyNavbarOverlay"></div>
+    
+
+<div class="top-nav">
+    <div class="inner">
+        <a id="hamburger" role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+        </a>
+        <div class="logo">
+            
+            
+        </div>
+        <div class="menu">
+            
+            <div class="navigation">
+                <a
+                    href="index.html"
+                    class="link"
+                >
+                    API Documentation
+                </a>
+                
+                
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <div id="main">
+        <div
+            class="sidebar "
+            id="sidebarNav"
+        >
+            
+            <nav>
+                
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Modules</h3><ul><li><a href="module-controllers_common.html">controllers/common</a></li><li><a href="module-controllers_cryptocurrency.html">controllers/cryptocurrency</a></li><li><a href="module-controllers_users.html">controllers/users</a></li><li><a href="module-enforcer_cryptocurrency.html">enforcer/cryptocurrency</a></li><li><a href="module-routers_cryptocurrency.html">routers/cryptocurrency</a></li><li><a href="module-routers_enforcer.html">routers/enforcer</a></li><li><a href="module-routers_users.html">routers/users</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-routers_cryptocurrency-cryptoRouter.html">cryptoRouter</a></li><li><a href="module-routers_enforcer-enforcerRouter.html">enforcerRouter</a></li><li><a href="module-routers_users-usersRouter.html">usersRouter</a></li></ul><h3>Classes</h3><ul><li><a href="Asset.html">Asset</a></li><li><a href="BaseModel.html">BaseModel</a></li><li><a href="Permissions.html">Permissions</a></li><li><a href="Transaction.html">Transaction</a></li><li><a href="User.html">User</a></li></ul><h3>Global</h3><ul><li><a href="global.html#http">http</a></li><li><a href="global.html#HTTP_METHODS">HTTP_METHODS</a></li><li><a href="global.html#inputValidation">inputValidation</a></li><li><a href="global.html#normalizePort">normalizePort</a></li><li><a href="global.html#onError">onError</a></li><li><a href="global.html#port">port</a></li><li><a href="global.html#server">server</a></li><li><a href="global.html#TYPE">TYPE</a></li><li><a href="global.html#USER_TYPE">USER_TYPE</a></li><li><a href="global.html#validate">validate</a></li><li><a href="global.html#validateAssetExistence">validateAssetExistence</a></li><li><a href="global.html#validateExistingTransaction">validateExistingTransaction</a></li><li><a href="global.html#validatePendingTransaction">validatePendingTransaction</a></li><li><a href="global.html#validateTransactionAddress">validateTransactionAddress</a></li><li><a href="global.html#validateTransactionUpdateRequest">validateTransactionUpdateRequest</a></li><li><a href="global.html#validateUserCreation">validateUserCreation</a></li></ul></div>
+                
+            </nav>
+        </div>
+        <div class="core" id="main-content-wrapper">
+            <div class="content">
+                <header class="page-title">
+                    <p>Source</p>
+                    <h1>enforcer/cryptocurrency.js</h1>
+                </header>
+                
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/** Enforcer controller functionality
+ * @module enforcer/cryptocurrency
+ */
+const {
+  findByAddress,
+  findAllAssets,
+  buildAssetTransaction,
+  putBatch,
+} = require("../controllers/common");
+const { TYPE, HTTP_METHODS } = require("../utils/constants");
+const { logFormatted, SEVERITY } = require("../utils/logger");
+
+/**
+ * Returns the updated transaction object &amp; asset in case its validity has changed.
+ * This mainly handles expiring transactions (with valid_thru property).
+ *
+ * @param {String} address - Address of the transaction.
+ * @param {Response} res- Express.js response object, used to access locals.
+ * @return {Promise&lt;{transactionObj: Transaction, assetObj: Asset}|null>}} Promise containing the asset and the updated transaction object if its validity has changed.
+ */
+const updateInvalidTransaction = (address, res) => {
+  return findByAddress(TYPE.TRANSACTION, address, false, false, res).then(
+    (transaction) => {
+      if (
+        transaction &amp;&amp;
+        ((!transaction.pending &amp;&amp;
+          transaction.checkValidity() !== transaction.valid) ||
+          (transaction.pending &amp;&amp; !transaction.checkValidity()))
+      ) {
+        transaction.valid = transaction.checkValidity();
+        return {
+          transactionObj: transaction,
+          assetObj: buildAssetTransaction(
+            TYPE.TRANSACTION,
+            HTTP_METHODS.PUT,
+            transaction
+          ),
+        };
+      }
+      return null;
+    }
+  );
+};
+
+/**
+ * Returns a list of transactions to update to a user specified.
+ * This mainly handles expiring transactions (with valid_thru property).
+ *
+ * @param {String} address - Address of the user.
+ * @param {Array&lt;String>} transactions - Array of known transactions that must be updated (used to limit blockchain queries to the minimum).
+ * @param {Response} res- Express.js response object, used to access locals.
+ * @return {Promise&lt;Array&lt;Asset>>} Promise containing a list of assets to post to the blockchain.
+ */
+const updateInvalidUserTransactions = (address, transactions, res) => {
+  return findByAddress(TYPE.USER, address, false, false, res).then((user) => {
+    const promises = [];
+    const arrayOfTransactions = [];
+    let requiresUpdate = false;
+    if (user) {
+      (Array.isArray(transactions) &amp;&amp; transactions.length > 0
+        ? (user.latest_transactions || []).filter(
+            (x) => transactions.indexOf(x) > -1
+          )
+        : user.latest_transactions || []
+      ).forEach((transaction) => {
+        promises.push(
+          updateInvalidTransaction(transaction, res).then((response) => {
+            if (response) {
+              const { transactionObj, assetObj } = response;
+              requiresUpdate = true;
+              user.removeInvalidTransaction(transactionObj);
+              arrayOfTransactions.push(assetObj);
+            }
+          })
+        );
+      });
+      (Array.isArray(transactions) &amp;&amp; transactions.length > 0
+        ? (user.pending_transactions || []).filter(
+            (x) => transactions.indexOf(x) > -1
+          )
+        : user.pending_transactions || []
+      ).forEach((transaction) => {
+        promises.push(
+          updateInvalidTransaction(transaction, res).then((response) => {
+            if (response) {
+              const { assetObj } = response;
+              requiresUpdate = true;
+              user.removePendingTransaction(transaction);
+              arrayOfTransactions.push(assetObj);
+            }
+          })
+        );
+      });
+    }
+    return Promise.all(promises).then(() => {
+      if (requiresUpdate) {
+        arrayOfTransactions.push(
+          buildAssetTransaction(TYPE.USER, HTTP_METHODS.PUT, user)
+        );
+      }
+      return arrayOfTransactions;
+    });
+  });
+};
+
+/**
+ * Updates the (now) invalid transactions in the Blockchain.
+ * This mainly handles expiring transactions (with valid_thru property).
+ * NOTE: users &amp; transactions parameters **should** be passed. If not, the function will search for invalid transaction in all the transactions of all the users.
+ * This call increment the processing time exponentially, and (if enough users &amp; transactions exists), may break the REST API. (Devmode Algorithm at least).
+ *
+ * @param {String} source - String description of the initializer of the request, used for logging.
+ * @param  {Array&lt;String>} [users] - Array of known users to hold (now) invalid transactions.
+ * @param {Array&lt;String>} [transactions] - Array of known transactions that must be updated (used to limit blockchain queries to the minimum).
+ * @param {Response} res- Express.js response object, used to access locals.
+ * @return {Promise&lt;Error | {responseCode, msg, payload}>} Promise containing the response of the Sawtooth REST API call.
+ */
+const updateInvalidUsersTransactions = (
+  source,
+  users = null,
+  transactions = null,
+  res
+) => {
+  const promises = [];
+  const promiseOfUsers = [];
+  if (Array.isArray(users) &amp;&amp; users.length > 0) {
+    users.forEach((user) => {
+      promiseOfUsers.push(findByAddress(TYPE.USER, user, false, false, res));
+    });
+  } else {
+    logFormatted(
+      "Warning: Enforcer called without users query parameter, increasing load significantly",
+      SEVERITY.WARN
+    );
+    promiseOfUsers.push(
+      findAllAssets(TYPE.USER, source, undefined, false, false, res)
+    );
+  }
+  return Promise.all(promiseOfUsers).then((users) => {
+    const userList = [].concat.apply([], users);
+    userList.forEach((user) => {
+      if (user.address)
+        promises.push(
+          updateInvalidUserTransactions(user.address, transactions, res)
+        );
+    });
+    return Promise.all(promises).then((arrayOfMultipleTransactions) => {
+      const flattenedArray = [].concat.apply([], arrayOfMultipleTransactions);
+      if (flattenedArray.length > 0) {
+        return putBatch(HTTP_METHODS.PUT, source, flattenedArray);
+      }
+      return;
+    });
+  });
+};
+
+/**
+ * Verifies and updates invalid user transactions.
+ *
+ * @param {Request} req - Express request object.
+ * @param {Response} res - Response object to handle Express request.
+ * @param {Function} next - Express.js next callback.
+ * @param {String} [req.query.users] - Comma separated list of addresses of users to validate.
+ * @param {String} [req.query.transactions] - Comma separated list of addresses of transactions to update.
+ * @post Updates req.query.transactions invalid transactions of the users defined in req.query.users.
+ */
+const enforceValidTransactionsMiddleware = (req, res, next) => {
+  let users;
+  let transactions;
+  if (req.query.users) {
+    users = req.query.users.split(",");
+  }
+  if (req.query.transactions) {
+    transactions = req.query.transactions.split(",");
+  }
+  return updateInvalidUsersTransactions("[ENFORCER]", users, transactions, res)
+    .then(() => next())
+    .catch((err) => {
+      logFormatted(`Enforcer failed with error`, SEVERITY.ERROR, err);
+      next();
+    });
+};
+
+module.exports.updateInvalidTransaction = updateInvalidTransaction;
+module.exports.updateInvalidUserTransactions = updateInvalidUserTransactions;
+module.exports.updateInvalidUsersTransactions = updateInvalidUsersTransactions;
+module.exports.enforceValidTransactionsMiddleware = enforceValidTransactionsMiddleware;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+            </div>
+            
+            <footer class="footer">
+                <div class="content has-text-centered">
+                    <p>Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a></p>
+                    <p class="sidebar-created-by">
+                        <a href="https://github.com/SoftwareBrothers/better-docs" target="_blank">BetterDocs theme</a> provided with <i class="fas fa-heart"></i> by 
+                        <a href="http://softwarebrothers.co" target="_blank">SoftwareBrothers - JavaScript Development Agency</a>
+                    </p>
+                </div>
+            </footer>
+            
+        </div>
+        <div id="side-nav" class="side-nav">
+        </div>
+    </div>
+<script src="scripts/app.min.js"></script>
+<script>PR.prettyPrint();</script>
+<script src="scripts/linenumber.js"> </script>
+
+</body>
+</html>

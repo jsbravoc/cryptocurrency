@@ -1,5 +1,6 @@
-/* eslint-disable no-param-reassign */
-/* eslint-disable no-await-in-loop */
+/** Cryptocurrency controller functionality
+ * @module controllers/cryptocurrency
+ */
 
 const { SEVERITY, logFormatted } = require("../utils/logger");
 const Transaction = require("../models/Transaction");
@@ -29,8 +30,8 @@ const {
  * @param {String} address - Address of the transaction.
  * @param {Boolean} [removeSignature] - Boolean that indicates if the signature should be removed.
  * @param {Boolean} [removeType] - Boolean that indicates if the type should be removed.
- * @param {Object} [res] - Express.js response object, used to access locals.
- * @return {Promise} Promise containing the transaction object or null if not found.
+ * @param {Response} [res] - Express.js response object, used to access locals.
+ * @return {Promise<Transaction|null>} Promise containing the transaction object or null if not found.
  */
 const findTransaction = (
   address,
@@ -43,7 +44,7 @@ const findTransaction = (
  * Updates a transaction in the blockchain.
  *
  * @param {Transaction} transaction - The transaction to update.
- * @return {Promise} Promise of the sawtooth REST API request response.
+ * @return {Promise<{ responseCode, msg, payload }| Error >} Promise of the sawtooth REST API request response.
  */
 // eslint-disable-next-line no-unused-vars
 const _updateTransaction = (transaction) =>
@@ -58,8 +59,8 @@ const _updateTransaction = (transaction) =>
  * Fetches all the supporting transactions required for a transaction.
  *
  * @param {Transaction} transaction - The transaction which requires supporting transactions.
- * @param {Object} [res] - Express.js response object, used to access locals.
- * @return {Promise} Promise of object containing {existingSender, existingRecipient, pendingAmount, usedTransactions}
+ * @param {Response} [res] - Express.js response object, used to access locals.
+ * @return {Promise<{existingSender, existingRecipient, pendingAmount, usedTransactions}>} Promise of object containing {existingSender, existingRecipient, pendingAmount, usedTransactions}
  */
 const getSupportingTransactions = (transaction, res = null) => {
   const { amount, recipient, sender } = transaction;
@@ -118,7 +119,8 @@ const getSupportingTransactions = (transaction, res = null) => {
  * Expands the supporting transactions of a transaction.
  *
  * @param {Transaction} transaction - The transaction which will be expanded.
- * @param {Object} [dictionaryOfTransactions] - Key-value dictionary of transactions (address: transaction).
+ * @param {Object<String, Transaction>} [dictionaryOfTransactions] - Key-value dictionary of transactions (address: transaction).
+ * @param {Response} [res] - Express.js response object, used to access locals.
  * @post transaction parameter will have its supporting transactions expanded.
  */
 const expandSupportingTransactions = async (

@@ -24,7 +24,11 @@
         "**/.DS_Store": true,
         "**/node_modules": true,
         "**/public": true,
-        "**/build": false,
+        "**/build": true,
+        "**/resources/docs": true,
+        "**/coverage": true,
+        "**/.nyc_output": true,
+        "**/blockchain_network": true,
         "**/.husky": false,
         "**/ledger_sync": true
     },

@@ -66,7 +66,7 @@
             
             <nav>
                 
-                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Modules</h3><ul><li><a href="module-MongoUtils.html">MongoUtils</a></li></ul><h3>Classes</h3><ul><li><a href="Asset.html">Asset</a></li><li><a href="BaseModel.html">BaseModel</a></li><li><a href="Transaction.html">Transaction</a></li><li><a href="User.html">User</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_putAsset">_putAsset</a></li><li><a href="global.html#_updateTransaction">_updateTransaction</a></li><li><a href="global.html#_updateUser">_updateUser</a></li><li><a href="global.html#buildAssetTransaction">buildAssetTransaction</a></li><li><a href="global.html#buildBatch">buildBatch</a></li><li><a href="global.html#createTransaction">createTransaction</a></li><li><a href="global.html#expandSupportingTransactions">expandSupportingTransactions</a></li><li><a href="global.html#findAllAssets">findAllAssets</a></li><li><a href="global.html#findByAddress">findByAddress</a></li><li><a href="global.html#findTransaction">findTransaction</a></li><li><a href="global.html#findUser">findUser</a></li><li><a href="global.html#getAddress">getAddress</a></li><li><a href="global.html#getSupportingTransactions">getSupportingTransactions</a></li><li><a href="global.html#getTransactionAddress">getTransactionAddress</a></li><li><a href="global.html#getTransactionByAddress">getTransactionByAddress</a></li><li><a href="global.html#getTransactions">getTransactions</a></li><li><a href="global.html#getUserAddress">getUserAddress</a></li><li><a href="global.html#getUserByAddress">getUserByAddress</a></li><li><a href="global.html#getUsers">getUsers</a></li><li><a href="global.html#hash512">hash512</a></li><li><a href="global.html#http">http</a></li><li><a href="global.html#inputValidation">inputValidation</a></li><li><a href="global.html#normalizePort">normalizePort</a></li><li><a href="global.html#onError">onError</a></li><li><a href="global.html#port">port</a></li><li><a href="global.html#putAsset">putAsset</a></li><li><a href="global.html#putBatch">putBatch</a></li><li><a href="global.html#server">server</a></li><li><a href="global.html#updateTransaction">updateTransaction</a></li><li><a href="global.html#validate">validate</a></li><li><a href="global.html#validateAssetExistence">validateAssetExistence</a></li><li><a href="global.html#validateExistingTransaction">validateExistingTransaction</a></li><li><a href="global.html#validatePendingTransaction">validatePendingTransaction</a></li><li><a href="global.html#validateTransactionAddress">validateTransactionAddress</a></li><li><a href="global.html#validateTransactionUpdateRequest">validateTransactionUpdateRequest</a></li><li><a href="global.html#validateUserCreation">validateUserCreation</a></li></ul></div>
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Modules</h3><ul><li><a href="module-controllers_common.html">controllers/common</a></li><li><a href="module-controllers_cryptocurrency.html">controllers/cryptocurrency</a></li><li><a href="module-controllers_users.html">controllers/users</a></li><li><a href="module-enforcer_cryptocurrency.html">enforcer/cryptocurrency</a></li><li><a href="module-routers_cryptocurrency.html">routers/cryptocurrency</a></li><li><a href="module-routers_enforcer.html">routers/enforcer</a></li><li><a href="module-routers_users.html">routers/users</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-routers_cryptocurrency-cryptoRouter.html">cryptoRouter</a></li><li><a href="module-routers_enforcer-enforcerRouter.html">enforcerRouter</a></li><li><a href="module-routers_users-usersRouter.html">usersRouter</a></li></ul><h3>Classes</h3><ul><li><a href="Asset.html">Asset</a></li><li><a href="BaseModel.html">BaseModel</a></li><li><a href="Permissions.html">Permissions</a></li><li><a href="Transaction.html">Transaction</a></li><li><a href="User.html">User</a></li></ul><h3>Global</h3><ul><li><a href="global.html#http">http</a></li><li><a href="global.html#HTTP_METHODS">HTTP_METHODS</a></li><li><a href="global.html#inputValidation">inputValidation</a></li><li><a href="global.html#normalizePort">normalizePort</a></li><li><a href="global.html#onError">onError</a></li><li><a href="global.html#port">port</a></li><li><a href="global.html#server">server</a></li><li><a href="global.html#TYPE">TYPE</a></li><li><a href="global.html#USER_TYPE">USER_TYPE</a></li><li><a href="global.html#validate">validate</a></li><li><a href="global.html#validateAssetExistence">validateAssetExistence</a></li><li><a href="global.html#validateExistingTransaction">validateExistingTransaction</a></li><li><a href="global.html#validatePendingTransaction">validatePendingTransaction</a></li><li><a href="global.html#validateTransactionAddress">validateTransactionAddress</a></li><li><a href="global.html#validateTransactionUpdateRequest">validateTransactionUpdateRequest</a></li><li><a href="global.html#validateUserCreation">validateUserCreation</a></li></ul></div>
                 
             </nav>
         </div>
@@ -99,6 +99,134 @@
 
 
 
+    <section>
+        <article><h1>Cryptocurrency</h1>
+<div align="center">
+<p><img src="https://img.shields.io/github/stars/jsbravoc/cryptocurrency" alt="GitHub Repo stars">
+<a href="https://github.com/jsbravoc/cryptocurrency/releases/"><img src="https://img.shields.io/circleci/build/github/jsbravoc/cryptocurrency?token=7ee902fdd4d28a5e30e21266f2101d7f11a0e0bb" alt="Build status"></a>
+<a href="https://codecov.io/gh/jsbravoc/cryptocurrency"><img src="https://codecov.io/gh/jsbravoc/cryptocurrency/branch/main/graph/badge.svg?token=V0OVR0D64N" alt="Coverage"></a>
+<img src="https://img.shields.io/github/license/jsbravoc/cryptocurrency" alt="License">
+<img src="https://img.shields.io/docker/v/jsbravoc/crypto-api/latest" alt="Docker build"></p>
+</div>
+<p><strong><a href="https://www.hyperledger.org/use/sawtooth">Hyperledger Sawtooth</a> blockchain application to handle a private cryptocurrency, featuring:</strong></p>
+<ul>
+<li>Transaction input validation to keep the cryptocurrency flow coherent (All non-coinbase transactions must be supported by another transaction).</li>
+<li>Pending transactions, such as a money transfer request from one user to another.</li>
+<li>User roles and permissions to use the cryptocurrency. For instance, <strong>coinbase</strong> permission to allow the creation of a coinbase (no input) transaction.</li>
+<li>Transaction tracking. Any transaction with corresponding input can be tracked down till the coinbase transaction. (Used to understand the flow and provenance of the cryptocurrency, thus avoiding its misuse).</li>
+<li>Transaction security. The API verifies the transaction &amp; users' signatures in order to verify integrity and non-repudiation.</li>
+</ul>
+<h2>Components</h2>
+<p>This projects contains the following components, required to launch the application.</p>
+<ul>
+<li>
+<p><a href="https://github.com/jsbravoc/cryptocurrency/tree/main/build/app/backend">crypto-api</a> - Express.js application which provides HTTP(S) JSON API to manage the cryptocurrency.</p>
+</li>
+<li>
+<p><a href="https://github.com/jsbravoc/cryptocurrency/tree/main/build/app/transaction_processor">crypto-tp</a> - Node.js application that handles the logic of the transactions between <a href="https://github.com/jsbravoc/cryptocurrency/tree/main/build/app/backend">crypto-api</a> and Hyperledger Sawtooth's REST API.</p>
+</li>
+</ul>
+<h2>Requirements</h2>
+<p>This project requires <a href="https://www.git-scm.com">git</a>, <a href="https://www.docker.com/why-docker">Docker</a>, <a href="https://www.npmjs.com/get-npm">npm</a>, and <a href="https://nodejs.org/en/">Node.js</a> &lt;=10.23.3*.</p>
+<p>* <code>backend</code> project uses <code>sawtooth-sdk^1.0.5</code>, which internally uses <code>zeromq^4.2.1</code>. Unfortunately, <code>zeromq^4.2.1</code> breaks on Node.js 11+.</p>
+<h2>Installation &amp; Usage</h2>
+<p>This application uses <a href="https://www.docker.com/why-docker">Docker</a>, used to simplify the installation and deployment of the whole application. Although the application can be started by using Node.js (i.e <code>node index.js</code>), Sawtooth's components (the validator, the REST API, etc) are started using Docker directly.</p>
+<h3>Alternative 1: Using Docker directly</h3>
+<p>In order to start the project using Docker, you will need to download the <a href="https://raw.githubusercontent.com/jsbravoc/cryptocurrency/main/docker-compose.yaml">docker-compose.yaml</a> file available at the root of the repository. You can also clone the repository and access the document.</p>
+<pre class="prettyprint source lang-sh"><code>git clone https://github.com/jsbravoc/cryptocurrency.git
+cd cryptocurrency
+</code></pre>
+<h4>1) Starting the application</h4>
+<p>To start the whole application, you need to start the containers and dependencies of the docker-compose.yaml file, by executing:</p>
+<pre class="prettyprint source lang-sh"><code>docker-compose up #Use -d flag to start it detached
+</code></pre>
+<p>Then, the application will be started at the port mapped in the docker-compose.yaml file, by default <code>http://localhost:3000</code>.</p>
+<h4>2) Stopping the application</h4>
+<p>To pause the execution of the application, you need to execute the following command:</p>
+<pre class="prettyprint source lang-sh"><code>cd blockchain_network/docker-compose-dev/sawtooth
+docker-compose pause
+</code></pre>
+<p>Please note that if you paused the application on Docker, the correct way to start it up again is:</p>
+<pre class="prettyprint source lang-sh"><code>cd blockchain_network/docker-compose-dev/sawtooth
+docker-compose unpause
+</code></pre>
+<p>Moreover, if you want to stop the project <strong>and delete all of its contents</strong>, you can execute:</p>
+<pre class="prettyprint source lang-sh"><code>docker-compose down
+</code></pre>
+<h3>Alternative 2: Cloning the project</h3>
+<h4>1) Downloading the project</h4>
+<p>In order to download the project and start it locally, you need to clone this repository and go to the root directory of the project:</p>
+<pre class="prettyprint source lang-sh"><code>git clone https://github.com/jsbravoc/cryptocurrency.git
+cd cryptocurrency
+</code></pre>
+<h4>2) Starting up the application</h4>
+<p>Once Docker is installed and you've cloned this repo, navigate to the root directory of the project and run:</p>
+<pre class="prettyprint source lang-sh"><code>cd blockchain_network/docker-compose-dev/sawtooth
+docker-compose up
+</code></pre>
+<p>Then, you need to install <code>transaction_processor</code> node dependencies and start it:</p>
+<pre class="prettyprint source lang-sh"><code>cd build/app/transaction_processor
+npm install
+npm start # or pm2 --name crypto-tp start npm -- start if using PM2
+</code></pre>
+<p>Finally, you need to install <code>backend</code> node dependencies and start it:</p>
+<pre class="prettyprint source lang-sh"><code>cd build/app/backend
+npm install
+npm start # or pm2 --name crypto-api start npm -- start if using PM2
+</code></pre>
+<p>Optionally, if you want to see the API definitions, make sure to go to <code>localhost:3000/api-docs</code> or to the URL of where the application was started.</p>
+<h4>3) Stopping the application</h4>
+<p>In order to stop the application you need to send SIGINT to the running processes. Therefore, you should use <code>^C</code> (<code>Ctrl + C</code>) on the terminals running any component of the application. If you are using PM2, then run:</p>
+<pre class="prettyprint source lang-sh"><code>pm2 stop crypto-api
+pm2 stop crypto-tp
+</code></pre>
+<p>To pause the blockchain network on Docker, execute the following command:</p>
+<pre class="prettyprint source lang-sh"><code>cd blockchain_network/docker-compose-dev/sawtooth
+docker-compose pause
+</code></pre>
+<p>Please note that if you paused the blockchain network on Docker, the correct way to start it up again is:</p>
+<pre class="prettyprint source lang-sh"><code>cd blockchain_network/docker-compose-dev/sawtooth
+docker-compose unpause
+</code></pre>
+<p>Moreover, if you want to stop the blockchain network <strong>and delete all of its contents</strong>, you can execute:</p>
+<pre class="prettyprint source lang-sh"><code>cd blockchain_network/docker-compose-dev/sawtooth
+docker-compose down
+</code></pre>
+<h2>Development &amp; Testing</h2>
+<h3>Front-end integration:</h3>
+<p>This application has been tested successfully with a front-end project that uses <a href="https://metamask.io/">Metamask</a> in order to sign the transactions with the public/private key pair. However, if you want to use it without Metamask, be sure to read Metamask's signature implementation (namely Ethereum's <code>eth_sign</code> function) (See <a href="https://github.com/jsbravoc/cryptocurrency/blob/main/src/app/backend/test/cryptocurrency.js#L62">getSignature function</a> in test/cryptocurrency) and sign the transactions in the same manner.</p>
+<p>Recommended readings:</p>
+<ul>
+<li><a href="https://docs.metamask.io/guide/signing-data.html#a-brief-history">Metamask docs</a></li>
+<li><a href="https://github.com/danfinlay/js-eth-personal-sign-examples">Metamask example usage</a></li>
+<li><a href="https://eth.wiki/json-rpc/API">Ethereum eth_sign explanation</a></li>
+<li><a href="https://hackernoon.com/a-closer-look-at-ethereum-signatures-5784c14abecc">A closer look at ethereum signatures, by @dominiek</a></li>
+</ul>
+<h3>Development:</h3>
+<p>In order to understand the functions used inside the <code>backend</code> component, please access to <code>localhost:3000/docs</code> or to the URL of where the application was started. There you will find the JS documentation of all the code.</p>
+<h3>Testing:</h3>
+<p><strong>Recommendation:</strong> Avoid integrity errors by editing .env file, setting <code>DISABLE_INTEGRITY_VALIDATION=true</code>. By doing this, the transaction's signature will not be validated. Note that if the variable is set to <code>false</code>, transactions' signatures <strong>must</strong> be verifiable with the corresponding user's public_key.</p>
+<p>In order to test and use the API, please check the <a href="https://www.postman.com/">Postman</a> collection available <a href="https://github.com/jsbravoc/cryptocurrency/tree/main/build/app/backend">here</a>.</p>
+<p>Also, if you want to test the application directly, please go to <code>localhost:3000/api-docs</code> or to the URL of where the application was started. There, you will find a <a href="https://swagger.io/tools/swagger-ui/">Swagger UI</a> application to test the API and see the API definitions.</p>
+<h3>Contributing:</h3>
+<p>In order to develop and contribute to this repository, make sure to run the tests of the API before creating a pull request:</p>
+<h4>1) Start the blockchain network:</h4>
+<pre class="prettyprint source lang-sh"><code>cd blockchain_network/docker-compose-dev/sawtooth
+docker-compose up #Use -d flag to start it detached
+</code></pre>
+<h4>2) Start the transaction processor:</h4>
+<pre class="prettyprint source lang-sh"><code>cd src/app/transaction_processor
+npm start # or pm2 --name crypto-tp start npm -- start if using PM2
+</code></pre>
+<h4>3) Run the tests:</h4>
+<pre class="prettyprint source lang-sh"><code>cd src/app/backend
+npm test
+</code></pre>
+<h2>Contributors</h2>
+<p><a href="https://github.com/jsbravoc">Juan Sebastián Bravo</a></p>
+<h2>License</h2></article>
+    </section>
+
 
 
 
@@ -108,7 +236,7 @@
             
             <footer class="footer">
                 <div class="content has-text-centered">
-                    <p>Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.6</a></p>
+                    <p>Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a></p>
                     <p class="sidebar-created-by">
                         <a href="https://github.com/SoftwareBrothers/better-docs" target="_blank">BetterDocs theme</a> provided with <i class="fas fa-heart"></i> by 
                         <a href="http://softwarebrothers.co" target="_blank">SoftwareBrothers - JavaScript Development Agency</a>

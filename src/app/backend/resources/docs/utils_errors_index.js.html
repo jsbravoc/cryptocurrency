@@ -1,0 +1,418 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title> utils/errors/index.js</title>
+
+  <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="./build/entry.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,400,700|Inconsolata,700" rel="stylesheet">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+  <link type="text/css" rel="stylesheet" href="https://jmblog.github.io/color-themes-for-google-code-prettify/themes/tomorrow-night.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/app.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/iframe.css">
+  <link type="text/css" rel="stylesheet" href="">
+  <script async defer src="https://buttons.github.io/buttons.js"></script>
+
+  
+</head>
+
+
+
+<body class="layout small-header">
+    <div id="stickyNavbarOverlay"></div>
+    
+
+<div class="top-nav">
+    <div class="inner">
+        <a id="hamburger" role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+        </a>
+        <div class="logo">
+            
+            
+        </div>
+        <div class="menu">
+            
+            <div class="navigation">
+                <a
+                    href="index.html"
+                    class="link"
+                >
+                    API Documentation
+                </a>
+                
+                
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <div id="main">
+        <div
+            class="sidebar "
+            id="sidebarNav"
+        >
+            
+            <nav>
+                
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Modules</h3><ul><li><a href="module-controllers_common.html">controllers/common</a></li><li><a href="module-controllers_cryptocurrency.html">controllers/cryptocurrency</a></li><li><a href="module-controllers_users.html">controllers/users</a></li><li><a href="module-enforcer_cryptocurrency.html">enforcer/cryptocurrency</a></li><li><a href="module-routers_cryptocurrency.html">routers/cryptocurrency</a></li><li><a href="module-routers_enforcer.html">routers/enforcer</a></li><li><a href="module-routers_users.html">routers/users</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-routers_cryptocurrency-cryptoRouter.html">cryptoRouter</a></li><li><a href="module-routers_enforcer-enforcerRouter.html">enforcerRouter</a></li><li><a href="module-routers_users-usersRouter.html">usersRouter</a></li></ul><h3>Classes</h3><ul><li><a href="Asset.html">Asset</a></li><li><a href="BaseModel.html">BaseModel</a></li><li><a href="Permissions.html">Permissions</a></li><li><a href="Transaction.html">Transaction</a></li><li><a href="User.html">User</a></li></ul><h3>Global</h3><ul><li><a href="global.html#http">http</a></li><li><a href="global.html#HTTP_METHODS">HTTP_METHODS</a></li><li><a href="global.html#inputValidation">inputValidation</a></li><li><a href="global.html#normalizePort">normalizePort</a></li><li><a href="global.html#onError">onError</a></li><li><a href="global.html#port">port</a></li><li><a href="global.html#server">server</a></li><li><a href="global.html#TYPE">TYPE</a></li><li><a href="global.html#USER_TYPE">USER_TYPE</a></li><li><a href="global.html#validate">validate</a></li><li><a href="global.html#validateAssetExistence">validateAssetExistence</a></li><li><a href="global.html#validateExistingTransaction">validateExistingTransaction</a></li><li><a href="global.html#validatePendingTransaction">validatePendingTransaction</a></li><li><a href="global.html#validateTransactionAddress">validateTransactionAddress</a></li><li><a href="global.html#validateTransactionUpdateRequest">validateTransactionUpdateRequest</a></li><li><a href="global.html#validateUserCreation">validateUserCreation</a></li></ul></div>
+                
+            </nav>
+        </div>
+        <div class="core" id="main-content-wrapper">
+            <div class="content">
+                <header class="page-title">
+                    <p>Source</p>
+                    <h1>utils/errors/index.js</h1>
+                </header>
+                
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @typedef {Object} app_errors
+ * @property {Object} ERRORS An object representing all the posible errors that the application can create.
+ * @global
+ */
+
+const errors = {
+  ERRORS: {
+    USER: {
+      INPUT: {
+        NO_INPUT: {
+          errorCode: "100",
+          error: (req, { property }) =>
+            req.t("ERRORS.USER.INPUT.NO_INPUT.error", { property }),
+          msg: (req, { property }) =>
+            req.t("ERRORS.USER.INPUT.NO_INPUT.msg", { property }),
+        },
+        MISSING_REQUIRED_INPUT: {
+          errorCode: "100a",
+          error: (req, { parameter }) =>
+            req.t("ERRORS.USER.INPUT.MISSING_REQUIRED_INPUT.error", {
+              parameter,
+            }),
+          msg: (req, { parameter }) =>
+            req.t("ERRORS.USER.INPUT.MISSING_REQUIRED_INPUT.msg", {
+              parameter,
+            }),
+        },
+        INCORRECT_INPUT: {
+          errorCode: "100b",
+          error: (req, { parameter }) =>
+            req.t("ERRORS.USER.INPUT.INCORRECT_INPUT.error", {
+              parameter,
+            }),
+          msg: (req, { parameter }) =>
+            req.t("ERRORS.USER.INPUT.INCORRECT_INPUT.msg", {
+              parameter,
+            }),
+        },
+        INCORRECT_INPUT_TYPE: {
+          errorCode: "110",
+          error: (req, { expectedType, receivedType, propertyName }) =>
+            req.t("ERRORS.USER.INPUT.INCORRECT_INPUT_TYPE.error", {
+              expectedType,
+              receivedType,
+              propertyName,
+            }),
+          msg: (req, { expectedType, receivedType, propertyName }) =>
+            req.t("ERRORS.USER.INPUT.INCORRECT_INPUT_TYPE.msg", {
+              expectedType,
+              receivedType,
+              propertyName,
+            }),
+        },
+        USER_EXISTS: {
+          errorCode: "111a",
+          error: (req, { address }) =>
+            req.t("ERRORS.USER.INPUT.USER_EXISTS.error", { address }),
+          msg: (req, { address }) =>
+            req.t("ERRORS.USER.INPUT.USER_EXISTS.msg", { address }),
+        },
+        USER_DOES_NOT_EXIST: {
+          errorCode: "111b",
+          error: (req, { address }) =>
+            req.t("ERRORS.USER.INPUT.USER_DOES_NOT_EXIST.error", { address }),
+          msg: (req, { address }) =>
+            req.t("ERRORS.USER.INPUT.USER_DOES_NOT_EXIST.msg", { address }),
+        },
+
+        NO_TRANSACTIONS: {
+          errorCode: "112",
+          error: (req, { address }) =>
+            req.t("ERRORS.USER.INPUT.NO_TRANSACTIONS.error", { address }),
+          msg: (req, { address }) =>
+            req.t("ERRORS.USER.INPUT.NO_TRANSACTIONS.msg", { address }),
+        },
+        INSUFFICIENT_FUNDS: {
+          errorCode: "113a",
+          error: (req, { address }) =>
+            req.t("ERRORS.USER.INPUT.INSUFFICIENT_FUNDS.error", { address }),
+          msg: (req, { address }) =>
+            req.t("ERRORS.USER.INPUT.INSUFFICIENT_FUNDS.msg", { address }),
+        },
+        INSUFFICIENT_FUNDS_PENDING_TRANSACTIONS: {
+          errorCode: "113b",
+          error: (req, { address, amountPending, actualBalance }) =>
+            req.t(
+              "ERRORS.USER.INPUT.INSUFFICIENT_FUNDS_PENDING_TRANSACTIONS.error",
+              { address, amountPending, actualBalance }
+            ),
+          msg: (req, { address, amountPending, actualBalance }) =>
+            req.t(
+              "ERRORS.USER.INPUT.INSUFFICIENT_FUNDS_PENDING_TRANSACTIONS.msg",
+              { address, amountPending, actualBalance }
+            ),
+        },
+        INSUFFICIENT_FUNDS_UNEXPECTED_BALANCE: {
+          errorCode: "114",
+          error: (req, { address, actualBalance }) =>
+            req.t(
+              "ERRORS.USER.INPUT.INSUFFICIENT_FUNDS_UNEXPECTED_BALANCE.error",
+              { address, actualBalance }
+            ),
+          msg: (req, { address, actualBalance }) =>
+            req.t(
+              "ERRORS.USER.INPUT.INSUFFICIENT_FUNDS_UNEXPECTED_BALANCE.msg",
+              { address, actualBalance }
+            ),
+        },
+        UNDEFINED_RETURN_TO_REASON: {
+          errorCode: "115",
+          error: (req, { address, reason }) =>
+            req.t("ERRORS.USER.INPUT.UNDEFINED_RETURN_TO_REASON.error", {
+              address,
+              reason,
+            }),
+          msg: (req, { address, reason }) =>
+            req.t("ERRORS.USER.INPUT.UNDEFINED_RETURN_TO_REASON.msg", {
+              address,
+              reason,
+            }),
+        },
+      },
+      LOGIC: {
+        USER_IS_NOT_ACTIVE: {
+          errorCode: "121",
+          error: (req, { address }) =>
+            req.t("ERRORS.USER.LOGIC.USER_IS_NOT_ACTIVE.error", { address }),
+          msg: (req, { address }) =>
+            req.t("ERRORS.USER.LOGIC.USER_IS_NOT_ACTIVE.msg", { address }),
+        },
+        USER_DOES_NOT_HAVE_PERMISSIONS: {
+          errorCode: "121",
+          error: (req, { address }) =>
+            req.t("ERRORS.USER.LOGIC.USER_DOES_NOT_HAVE_PERMISSIONS.error", {
+              address,
+            }),
+          msg: (req, { address }) =>
+            req.t("ERRORS.USER.LOGIC.USER_DOES_NOT_HAVE_PERMISSIONS.msg", {
+              address,
+            }),
+        },
+        USER_DOES_NOT_HAVE_TRANSFER_PERMISSIONS: {
+          errorCode: "122",
+          error: (req, { address, recipient }) =>
+            req.t(
+              "ERRORS.USER.LOGIC.USER_DOES_NOT_HAVE_TRANSFER_PERMISSIONS.error",
+              {
+                address,
+                recipient,
+              }
+            ),
+          msg: (req, { address, recipient }) =>
+            req.t(
+              "ERRORS.USER.LOGIC.USER_DOES_NOT_HAVE_TRANSFER_PERMISSIONS.msg",
+              {
+                address,
+                recipient,
+              }
+            ),
+        },
+        NONEXISTENT_LASTEST_TRANSACTION: {
+          errorCode: "123",
+          error: (req, { address, transactionSignature }) =>
+            req.t("ERRORS.USER.LOGIC.NONEXISTENT_LASTEST_TRANSACTION.error", {
+              address,
+              transactionSignature,
+            }),
+          msg: (req, { address, transactionSignature }) =>
+            req.t("ERRORS.USER.LOGIC.NONEXISTENT_LASTEST_TRANSACTION.msg", {
+              address,
+              transactionSignature,
+            }),
+        },
+        NONEXISTENT_PENDING_TRANSACTION: {
+          errorCode: "124",
+          error: (req, { address, transactionSignature }) =>
+            req.t("ERRORS.USER.LOGIC.NONEXISTENT_PENDING_TRANSACTION.error", {
+              address,
+              transactionSignature,
+            }),
+          msg: (req, { address, transactionSignature }) =>
+            req.t("ERRORS.USER.LOGIC.NONEXISTENT_PENDING_TRANSACTION.msg", {
+              address,
+              transactionSignature,
+            }),
+        },
+        INCORRECT_RECIPIENT_LASTEST_TRANSACTION: {
+          errorCode: "125",
+          error: (req, { address, transactionSignature }) =>
+            req.t(
+              "ERRORS.USER.LOGIC.INCORRECT_RECIPIENT_LASTEST_TRANSACTION.error",
+              {
+                address,
+                transactionSignature,
+              }
+            ),
+          msg: (req, { address, transactionSignature }) =>
+            req.t(
+              "ERRORS.USER.LOGIC.INCORRECT_RECIPIENT_LASTEST_TRANSACTION.msg",
+              {
+                address,
+                transactionSignature,
+              }
+            ),
+        },
+        NO_RETURN_TO_ADDRESSES: {
+          errorCode: "126",
+          error: (req, { address }) =>
+            req.t("ERRORS.USER.LOGIC.NO_RETURN_TO_ADDRESSES.error", {
+              address,
+            }),
+          msg: (req, { address }) =>
+            req.t("ERRORS.USER.LOGIC.NO_RETURN_TO_ADDRESSES.msg", {
+              address,
+            }),
+        },
+      },
+    },
+    TRANSACTION: {
+      INPUT: {
+        NO_INPUT: {
+          errorCode: "200",
+          error: (req, { property }) =>
+            req.t("ERRORS.TRANSACTION.INPUT.NO_INPUT.error", { property }),
+          msg: (req, { property }) =>
+            req.t("ERRORS.TRANSACTION.INPUT.NO_INPUT.msg", { property }),
+        },
+        MISSING_REQUIRED_INPUT: {
+          errorCode: "200a",
+          error: (req, { parameter }) =>
+            req.t("ERRORS.TRANSACTION.INPUT.MISSING_REQUIRED_INPUT.error", {
+              parameter,
+            }),
+          msg: (req, { parameter }) =>
+            req.t("ERRORS.TRANSACTION.INPUT.MISSING_REQUIRED_INPUT.msg", {
+              parameter,
+            }),
+        },
+        INCORRECT_INPUT: {
+          errorCode: "200b",
+          error: (req, { parameter }) =>
+            req.t("ERRORS.TRANSACTION.INPUT.INCORRECT_INPUT.error", {
+              parameter,
+            }),
+          msg: (req, { parameter }) =>
+            req.t("ERRORS.TRANSACTION.INPUT.INCORRECT_INPUT.msg", {
+              parameter,
+            }),
+        },
+        TRANSACTION_EXISTS: {
+          errorCode: "211a",
+          error: (req, { signature }) =>
+            req.t("ERRORS.TRANSACTION.INPUT.TRANSACTION_EXISTS.error", {
+              signature,
+            }),
+          msg: (req, { signature }) =>
+            req.t("ERRORS.TRANSACTION.INPUT.TRANSACTION_EXISTS.msg", {
+              signature,
+            }),
+        },
+        TRANSACTION_DOES_NOT_EXIST: {
+          errorCode: "211b",
+          error: (req, { signature }) =>
+            req.t("ERRORS.TRANSACTION.INPUT.TRANSACTION_DOES_NOT_EXIST.error", {
+              signature,
+            }),
+          msg: (req, { signature }) =>
+            req.t("ERRORS.TRANSACTION.INPUT.TRANSACTION_DOES_NOT_EXIST.msg", {
+              signature,
+            }),
+        },
+        TRANSACTION_IS_NOT_PENDING: {
+          errorCode: "212",
+          error: (req, { signature }) =>
+            req.t("ERRORS.TRANSACTION.INPUT.TRANSACTION_IS_NOT_PENDING.error", {
+              signature,
+            }),
+          msg: (req, { signature }) =>
+            req.t("ERRORS.TRANSACTION.INPUT.TRANSACTION_IS_NOT_PENDING.msg", {
+              signature,
+            }),
+        },
+      },
+      LOGIC: {
+        NON_MATCHING_KEYS: {
+          errorCode: "220",
+          error: (req) =>
+            req.t("ERRORS.TRANSACTION.LOGIC.NON_MATCHING_KEYS.error"),
+          msg: (req) => req.t("ERRORS.TRANSACTION.LOGIC.NON_MATCHING_KEYS.msg"),
+        },
+        DECRYPTING_ERROR: {
+          errorCode: "221",
+          error: (req) =>
+            req.t("ERRORS.TRANSACTION.LOGIC.DECRYPTING_ERROR.error"),
+          msg: (req) => req.t("ERRORS.TRANSACTION.LOGIC.DECRYPTING_ERROR.msg"),
+        },
+      },
+    },
+  },
+};
+module.exports = Object.freeze({ ...errors });
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+            </div>
+            
+            <footer class="footer">
+                <div class="content has-text-centered">
+                    <p>Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a></p>
+                    <p class="sidebar-created-by">
+                        <a href="https://github.com/SoftwareBrothers/better-docs" target="_blank">BetterDocs theme</a> provided with <i class="fas fa-heart"></i> by 
+                        <a href="http://softwarebrothers.co" target="_blank">SoftwareBrothers - JavaScript Development Agency</a>
+                    </p>
+                </div>
+            </footer>
+            
+        </div>
+        <div id="side-nav" class="side-nav">
+        </div>
+    </div>
+<script src="scripts/app.min.js"></script>
+<script>PR.prettyPrint();</script>
+<script src="scripts/linenumber.js"> </script>
+
+</body>
+</html>

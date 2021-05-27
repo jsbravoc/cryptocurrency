@@ -1,4 +1,7 @@
-/* eslint-disable camelcase */
+/** Common controller functionality
+ * @module controllers/common
+ */
+
 const _ = require("lodash");
 const crypto = require("crypto");
 const { default: axios } = require("axios");
@@ -7,7 +10,6 @@ const {
   HTTP_METHODS,
   TYPE,
   TRANSACTION_FAMILY,
-  LOCAL_ADDRESS,
 } = require("../utils/constants");
 const { SEVERITY, logFormatted } = require("../utils/logger");
 
@@ -62,12 +64,12 @@ const getUserAddress = (userId) =>
 /**
  * Finds and returns an asset in the blockchain.
  *
- * @param {String} type - Type of asset, such as TRANSACTION or USER ( @see TYPE ).
+ * @param {TYPE} type - Type of asset, such as TRANSACTION or USER ({@link TYPE}).
  * @param {String} txid - Asset unique identification (before calculated address).
  * @param {Boolean} [removeSignature] - Boolean that indicates if the signature should be removed.
  * @param {Boolean} [removeType] - Boolean that indicates if the type should be removed.
- * @param {Object} [res] - Express.js response object, used to access locals.
- * @return {Promise} Promise of the asset if found or null if not found.
+ * @param {Response} [res] - Express.js response object, used to access locals.
+ * @return {Promise<Transaction|User|null>} Promise of the asset if found or null if not found.
  */
 const findByAddress = (
   type,
@@ -135,13 +137,13 @@ const findByAddress = (
 /**
  * Finds and returns all assets of a type.
  * @pre A request to an endpoint of an asset is made. The endpoint must be GET /{asset}
- * @param {String} type - Type of asset, such as TRANSACTION or USER ( @see TYPE ).
+ * @param {String} type - Type of asset, such as TRANSACTION or USER (@see {@link TYPE}).
  * @param {String} source - Endpoint source that invoked function (used for logging).
  * @param {Number} [limit] - Maximum number of assets to return.
  * @param {Boolean} [removeSignature] - Boolean that indicates if the signature should be removed.
  * @param {Boolean} [removeType] - Boolean that indicates if the type should be removed.
- * @param {Object} [res] - Express.js response object, used to access locals.
- * @returns {Promise} - Promise of the assets returned.
+ * @param {Response} [res] - Express.js response object, used to access locals.
+ * @returns {Promise<Array<Transaction|User>|Error>} - Promise of the assets returned.
  */
 const findAllAssets = (
   type,
@@ -237,11 +239,11 @@ const buildBatch = ({ inputs, outputs, payload }, ...args) => {
 /**
  * Puts an asset in the blockchain.
  *
- * @param {String} type - Type of asset, such as TRANSACTION or USER ( @see TYPE ).
- * @param {String} httpMethod - PUT or POST (defined in TYPE constants).
+ * @param {TYPE} type - Type of asset, such as TRANSACTION or USER (@see {@link TYPE}).
+ * @param {HTTP_METHODS} httpMethod - PUT or POST (defined in @see {@link HTTP_METHODS} constants).
  * @param {String} source - Endpoint source that invoked function (used for logging).
- * @param {BaseModel} object - Asset object.
- * @returns {Promise}  Promise of the batch post request. If successfully resolved, contains responseCode, msg, payload
+ * @param {User|Transaction} object - Asset object.
+ * @returns {Promise<{ responseCode, msg, payload }| Error >}  Promise of the batch post request. If successfully resolved, contains responseCode, msg, payload
  */
 const _putAsset = (type, httpMethod, source, object) => {
   let asset;
@@ -295,9 +297,9 @@ const _putAsset = (type, httpMethod, source, object) => {
 /**
  * Builds a transaction of an asset (User, Transaction, etc).
  *
- * @param {String} type - Type of asset, such as TRANSACTION or USER ( @see TYPE ).
- * @param {String} httpMethod - PUT or POST ( @see HTTP_METHODS ).
- * @param {BaseModel} object - Asset object ( @see Transaction , @see User )
+ * @param {String} type - Type of asset, such as TRANSACTION or USER (@see {@link TYPE}).
+ * @param {HTTP_METHODS} httpMethod - PUT or POST (@see {@link HTTP_METHODS}).
+ * @param {User|Transaction} object - Asset object, such as {@link User}, {@link Transaction}.
  * @returns {Asset} Asset (namely a transaction) of the Sawtooth REST API.
  */
 const buildAssetTransaction = (type, httpMethod, object) => {
@@ -333,10 +335,10 @@ const buildAssetTransaction = (type, httpMethod, object) => {
 /**
  * Puts a batch of assets into the blockchain.
  *
- * @param {String} httpMethod - PUT or POST ( @see HTTP_METHODS ).
+ * @param {HTTP_METHODS} httpMethod - PUT or POST (@see {@link HTTP_METHODS}).
  * @param {String} source - Endpoint source that invoked function (used for logging).
  * @param {Object} arrayOfAssets - Array of assets to be inserted into the blockchain.
- * @returns {Promise} Promise of the batch post request. If successfully resolved, contains responseCode, msg, payload
+ * @returns {Promise<{ responseCode, msg, payload }| Error >} Promise of the batch post request. If successfully resolved, contains responseCode, msg, payload
  */
 const putBatch = (httpMethod, source, arrayOfAssets) => {
   const batch = buildBatch(...arrayOfAssets);
@@ -369,13 +371,12 @@ const putBatch = (httpMethod, source, arrayOfAssets) => {
 /**
  * Puts an asset in the blockchain.
  *
- * @param {String} type - Type of asset, such as TRANSACTION or USER ( @see TYPE ).
- * @param {String} httpMethod - PUT or POST ( @see HTTP_METHODS ).
+ * @param {String} type - Type of asset, such as TRANSACTION or USER (@see {@link TYPE}).
+ * @param {HTTP_METHODS} httpMethod - PUT or POST (@see {@link HTTP_METHODS}).
  * @param {String} source - Endpoint source that invoked function (used for logging).
- * @param {Object} req - Http request object.
- * @param {Object} res - Response object to handle Express request.
- * @return {Promise} Promise of the Sawtooth REST API request response.
- * @throws {Error} If Sawtooth REST API rejects the request.
+ * @param {Request} req - Http request object.
+ * @param {Response} res - Response object to handle Express request.
+ * @return {Promise<{ responseCode, msg, payload }| Error >} Promise of the Sawtooth REST API request response.
  */
 const putAsset = (type, httpMethod, source, req, res) => {
   let asset;

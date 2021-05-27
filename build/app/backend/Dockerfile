@@ -5,9 +5,10 @@ FROM node:10 as build
 RUN npm install pm2 -g
 WORKDIR /backend
 COPY ./package*.json ./
-RUN npm install --loglevel verbose
+COPY ./ecosystem.config.js ./
+RUN npm install --production
 COPY . .
 
 EXPOSE 3000
 
-CMD [ "pm2-runtime", "bin/www.js" ]
+CMD [ "pm2-runtime", "start" ]

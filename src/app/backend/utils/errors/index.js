@@ -1,4 +1,10 @@
-module.exports = Object.freeze({
+/**
+ * @typedef {Object} app_errors
+ * @property {Object} ERRORS An object representing all the posible errors that the application can create.
+ * @global
+ */
+
+const errors = {
   ERRORS: {
     USER: {
       INPUT: {
@@ -292,4 +298,5 @@ module.exports = Object.freeze({
       },
     },
   },
-});
+};
+module.exports = Object.freeze({ ...errors });

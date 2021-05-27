@@ -66,7 +66,7 @@
             
             <nav>
                 
-                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Modules</h3><ul><li><a href="module-MongoUtils.html">MongoUtils</a></li></ul><h3>Classes</h3><ul><li><a href="Asset.html">Asset</a></li><li><a href="BaseModel.html">BaseModel</a></li><li><a href="Transaction.html">Transaction</a></li><li><a href="User.html">User</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_putAsset">_putAsset</a></li><li><a href="global.html#_updateTransaction">_updateTransaction</a></li><li><a href="global.html#_updateUser">_updateUser</a></li><li><a href="global.html#buildAssetTransaction">buildAssetTransaction</a></li><li><a href="global.html#buildBatch">buildBatch</a></li><li><a href="global.html#createTransaction">createTransaction</a></li><li><a href="global.html#expandSupportingTransactions">expandSupportingTransactions</a></li><li><a href="global.html#findAllAssets">findAllAssets</a></li><li><a href="global.html#findByAddress">findByAddress</a></li><li><a href="global.html#findTransaction">findTransaction</a></li><li><a href="global.html#findUser">findUser</a></li><li><a href="global.html#getAddress">getAddress</a></li><li><a href="global.html#getSupportingTransactions">getSupportingTransactions</a></li><li><a href="global.html#getTransactionAddress">getTransactionAddress</a></li><li><a href="global.html#getTransactionByAddress">getTransactionByAddress</a></li><li><a href="global.html#getTransactions">getTransactions</a></li><li><a href="global.html#getUserAddress">getUserAddress</a></li><li><a href="global.html#getUserByAddress">getUserByAddress</a></li><li><a href="global.html#getUsers">getUsers</a></li><li><a href="global.html#hash512">hash512</a></li><li><a href="global.html#http">http</a></li><li><a href="global.html#inputValidation">inputValidation</a></li><li><a href="global.html#normalizePort">normalizePort</a></li><li><a href="global.html#onError">onError</a></li><li><a href="global.html#port">port</a></li><li><a href="global.html#putAsset">putAsset</a></li><li><a href="global.html#putBatch">putBatch</a></li><li><a href="global.html#server">server</a></li><li><a href="global.html#updateTransaction">updateTransaction</a></li><li><a href="global.html#validate">validate</a></li><li><a href="global.html#validateAssetExistence">validateAssetExistence</a></li><li><a href="global.html#validateExistingTransaction">validateExistingTransaction</a></li><li><a href="global.html#validatePendingTransaction">validatePendingTransaction</a></li><li><a href="global.html#validateTransactionAddress">validateTransactionAddress</a></li><li><a href="global.html#validateTransactionUpdateRequest">validateTransactionUpdateRequest</a></li><li><a href="global.html#validateUserCreation">validateUserCreation</a></li></ul></div>
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Modules</h3><ul><li><a href="module-controllers_common.html">controllers/common</a></li><li><a href="module-controllers_cryptocurrency.html">controllers/cryptocurrency</a></li><li><a href="module-controllers_users.html">controllers/users</a></li><li><a href="module-enforcer_cryptocurrency.html">enforcer/cryptocurrency</a></li><li><a href="module-routers_cryptocurrency.html">routers/cryptocurrency</a></li><li><a href="module-routers_enforcer.html">routers/enforcer</a></li><li><a href="module-routers_users.html">routers/users</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-routers_cryptocurrency-cryptoRouter.html">cryptoRouter</a></li><li><a href="module-routers_enforcer-enforcerRouter.html">enforcerRouter</a></li><li><a href="module-routers_users-usersRouter.html">usersRouter</a></li></ul><h3>Classes</h3><ul><li><a href="Asset.html">Asset</a></li><li><a href="BaseModel.html">BaseModel</a></li><li><a href="Permissions.html">Permissions</a></li><li><a href="Transaction.html">Transaction</a></li><li><a href="User.html">User</a></li></ul><h3>Global</h3><ul><li><a href="global.html#http">http</a></li><li><a href="global.html#HTTP_METHODS">HTTP_METHODS</a></li><li><a href="global.html#inputValidation">inputValidation</a></li><li><a href="global.html#normalizePort">normalizePort</a></li><li><a href="global.html#onError">onError</a></li><li><a href="global.html#port">port</a></li><li><a href="global.html#server">server</a></li><li><a href="global.html#TYPE">TYPE</a></li><li><a href="global.html#USER_TYPE">USER_TYPE</a></li><li><a href="global.html#validate">validate</a></li><li><a href="global.html#validateAssetExistence">validateAssetExistence</a></li><li><a href="global.html#validateExistingTransaction">validateExistingTransaction</a></li><li><a href="global.html#validatePendingTransaction">validatePendingTransaction</a></li><li><a href="global.html#validateTransactionAddress">validateTransactionAddress</a></li><li><a href="global.html#validateTransactionUpdateRequest">validateTransactionUpdateRequest</a></li><li><a href="global.html#validateUserCreation">validateUserCreation</a></li></ul></div>
                 
             </nav>
         </div>
@@ -85,9 +85,9 @@
 
 <header>
     
-        <h2><span class="attribs"><span class="type-signature"></span></span>User<span class="signature">(address, role<span class="signature-attributes">opt</span>, description<span class="signature-attributes">opt</span>, public_key, return_to<span class="signature-attributes">opt</span>, permissions, signature)</span><span class="type-signature"></span></h2>
+        <h2><span class="attribs"><span class="type-signature"></span></span>User<span class="signature">(user)</span><span class="type-signature"></span></h2>
         
-            <div class="class-description">Represents a user of the blockchain.</div>
+            <div class="class-description"><p>Represents a user of the blockchain.</p></div>
         
     
 </header>
@@ -111,7 +111,7 @@
         
         <span class="code-name">
             
-                new User<span class="signature">(address, role<span class="signature-attributes">opt</span>, description<span class="signature-attributes">opt</span>, public_key, return_to<span class="signature-attributes">opt</span>, permissions, signature)</span><span class="type-signature"></span>
+                new User<span class="signature">(user)</span><span class="type-signature"></span>
             
         </span>
     </h4>
@@ -156,6 +156,38 @@
             
 <tr class="deep-level-0">
   
+      <td class="name"><code>user</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">Object</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"><p>The user object to create.</p></td>
+</tr>
+
+  
+  
+    
+<tr class="deep-level-1">
+  
       <td class="name"><code>address</code></td>
   
 
@@ -180,14 +212,12 @@
 
   
 
-  <td class="description last">The unique address of the user.</td>
+  <td class="description last"><p>The unique address of the user.</p></td>
 </tr>
 
-
-        
-
-            
-<tr class="deep-level-0">
+  
+    
+<tr class="deep-level-1">
   
       <td class="name"><code>role</code></td>
   
@@ -215,14 +245,12 @@
 
   
 
-  <td class="description last">The role of the user.</td>
+  <td class="description last"><p>The role of the user.</p></td>
 </tr>
 
-
-        
-
-            
-<tr class="deep-level-0">
+  
+    
+<tr class="deep-level-1">
   
       <td class="name"><code>description</code></td>
   
@@ -250,14 +278,12 @@
 
   
 
-  <td class="description last">The description of the user.</td>
+  <td class="description last"><p>The description of the user.</p></td>
 </tr>
 
-
-        
-
-            
-<tr class="deep-level-0">
+  
+    
+<tr class="deep-level-1">
   
       <td class="name"><code>public_key</code></td>
   
@@ -283,14 +309,12 @@
 
   
 
-  <td class="description last">The public key of the user.</td>
+  <td class="description last"><p>The public key of the user.</p></td>
 </tr>
 
-
-        
-
-            
-<tr class="deep-level-0">
+  
+    
+<tr class="deep-level-1">
   
       <td class="name"><code>return_to</code></td>
   
@@ -318,14 +342,12 @@
 
   
 
-  <td class="description last">Key-value object containing actions and addresses of users who will receive the user's transactions upon the action execution (ex. user_retire: 'cs_department')</td>
+  <td class="description last"><p>Key-value object containing actions and addresses of users who will receive the user's transactions upon the action execution (ex. user_retire: 'cs_department')</p></td>
 </tr>
 
-
-        
-
-            
-<tr class="deep-level-0">
+  
+    
+<tr class="deep-level-1">
   
       <td class="name"><code>permissions</code></td>
   
@@ -333,7 +355,7 @@
   <td class="type">
   
       
-<span class="param-type">Permissions</span>
+<span class="param-type"><a href="Permissions.html">Permissions</a></span>
 
 
   
@@ -351,14 +373,12 @@
 
   
 
-  <td class="description last">The permissions of the user.</td>
+  <td class="description last"><p>The permissions of the user.</p></td>
 </tr>
 
-
-        
-
-            
-<tr class="deep-level-0">
+  
+    
+<tr class="deep-level-1">
   
       <td class="name"><code>signature</code></td>
   
@@ -384,8 +404,10 @@
 
   
 
-  <td class="description last">The signature of the user.</td>
+  <td class="description last"><p>The signature of the user.</p></td>
 </tr>
+
+  
 
 
         
@@ -432,7 +454,7 @@
         <p class="tag-source">
             <a href="models_User.js.html" class="button">View Source</a>
             <span>
-                <a href="models_User.js.html">models/User.js</a>, <a href="models_User.js.html#line18">line 18</a>
+                <a href="models_User.js.html">models/User.js</a>, <a href="models_User.js.html#line19">line 19</a>
             </span>
         </p>
     
@@ -481,6 +503,657 @@
     
 
     
+        <div class='vertical-section'>
+            <h1>Methods</h1>
+            <div class="members">
+            
+                <div class="member">
+
+
+    
+    <h4 class="name" id="addTransaction">
+        <a class="href-link" href="#addTransaction">#</a>
+        
+        <span class="code-name">
+            
+                addTransaction<span class="signature">(userType, amount, transactionSignature, validTransaction<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span>
+            
+        </span>
+    </h4>
+    
+
+    
+    <p class="summary">Adds a transaction to the user if they are the recipient (adding to the account balance), removes it if they are the sender (subtracting to the account balance).</p>
+    
+    
+    <div class="description">
+        <p>Adds a transaction to the user if they are the recipient (adding to the account balance), removes it if they are the sender (subtracting to the account balance).</p>
+    </div>
+    
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+<div class="table-container">
+    <table class="params table">
+        <thead>
+        <tr>
+            
+            <th>Name</th>
+            
+
+            <th>Type</th>
+
+            
+            <th>Attributes</th>
+            
+
+            
+            <th>Default</th>
+            
+
+            <th class="last">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>userType</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type"><a href="global.html#USER_TYPE">USER_TYPE</a></span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+
+      
+
+      
+      </td>
+  
+
+  
+      <td class="default">
+      
+      </td>
+  
+
+  <td class="description last"><p>The type of user in the transaction (recipient or sender).</p></td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>amount</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">Number</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+
+      
+
+      
+      </td>
+  
+
+  
+      <td class="default">
+      
+      </td>
+  
+
+  <td class="description last"><p>The amount of the transaction.</p></td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>transactionSignature</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">String</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+
+      
+
+      
+      </td>
+  
+
+  
+      <td class="default">
+      
+      </td>
+  
+
+  <td class="description last"><p>The signature of the transaction.</p></td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>validTransaction</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">Boolean</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+          &lt;optional><br>
+      
+
+      
+
+      
+      </td>
+  
+
+  
+      <td class="default">
+      
+          true
+      
+      </td>
+  
+
+  <td class="description last"><p>True if the transaction is valid, false otherwise.</p></td>
+</tr>
+
+
+        
+        </tbody>
+    </table>
+</div>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+
+    
+
+    
+
+    
+        <p class="tag-source">
+            <a href="models_User.js.html" class="button">View Source</a>
+            <span>
+                <a href="models_User.js.html">models/User.js</a>, <a href="models_User.js.html#line95">line 95</a>
+            </span>
+        </p>
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div class='columns method-parameter'>
+        <div class="column is-2"><label>Throws:</label></div>
+        <div class="column is-10">
+            
+                    
+<div class="columns">
+    
+    <div class='param-desc column is-7'><p>Throws error if the sender user does not have that transaction signature in latest_transactions.</p></div>
+    <div class='column is-5 has-text-left'>
+        <label>Type: </label>
+<span class="param-type">Error</span>
+
+
+    </div>
+    
+</div>
+
+                
+        </div>
+    </div>
+
+
+
+
+
+
+</div>
+            
+                <div class="member">
+
+
+    
+    <h4 class="name" id="removeInvalidTransaction">
+        <a class="href-link" href="#removeInvalidTransaction">#</a>
+        
+        <span class="code-name">
+            
+                removeInvalidTransaction<span class="signature">(transaction)</span><span class="type-signature"></span>
+            
+        </span>
+    </h4>
+    
+
+    
+    <p class="summary">Removes an invalid transaction from the user, deducting their current account balance.</p>
+    
+    
+    <div class="description">
+        <p>Removes an invalid transaction from the user, deducting their current account balance.</p>
+    </div>
+    
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+<div class="table-container">
+    <table class="params table">
+        <thead>
+        <tr>
+            
+            <th>Name</th>
+            
+
+            <th>Type</th>
+
+            
+
+            
+
+            <th class="last">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>transaction</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type"><a href="Transaction.html">Transaction</a></span>
+
+
+  
+  </td>
+
+  
+
+  
+
+  <td class="description last"><p>The transaction object to delete.</p></td>
+</tr>
+
+
+        
+        </tbody>
+    </table>
+</div>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+
+    
+
+    
+
+    
+        <p class="tag-source">
+            <a href="models_User.js.html" class="button">View Source</a>
+            <span>
+                <a href="models_User.js.html">models/User.js</a>, <a href="models_User.js.html#line54">line 54</a>
+            </span>
+        </p>
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div class='columns method-parameter'>
+        <div class="column is-2"><label>Throws:</label></div>
+        <div class="column is-10">
+            
+                    
+<div class="columns">
+    
+    <div class='param-desc column is-7'><p>Throws error if the user does not have that transaction in latest_transactions.</p></div>
+    <div class='column is-5 has-text-left'>
+        <label>Type: </label>
+<span class="param-type">Error</span>
+
+
+    </div>
+    
+</div>
+
+                
+        </div>
+    </div>
+
+
+
+
+
+
+</div>
+            
+                <div class="member">
+
+
+    
+    <h4 class="name" id="removePendingTransaction">
+        <a class="href-link" href="#removePendingTransaction">#</a>
+        
+        <span class="code-name">
+            
+                removePendingTransaction<span class="signature">(transaction)</span><span class="type-signature"></span>
+            
+        </span>
+    </h4>
+    
+
+    
+    <p class="summary">Removes a pending transaction from the user.</p>
+    
+    
+    <div class="description">
+        <p>Removes a pending transaction from the user.</p>
+    </div>
+    
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+<div class="table-container">
+    <table class="params table">
+        <thead>
+        <tr>
+            
+            <th>Name</th>
+            
+
+            <th>Type</th>
+
+            
+
+            
+
+            <th class="last">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>transaction</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">String</span>
+
+
+  
+  </td>
+
+  
+
+  
+
+  <td class="description last"><p>The transaction signature to remove from pending_transactions.</p></td>
+</tr>
+
+
+        
+        </tbody>
+    </table>
+</div>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+
+    
+
+    
+
+    
+        <p class="tag-source">
+            <a href="models_User.js.html" class="button">View Source</a>
+            <span>
+                <a href="models_User.js.html">models/User.js</a>, <a href="models_User.js.html#line72">line 72</a>
+            </span>
+        </p>
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div class='columns method-parameter'>
+        <div class="column is-2"><label>Throws:</label></div>
+        <div class="column is-10">
+            
+                    
+<div class="columns">
+    
+    <div class='param-desc column is-7'><p>Throws error if the user does not have that transaction signature in pending_transactions.</p></div>
+    <div class='column is-5 has-text-left'>
+        <label>Type: </label>
+<span class="param-type">Error</span>
+
+
+    </div>
+    
+</div>
+
+                
+        </div>
+    </div>
+
+
+
+
+
+
+</div>
+            
+            </div>
+        </div>
+    
 
     
 
@@ -496,7 +1169,7 @@
             
             <footer class="footer">
                 <div class="content has-text-centered">
-                    <p>Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.6</a></p>
+                    <p>Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a></p>
                     <p class="sidebar-created-by">
                         <a href="https://github.com/SoftwareBrothers/better-docs" target="_blank">BetterDocs theme</a> provided with <i class="fas fa-heart"></i> by 
                         <a href="http://softwarebrothers.co" target="_blank">SoftwareBrothers - JavaScript Development Agency</a>
