@@ -61,6 +61,13 @@ if (process.env.NODE_ENV !== "production") {
   app.use("/api-docs", require("./routes/docs"));
   const jsDocs = path.join(__dirname, "/resources/docs/");
   app.use("/docs", express.static(jsDocs));
+  if (process.env.ALLOW_DEV_ENV_CHANGES === "true") {
+    logFormatted(
+      "Warning: allowing environment variables to be changed by method POST in /config. This is **only** recommended for testing, not for production.",
+      SEVERITY.ERROR
+    );
+    app.use("/config", require("./routes/dev/config"));
+  }
 }
 
 app.use("/cryptocurrency", require("./routes/cryptocurrency"));

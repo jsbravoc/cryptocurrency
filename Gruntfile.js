@@ -302,6 +302,11 @@ module.exports = function (grunt) {
             dest: "build/app/backend/package.json",
             filter: "isFile",
           },
+          {
+            src: "build/app/backend/.env",
+            dest: "build/app/backend/.env",
+            filter: "isFile",
+          },
         ],
         options: {
           replacements: [
@@ -309,6 +314,10 @@ module.exports = function (grunt) {
             {
               pattern: `node ./bin/www.js`,
               replacement: "NODE_ENV=production node ./bin/www.js",
+            },
+            {
+              pattern: `ALLOW_DEV_ENV_CHANGES=true`,
+              replacement: "ALLOW_DEV_ENV_CHANGES=false",
             },
           ],
         },
