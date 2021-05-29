@@ -103,10 +103,10 @@ jobs:
       - add_ssh_keys:
           fingerprints: "03:10:83:41:c2:2b:b2:33:43:13:37:aa:e9:47:72:e7"
       - run:
-          name: Get candidate semver
+          name: Get final semver
           command: |
             if [[ "${CIRCLE_BRANCH}" == "main" ]]; then
-              ../../../semtag candidate -s patch
+              ../../../semtag final -s patch
               echo New tag on ${CIRCLE_BRANCH}: $(../../../semtag getcurrent)
             fi
       - run:
