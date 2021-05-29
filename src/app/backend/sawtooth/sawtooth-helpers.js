@@ -99,7 +99,9 @@ module.exports.sendTransaction = async function (transactions) {
 
   const params = {
     headers: { "Content-Type": "application/octet-stream" },
-    timeout: process.env.SAWTOOTH_REST_TIMEOUT || 5000,
+    timeout: !isNaN(Number(process.env.SAWTOOTH_REST_TIMEOUT))
+      ? Number(process.env.SAWTOOTH_REST_TIMEOUT)
+      : 5000,
   };
   return axios.post(
     `${process.env.SAWTOOTH_REST}/batches`,
