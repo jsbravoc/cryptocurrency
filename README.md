@@ -99,7 +99,7 @@ Then, you need to install `transaction_processor` node dependencies and start it
 ```sh
 cd build/app/transaction_processor
 npm install
-npm start # or pm2 --name crypto-tp start npm -- start if using PM2
+npm start # or pm2 start
 ```
 
 Finally, you need to install `backend` node dependencies and start it: 
@@ -107,7 +107,7 @@ Finally, you need to install `backend` node dependencies and start it:
 ```sh
 cd build/app/backend
 npm install
-npm start # or pm2 --name crypto-api start npm -- start if using PM2
+npm start # or pm2 start if using PM2
 ```
 
 Optionally, if you want to see the API definitions, make sure to go to `localhost:3000/api-docs` or to the URL of where the application was started.
@@ -178,7 +178,7 @@ docker-compose up #Use -d flag to start it detached
 
 ```sh
 cd src/app/transaction_processor
-npm start # or pm2 --name crypto-tp start npm -- start if using PM2
+npm start # or pm2 start if using PM2
 ```
 #### 3) Run the tests:
 
@@ -193,3 +193,4 @@ npm test
 
 
 ## License
+BSD-3-Clause License © [Juan Sebastián Bravo](https://github.com/jsbravoc)

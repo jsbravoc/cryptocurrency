@@ -6,4 +6,4 @@ COPY ./ecosystem.config.js ./
 RUN npm install --production
 COPY . .
 
-CMD [ "pm2-runtime", "start" ]
+CMD [ "pm2-runtime", "start", "ecosystem.config.js" ]
