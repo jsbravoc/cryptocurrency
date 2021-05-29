@@ -108,8 +108,19 @@ const {
   _putAsset,
   putBatch,
 } = require("./common");
+const { ERRORS } = require("../utils/errors");
 
 //#region [AUXILIARY FUNCTIONS]
+
+/**
+ * Creates a collision-free signature for a transaction.
+ *
+ * @param {String} signature - Signature of the transaction.
+ * @param {Date} [creationDate]  - Transaction's creation date.
+ * @return {String} New signature that avoids collisions.
+ */
+const createSignature = (signature, creationDate = new Date()) =>
+  hash512(`${signature}${creationDate.getTime()}`);
 
 /**
  * Finds a transaction in the blockchain.
@@ -254,14 +265,6 @@ const expandSupportingTransactions = async (
           transaction.supporting_transactions[index] = stx;
         }
       }
-    } else if (typeof transaction === "string") {
-      transaction = await findTransaction(transaction);
-      await expandSupportingTransactions(
-        transaction,
-        dictionaryOfTransactions,
-        res
-      );
-      return transaction;
     }
   }
   return transaction;
@@ -325,10 +328,10 @@ const getTransactions = (req, res) => {
           .json(assetList.map((transaction) => transaction.toObject()));
       });
     })
-    .catch((err) =>
-      res.status(503).json({
+    .catch(() =>
+      res.status(ERRORS.SAWTOOTH.UNAVAILABLE.errorCode).json({
         msg: req.t("MESSAGES.SAWTOOTH_UNAVAILABLE"),
-        error: { ...err },
+        error: req.t("MESSAGES.SAWTOOTH_UNAVAILABLE"),
       })
     );
 };
@@ -342,22 +345,15 @@ const getTransactions = (req, res) => {
  * @post Returns the transaction in res object. If an error happens, response object has the error.
  */
 const getTransactionByAddress = (req, res) => {
-  return findTransaction(req.params.address, false, true, res)
-    .then((tx) => {
-      const expanded = req.query.expanded === "true" || false;
-      if (!expanded) {
-        return res.status(200).json(tx);
-      }
-      return expandSupportingTransactions(tx, undefined, res).then(() =>
-        res.status(200).json(tx)
-      );
-    })
-    .catch((err) =>
-      res.status(503).json({
-        msg: req.t("MESSAGES.SAWTOOTH_UNAVAILABLE"),
-        error: err.message,
-      })
+  return findTransaction(req.params.address, false, true, res).then((tx) => {
+    const expanded = req.query.expanded === "true" || false;
+    if (!expanded) {
+      return res.status(200).json(tx);
+    }
+    return expandSupportingTransactions(tx, undefined, res).then(() =>
+      res.status(200).json(tx)
     );
+  });
 };
 
 /**
@@ -375,13 +371,25 @@ const createTransaction = (
   res,
   { disableSender = false, disableRecipient = false } = null
 ) => {
-  const newTx = new Transaction(req.body);
+  const txObj = {
+    amount: req.body.amount,
+    recipient: req.body.recipient,
+    sender: req.body.sender,
+    description: req.body.description,
+    valid: req.body.valid,
+    valid_thru: req.body.valid_thru,
+    signature: req.body.signature,
+    pending: req.body.pending,
+    creationDate: req.body.creationDate,
+    creator: req.body.creator,
+  };
+
+  //Avoid adding supporting transactions through post request
+  const newTx = new Transaction(txObj);
   const { sender, recipient, amount, valid } = newTx;
   let { signature } = newTx;
   //Avoid transaction collisions
-  signature = hash512(
-    `${signature}${(newTx.creationDate || new Date()).getTime()}`
-  );
+  signature = createSignature(signature, newTx.creationDate);
   newTx.signature = signature;
 
   return createTransactionPayload(
@@ -420,21 +428,13 @@ const updateTransaction = (req, res) => {
         existingTx.description = req.body.description;
       }
       if (approve === undefined) {
-        return _updateTransaction(existingTx)
-          .then(({ responseCode }) => {
-            delete existingTx.type;
-            return res.status(responseCode).json({
-              msg: req.t("MESSAGES.SUCCESSFUL_REQUEST.TRANSACTION.UPDATE"),
-              payload: existingTx,
-            });
-          })
-          .catch((err) => {
-            logFormatted(
-              `PUT /cryptocurrency | BATCH Response: ${err}`,
-              SEVERITY.ERROR
-            );
-            return res.status(500).json({ err });
+        return _updateTransaction(existingTx).then(({ responseCode }) => {
+          delete existingTx.type;
+          return res.status(responseCode).json({
+            msg: req.t("MESSAGES.SUCCESSFUL_REQUEST.TRANSACTION.UPDATE"),
+            payload: existingTx,
           });
+        });
       }
       existingTx.valid = approve;
       existingTx.pending = false;
@@ -571,7 +571,10 @@ const createTransactionPayload = (
             );
             const changeTransactionPayload = JSON.stringify({
               func: "post",
-              args: { transaction: changeTransaction, txid: changeTxSignature },
+              args: {
+                transaction: changeTransaction,
+                txid: changeTxSignature,
+              },
             });
             newChangeTransaction = {
               inputs: [changeTransactionAddress, ...transactionInput],
@@ -626,30 +629,27 @@ const createTransactionPayload = (
       if (newChangeTransaction) {
         transactionsToSend.push({ ...newChangeTransaction });
       }
-      return putBatch(method, `${method} /cryptocurrency`, transactionsToSend)
-        .then(({ responseCode }) => {
-          delete transaction.type;
-          return res.status(responseCode).json({
-            msg:
-              method === HTTP_METHODS.POST
-                ? req.t("MESSAGES.SUCCESSFUL_REQUEST.TRANSACTION.CREATION")
-                : req.t("MESSAGES.SUCCESSFUL_REQUEST.TRANSACTION.UPDATE"),
-            payload: transaction,
-          });
-        })
-        .catch((err) => {
-          logFormatted(
-            `${method} /cryptocurrency | BATCH Response: ${err}`,
-            SEVERITY.ERROR
-          );
-          return res.status(500).json({ err });
+      return putBatch(
+        method,
+        `${method} /cryptocurrency`,
+        transactionsToSend
+      ).then(({ responseCode }) => {
+        delete transaction.type;
+        return res.status(responseCode).json({
+          msg:
+            method === HTTP_METHODS.POST
+              ? req.t("MESSAGES.SUCCESSFUL_REQUEST.TRANSACTION.CREATION")
+              : req.t("MESSAGES.SUCCESSFUL_REQUEST.TRANSACTION.UPDATE"),
+          payload: transaction,
         });
+      });
     }
   );
 };
 
 //#endregion
 
+module.exports.createSignature = createSignature;
 module.exports.findTransaction = findTransaction;
 module.exports.getSupportingTransactions = getSupportingTransactions;
 module.exports.expandSupportingTransactions = expandSupportingTransactions;

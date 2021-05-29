@@ -118,15 +118,18 @@ const validate = (validations) => (req, res, next) => {
   );
 };
 
-const createErrorObj = (req, { error, location, params }) => {
+const createErrorObj = (
+  req,
+  { error, location, params, noLocation = false }
+) => {
   const errorObj = {};
   if (error.errorCode) errorObj.errorCode = error.errorCode;
-  if (params.param) params.parameter = params.param;
+  if (params &amp;&amp; params.param) params.parameter = params.param;
   if (error.error) errorObj.error = error.error(req, params);
   if (error.msg) errorObj.msg = error.msg(req, params);
-  errorObj.location = location || "body";
-  if (params.param) errorObj.param = params.param;
-  if (params.value) errorObj.value = params.value;
+  if (noLocation !== true) errorObj.location = location || "body";
+  if (params &amp;&amp; params.param) errorObj.param = params.param;
+  if (params &amp;&amp; params.value) errorObj.value = params.value;
   logFormatted(
     `Validation error with code ${errorObj.errorCode} - ${errorObj.error}`,
     SEVERITY.WARN
@@ -134,9 +137,13 @@ const createErrorObj = (req, { error, location, params }) => {
   return { ...errorObj };
 };
 
-const createError = (req, res, { error, location, params }) => {
-  const errorObj = createErrorObj(req, { error, location, params });
-  return res.status(400).json({ errors: [{ ...errorObj }] });
+const createError = (
+  req,
+  res,
+  { error, location, params, statusCode = 400, noLocation = false }
+) => {
+  const errorObj = createErrorObj(req, { error, location, params, noLocation });
+  return res.status(statusCode).json({ errors: [{ ...errorObj }] });
 };
 
 /**
@@ -145,6 +152,7 @@ const createError = (req, res, { error, location, params }) => {
  * @param {String} type - Type of asset, @see TYPE
  * @param {String} txid - Asset unique identification (before calculated address)
  * @param {Boolean} shouldExist - Represents if the asset should or should not exist, used to manage error.
+ * @param {Request} req - Express.js request object.
  * @param {Response} res - Express.js response object.
  * @return {Promise} Promise rejection if:
  *   The type was missing
@@ -176,8 +184,8 @@ const validateAssetExistence = (
       return Promise.reject(`Missing type ${type}`);
   }
   if (txid &amp;&amp; txid !== "") {
-    return findByAddress(type, txid, false, false, res).then(
-      (existingAsset) => {
+    return findByAddress(type, txid, false, false, res)
+      .then((existingAsset) => {
         const expectedToExist = shouldExist &amp;&amp; existingAsset === null;
         const notExpectedToExist = !shouldExist &amp;&amp; existingAsset !== null;
         if (expectedToExist || notExpectedToExist) {
@@ -235,13 +243,23 @@ const validateAssetExistence = (
             default:
               break;
           }
-          return Promise.reject(() => createError(req, res, errorObj));
+          return Promise.reject({ callback: createError(req, res, errorObj) });
         }
         const obj = {};
         obj[type] = existingAsset;
         return Promise.resolve(obj);
-      }
-    );
+      })
+      .catch((err) => {
+        if (!err.callback) {
+          return Promise.reject(() =>
+            createError(req, res, {
+              error: ERRORS.SAWTOOTH.UNAVAILABLE,
+              statusCode: 503,
+              noLocation: true,
+            })
+          );
+        } else return Promise.reject(() => err.callback());
+      });
   } else
     return Promise.reject(() =>
       createError(req, res, {

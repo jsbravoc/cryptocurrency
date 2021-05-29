@@ -86,10 +86,13 @@
           "msg": "The {{property}} parameter was expected, but did not received it"
         },
         "MISSING_REQUIRED_INPUT": {
-          "error": "{{message}}"
+          "error": "The method required the parameter {{parameter}}, but received undefined",
+          "msg": "The method required the parameter {{parameter}}, but did not receive it"
         },
+
         "INCORRECT_INPUT": {
-          "error": "{{message}}"
+          "error": "The property {{propertyName}} received is invalid",
+          "msg": "The property {{propertyName}} received is invalid"
         },
         "TRANSACTION_EXISTS": {
           "error": "Transaction with signature {{signature}} already exists",
