@@ -19,6 +19,7 @@ const {
   createTransaction,
 } = require("./cryptocurrency");
 const Transaction = require("../models/Transaction");
+const { ERRORS } = require("../utils/errors");
 
 //#region [AUXILIARY FUNCTIONS]
 
@@ -48,14 +49,11 @@ const findUser = (
  */
 // eslint-disable-next-line no-unused-vars
 const _updateUser = (user, res, source = "[LOCAL USER UPDATE]") =>
-  _putAsset(TYPE.USER, HTTP_METHODS.PUT, source, user)
-    .then(({ responseCode, msg, payload }) => {
+  _putAsset(TYPE.USER, HTTP_METHODS.PUT, source, user).then(
+    ({ responseCode, msg, payload }) => {
       return res.status(responseCode).json({ msg, payload });
-    })
-    .catch((err) => {
-      logFormatted(`Error in local _updateUser`, SEVERITY.ERROR, err);
-      return res.status(500).json({ err });
-    });
+    }
+  );
 
 //#endregion
 
@@ -144,10 +142,10 @@ const getUsers = (req, res) => {
         });
       }
     })
-    .catch((err) =>
-      res.status(503).json({
+    .catch(() =>
+      res.status(ERRORS.SAWTOOTH.UNAVAILABLE.errorCode).json({
         msg: req.t("MESSAGES.SAWTOOTH_UNAVAILABLE"),
-        error: { ...err },
+        error: req.t("MESSAGES.SAWTOOTH_UNAVAILABLE"),
       })
     );
 };
@@ -160,72 +158,65 @@ const getUsers = (req, res) => {
  * @post Returns the user in res object. If an error happens, response object has the error.
  */
 const getUserByAddress = (req, res) => {
-  return findUser(req.params.address, true, true, res)
-    .then((user) => {
-      const expanded = req.query.expanded === "true" || false;
-      if (!expanded) {
-        return res.status(200).json(user);
-      }
-      return findAllAssets(
-        TYPE.TRANSACTION,
-        "GET /users",
-        0,
-        false,
-        true,
-        res
-      ).then((transactionList) => {
-        let promises = [];
-        const dictionaryOfTransactions = {};
-        (transactionList || []).forEach((asset) => {
-          dictionaryOfTransactions[asset.signature] = asset;
-        });
-        promises.push(
-          (user.latest_transactions || []).map((txid) =>
-            findTransaction(txid).then((transaction) => {
-              return expandSupportingTransactions(
-                transaction,
-                dictionaryOfTransactions
-              );
-            })
-          )
-        );
-
-        promises.push(
-          (user.pending_transactions || []).map((txid) =>
-            findTransaction(txid).then((transaction) => {
-              return expandSupportingTransactions(
-                transaction,
-                dictionaryOfTransactions
-              );
-            })
-          )
-        );
-        promises = [].concat.apply([], promises);
-        return Promise.all(promises).then((values) => {
-          values.forEach((tx) => {
-            const indexOfTx = (user.latest_transactions || []).indexOf(
-              tx.signature
-            );
-            const indexOfPendingTx = (user.pending_transactions || []).indexOf(
-              tx.signature
-            );
-            if (indexOfTx > -1) {
-              user.latest_transactions[indexOfTx] = tx;
-            }
-            if (indexOfPendingTx > -1) {
-              user.pending_transactions[indexOfPendingTx] = tx;
-            }
-          });
-          return res.status(200).json(user);
-        });
+  return findUser(req.params.address, true, true, res).then((user) => {
+    const expanded = req.query.expanded === "true" || false;
+    if (!expanded) {
+      return res.status(200).json(user);
+    }
+    return findAllAssets(
+      TYPE.TRANSACTION,
+      "GET /users",
+      0,
+      false,
+      true,
+      res
+    ).then((transactionList) => {
+      let promises = [];
+      const dictionaryOfTransactions = {};
+      (transactionList || []).forEach((asset) => {
+        dictionaryOfTransactions[asset.signature] = asset;
       });
-    })
-    .catch((err) =>
-      res.status(503).json({
-        msg: req.t("MESSAGES.SAWTOOTH_UNAVAILABLE"),
-        error: { ...err },
-      })
-    );
+      promises.push(
+        (user.latest_transactions || []).map((txid) =>
+          findTransaction(txid).then((transaction) => {
+            return expandSupportingTransactions(
+              transaction,
+              dictionaryOfTransactions
+            );
+          })
+        )
+      );
+
+      promises.push(
+        (user.pending_transactions || []).map((txid) =>
+          findTransaction(txid).then((transaction) => {
+            return expandSupportingTransactions(
+              transaction,
+              dictionaryOfTransactions
+            );
+          })
+        )
+      );
+      promises = [].concat.apply([], promises);
+      return Promise.all(promises).then((values) => {
+        values.forEach((tx) => {
+          const indexOfTx = (user.latest_transactions || []).indexOf(
+            tx.signature
+          );
+          const indexOfPendingTx = (user.pending_transactions || []).indexOf(
+            tx.signature
+          );
+          if (indexOfTx > -1) {
+            user.latest_transactions[indexOfTx] = tx;
+          }
+          if (indexOfPendingTx > -1) {
+            user.pending_transactions[indexOfPendingTx] = tx;
+          }
+        });
+        return res.status(200).json(user);
+      });
+    });
+  });
 };
 
 const createUser = (req, res) =>

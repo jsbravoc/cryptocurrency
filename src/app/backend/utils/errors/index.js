@@ -67,13 +67,18 @@ const errors = {
             req.t("ERRORS.USER.INPUT.USER_DOES_NOT_EXIST.msg", { address }),
         },
 
+        /* 
+        This error cannot happen.
+        This error validates latest_transactions when there is balance, but no latest_transactions to support the balance.
+        However, the API keeps balance property as a reflection of the latest transactions, thus this cannot happen.
+
         NO_TRANSACTIONS: {
           errorCode: "112",
           error: (req, { address }) =>
             req.t("ERRORS.USER.INPUT.NO_TRANSACTIONS.error", { address }),
           msg: (req, { address }) =>
             req.t("ERRORS.USER.INPUT.NO_TRANSACTIONS.msg", { address }),
-        },
+        }, */
         INSUFFICIENT_FUNDS: {
           errorCode: "113a",
           error: (req, { address }) =>
@@ -94,6 +99,11 @@ const errors = {
               { address, amountPending, actualBalance }
             ),
         },
+        /* 
+        This error cannot happen.
+        This error validates latest_transactions when there is balance, but latest_transactions amount sum if different than balance.
+        However, the API keeps balance property as a reflection of the latest transactions, thus this cannot happen.
+
         INSUFFICIENT_FUNDS_UNEXPECTED_BALANCE: {
           errorCode: "114",
           error: (req, { address, actualBalance }) =>
@@ -106,7 +116,7 @@ const errors = {
               "ERRORS.USER.INPUT.INSUFFICIENT_FUNDS_UNEXPECTED_BALANCE.msg",
               { address, actualBalance }
             ),
-        },
+        }, */
         UNDEFINED_RETURN_TO_REASON: {
           errorCode: "115",
           error: (req, { address, reason }) =>
@@ -159,6 +169,11 @@ const errors = {
               }
             ),
         },
+        /* 
+        This errors cannot happen.
+        This errors validate latest_transactions & pending_transactions existence.
+        However, the API keeps latest_transactions & pending_transactions as a reference of a created transaction.
+        
         NONEXISTENT_LASTEST_TRANSACTION: {
           errorCode: "123",
           error: (req, { address, transactionSignature }) =>
@@ -185,6 +200,11 @@ const errors = {
               transactionSignature,
             }),
         },
+
+        This error cannot happen.
+        This errors validates that all the latest transactions of an user belongs to them.
+        However, the API assigns latest_transactions to a user only if they are the recipient of the transaction.
+
         INCORRECT_RECIPIENT_LASTEST_TRANSACTION: {
           errorCode: "125",
           error: (req, { address, transactionSignature }) =>
@@ -203,7 +223,7 @@ const errors = {
                 transactionSignature,
               }
             ),
-        },
+        }, */
         NO_RETURN_TO_ADDRESSES: {
           errorCode: "126",
           error: (req, { address }) =>
@@ -228,24 +248,24 @@ const errors = {
         },
         MISSING_REQUIRED_INPUT: {
           errorCode: "200a",
-          error: (req, { parameter }) =>
+          error: (req, { propertyName }) =>
             req.t("ERRORS.TRANSACTION.INPUT.MISSING_REQUIRED_INPUT.error", {
-              parameter,
+              propertyName,
             }),
-          msg: (req, { parameter }) =>
+          msg: (req, { propertyName }) =>
             req.t("ERRORS.TRANSACTION.INPUT.MISSING_REQUIRED_INPUT.msg", {
-              parameter,
+              propertyName,
             }),
         },
         INCORRECT_INPUT: {
           errorCode: "200b",
-          error: (req, { parameter }) =>
+          error: (req, { propertyName }) =>
             req.t("ERRORS.TRANSACTION.INPUT.INCORRECT_INPUT.error", {
-              parameter,
+              propertyName,
             }),
-          msg: (req, { parameter }) =>
+          msg: (req, { propertyName }) =>
             req.t("ERRORS.TRANSACTION.INPUT.INCORRECT_INPUT.msg", {
-              parameter,
+              propertyName,
             }),
         },
         TRANSACTION_EXISTS: {
@@ -295,6 +315,13 @@ const errors = {
             req.t("ERRORS.TRANSACTION.LOGIC.DECRYPTING_ERROR.error"),
           msg: (req) => req.t("ERRORS.TRANSACTION.LOGIC.DECRYPTING_ERROR.msg"),
         },
+      },
+    },
+    SAWTOOTH: {
+      UNAVAILABLE: {
+        errorCode: "503",
+        error: (req) => req.t("MESSAGES.SAWTOOTH_UNAVAILABLE"),
+        msg: (req) => req.t("MESSAGES.SAWTOOTH_UNAVAILABLE"),
       },
     },
   },

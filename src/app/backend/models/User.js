@@ -55,9 +55,6 @@ class User extends BaseModel {
     const indexOfTransaction = this.latest_transactions.indexOf(
       transaction.signature
     );
-    if (indexOfTransaction <= -1) {
-      throw new Error("User error: Tried to remove nonexistent transaction");
-    }
     const { amount } = transaction;
     this.balance -= amount;
     this.latest_transactions.splice(indexOfTransaction, 1);
@@ -74,11 +71,6 @@ class User extends BaseModel {
       const indexOfTransaction = this.pending_transactions.indexOf(
         transactionSignature
       );
-      if (indexOfTransaction <= -1) {
-        throw new Error(
-          "User error: Sender tried to use remove pending unexistent transaction"
-        );
-      }
       this.pending_transactions.splice(indexOfTransaction, 1);
     }
   }
@@ -98,20 +90,12 @@ class User extends BaseModel {
     transactionSignature,
     validTransaction = true
   ) {
-    if (!Array.isArray(this.latest_transactions)) {
-      this.latest_transactions = [];
-    }
     switch (userType) {
       case USER_TYPE.SENDER:
         if (validTransaction) {
           const indexOfTransaction = this.latest_transactions.indexOf(
             transactionSignature
           );
-          if (indexOfTransaction <= -1) {
-            throw new Error(
-              "User error: Sender tried to use nonexistent transaction"
-            );
-          }
           this.balance -= amount;
           this.latest_transactions.splice(indexOfTransaction, 1);
         } else {

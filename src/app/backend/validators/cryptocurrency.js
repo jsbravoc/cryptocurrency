@@ -11,7 +11,7 @@ const { findByAddress } = require("../controllers/common");
 const Transaction = require("../models/Transaction");
 const { MAXIMUM_FLOAT_PRECISION } = require("../utils/constants");
 const { getPublicKey } = require("../utils/signature");
-
+const { createSignature } = require("../controllers/cryptocurrency");
 /**
  * Verifies if a transaction's request body is valid.
  * Conditions:
@@ -31,8 +31,9 @@ const inputValidation = validate([
       createErrorObj(req, {
         error: ERRORS.TRANSACTION.INPUT.MISSING_REQUIRED_INPUT,
         params: {
-          param: "recipient",
+          propertyName: "recipient",
           value,
+          param: "recipient",
         },
       })
     )
@@ -46,8 +47,9 @@ const inputValidation = validate([
       createErrorObj(req, {
         error: ERRORS.TRANSACTION.INPUT.INCORRECT_INPUT,
         params: {
-          param: "amount",
+          propertyName: "amount",
           value,
+          param: "amount",
         },
       })
     )
@@ -63,8 +65,9 @@ const inputValidation = validate([
       createErrorObj(req, {
         error: ERRORS.TRANSACTION.INPUT.MISSING_REQUIRED_INPUT,
         params: {
-          param: "signature",
+          propertyName: "signature",
           value,
+          param: "signature",
         },
       })
     )
@@ -79,25 +82,38 @@ const inputValidation = validate([
       createErrorObj(req, {
         error: ERRORS.TRANSACTION.INPUT.INCORRECT_INPUT,
         params: {
-          param: "valid_thru",
+          propertyName: "valid_thru",
           value,
-          message: "The valid_thru date must be in ISO 8601 format",
+          param: "valid_thru",
+        },
+      })
+    )
+    .bail(),
+  body("creationDate")
+    .optional({ checkFalsy: true, checkNull: true })
+    .isISO8601()
+    .toDate()
+    .withMessage((value, { req }) =>
+      createErrorObj(req, {
+        error: ERRORS.TRANSACTION.INPUT.INCORRECT_INPUT,
+        params: {
+          propertyName: "creationDate",
+          value,
+          param: "creationDate",
         },
       })
     )
     .bail(),
   body("supporting_transactions").customSanitizer(() => undefined),
-  body("creationDate").customSanitizer(() => undefined),
   body("valid_thru").custom((value, { req }) => {
     if (value && new Date(value) < new Date())
       return Promise.reject(
         createErrorObj(req, {
           error: ERRORS.TRANSACTION.INPUT.INCORRECT_INPUT,
           params: {
-            param: "valid_thru",
+            propertyName: "valid_thru",
             value,
-            message:
-              "The valid_thru date must be after the transaction creation date",
+            param: "valid_thru",
           },
         })
       );
@@ -155,138 +171,97 @@ const verifyPostTransaction = (req, res, next) => {
   if (req.body.sender) {
     promises.push(findByAddress(TYPE.USER, req.body.sender, false, false, res));
   }
-  return Promise.all(promises).then(([recipientUser, senderUser]) => {
-    if (!recipientUser) {
-      return createError(req, res, {
-        error: ERRORS.USER.INPUT.USER_DOES_NOT_EXIST,
-        params: {
-          address: req.body.recipient,
-          param: "recipient",
-          value: req.body.recipient,
-        },
-      });
-    } else if (recipientUser && recipientUser.active === false) {
-      return createError(req, res, {
-        error: ERRORS.USER.LOGIC.USER_IS_NOT_ACTIVE,
-        params: {
-          address: req.body.recipient.address,
-          param: "recipient",
-          value: req.body.recipient.address,
-        },
-      });
-    } else if (req.body.sender && !senderUser) {
-      return createError(req, res, {
-        error: ERRORS.USER.INPUT.USER_DOES_NOT_EXIST,
-        params: {
-          address: req.body.sender,
-          param: "sender",
-          value: req.body.sender,
-        },
-      });
-    } else if (senderUser && senderUser.active === false) {
-      return createError(req, res, {
-        error: ERRORS.USER.LOGIC.USER_IS_NOT_ACTIVE,
-        params: {
-          address: req.body.sender,
-          param: "sender",
-          value: req.body.sender,
-        },
-      });
-    } else if (senderUser) {
-      if (
-        senderUser.permissions &&
-        senderUser.permissions.transfer_to &&
-        senderUser.permissions.transfer_to[req.body.recipient] === false
-      ) {
+  return Promise.all(promises)
+    .then(([recipientUser, senderUser]) => {
+      if (!recipientUser) {
         return createError(req, res, {
-          error: ERRORS.USER.LOGIC.USER_DOES_NOT_HAVE_TRANSFER_PERMISSIONS,
+          error: ERRORS.USER.INPUT.USER_DOES_NOT_EXIST,
           params: {
-            address: req.body.sender,
-            recipient: req.body.recipient,
-            param: "sender",
-            value: req.body.sender,
+            address: req.body.recipient,
+            param: "recipient",
+            value: req.body.recipient,
           },
         });
-      }
-      if (senderUser.balance < req.body.amount) {
+      } else if (recipientUser && recipientUser.active === false) {
         return createError(req, res, {
-          error: ERRORS.USER.INPUT.INSUFFICIENT_FUNDS,
+          error: ERRORS.USER.LOGIC.USER_IS_NOT_ACTIVE,
           params: {
-            address: req.body.sender,
-            param: "amount",
-            value: req.body.sender,
+            address: recipientUser.address,
+            param: "recipient",
+            value: req.body.recipient,
           },
         });
-      } else if (
-        !Array.isArray(senderUser.latest_transactions) ||
-        senderUser.latest_transactions.length === 0
-      ) {
+      } else if (req.body.sender && !senderUser) {
         return createError(req, res, {
-          error: ERRORS.USER.INPUT.NO_TRANSACTIONS,
+          error: ERRORS.USER.INPUT.USER_DOES_NOT_EXIST,
           params: {
             address: req.body.sender,
             param: "sender",
             value: req.body.sender,
           },
         });
-      } else {
-        let amountToFulfill = req.body.amount;
-        let actualBalance = 0;
-        let returnedError = false;
-        const lastestTxPromises = [];
-        (senderUser.latest_transactions || []).forEach((txid) => {
-          lastestTxPromises.push(
-            findByAddress(TYPE.TRANSACTION, txid, false, false, res).then(
-              (supportingTransaction) => {
-                if (!supportingTransaction) {
-                  returnedError = true;
-                  return createError(req, res, {
-                    error: ERRORS.USER.LOGIC.NONEXISTENT_LASTEST_TRANSACTION,
-                    params: {
-                      address: req.body.sender,
-                      param: "sender",
-                      value: req.body.sender,
-                      transactionSignature: txid,
-                    },
-                  });
-                } else if (
-                  supportingTransaction.recipient !== req.body.sender
-                ) {
-                  returnedError = true;
-                  return createError(req, res, {
-                    error:
-                      ERRORS.USER.LOGIC.INCORRECT_RECIPIENT_LASTEST_TRANSACTION,
-                    params: {
-                      address: req.body.sender,
-                      param: "sender",
-                      value: req.body.sender,
-                      transactionSignature: txid,
-                    },
-                  });
-                } else {
-                  amountToFulfill -= supportingTransaction.amount;
-                  actualBalance += supportingTransaction.amount;
-                }
-              }
-            )
-          );
+      } else if (senderUser && senderUser.active === false) {
+        return createError(req, res, {
+          error: ERRORS.USER.LOGIC.USER_IS_NOT_ACTIVE,
+          params: {
+            address: senderUser.address,
+            param: "sender",
+            value: senderUser.address,
+          },
         });
-        return Promise.all(lastestTxPromises).then(() => {
-          if (returnedError) {
-            return;
-          }
-          const copyOfAmountToFulfill = amountToFulfill;
-          let amountPending = 0;
-          const pendingTxPromises = [];
-
-          (senderUser.pending_transactions || []).forEach((txid) => {
-            pendingTxPromises.push(
+      } else if (senderUser) {
+        if (
+          senderUser.permissions &&
+          senderUser.permissions.transfer_to &&
+          senderUser.permissions.transfer_to[req.body.recipient] === false
+        ) {
+          return createError(req, res, {
+            error: ERRORS.USER.LOGIC.USER_DOES_NOT_HAVE_TRANSFER_PERMISSIONS,
+            params: {
+              address: req.body.sender,
+              recipient: req.body.recipient,
+              param: "sender",
+              value: req.body.sender,
+            },
+          });
+        }
+        if (senderUser.balance < req.body.amount) {
+          return createError(req, res, {
+            error: ERRORS.USER.INPUT.INSUFFICIENT_FUNDS,
+            params: {
+              address: req.body.sender,
+              param: "amount",
+              value: req.body.sender,
+            },
+          });
+        } /*
+        This cannot happen. Check utils/errors/index
+         else if (
+          !Array.isArray(senderUser.latest_transactions) ||
+          senderUser.latest_transactions.length === 0
+        ) {
+          return createError(req, res, {
+            error: ERRORS.USER.INPUT.NO_TRANSACTIONS,
+            params: {
+              address: req.body.sender,
+              param: "sender",
+              value: req.body.sender,
+            },
+          });
+        } */ else {
+          let amountToFulfill = req.body.amount;
+          let actualBalance = 0;
+          let returnedError = false;
+          const lastestTxPromises = [];
+          (senderUser.latest_transactions || []).forEach((txid) => {
+            lastestTxPromises.push(
               findByAddress(TYPE.TRANSACTION, txid, false, false, res).then(
-                (pendingTransaction) => {
-                  if (!pendingTransaction) {
+                (supportingTransaction) => {
+                  /* This cannot happen. Check utils/errors/index
+                   if (!supportingTransaction) {
                     returnedError = true;
                     return createError(req, res, {
-                      error: ERRORS.USER.LOGIC.NONEXISTENT_PENDING_TRANSACTION,
+                      error: ERRORS.USER.LOGIC.NONEXISTENT_LASTEST_TRANSACTION,
                       params: {
                         address: req.body.sender,
                         param: "sender",
@@ -294,74 +269,135 @@ const verifyPostTransaction = (req, res, next) => {
                         transactionSignature: txid,
                       },
                     });
-                  }
-                  //The user created a pending transaction, owing money to pending's transaction recipient (until approved or rejected)
-                  if (
-                    pendingTransaction.sender === req.body.sender &&
-                    pendingTransaction.creator === req.body.sender
+                  } */ /* 
+                  This cannot happen. Check utils/errors/index
+                  else if (
+                    supportingTransaction.recipient !== req.body.sender
                   ) {
-                    amountPending += pendingTransaction.amount;
-                    amountToFulfill += pendingTransaction.amount;
-                    actualBalance -= pendingTransaction.amount;
-                  }
+                    returnedError = true;
+                    return createError(req, res, {
+                      error:
+                        ERRORS.USER.LOGIC
+                          .INCORRECT_RECIPIENT_LASTEST_TRANSACTION,
+                      params: {
+                        address: req.body.sender,
+                        param: "sender",
+                        value: req.body.sender,
+                        transactionSignature: txid,
+                      },
+                    });
+                  } else { */
+                  amountToFulfill -= supportingTransaction.amount;
+                  actualBalance += supportingTransaction.amount;
+                  //}
                 }
               )
             );
           });
-
-          return Promise.all(pendingTxPromises).then(() => {
+          return Promise.all(lastestTxPromises).then(() => {
             if (returnedError) {
               return;
-            } else {
-              if (amountToFulfill > 0) {
-                returnedError = true;
-                if (amountToFulfill !== copyOfAmountToFulfill)
-                  return createError(req, res, {
-                    error:
-                      ERRORS.USER.INPUT.INSUFFICIENT_FUNDS_PENDING_TRANSACTIONS,
-                    params: {
-                      address: req.body.sender,
-                      param: "amount",
-                      value: req.body.sender,
-                      amountPending,
-                      actualBalance,
-                    },
-                  });
-                else
-                  return createError(req, res, {
-                    error:
-                      ERRORS.USER.INPUT.INSUFFICIENT_FUNDS_UNEXPECTED_BALANCE,
-                    params: {
-                      address: req.body.sender,
-                      param: "amount",
-                      value: req.body.sender,
-                      actualBalance,
-                    },
-                  });
-              }
             }
-            return next();
+            const copyOfAmountToFulfill = amountToFulfill;
+            let amountPending = 0;
+            const pendingTxPromises = [];
+
+            (senderUser.pending_transactions || []).forEach((txid) => {
+              pendingTxPromises.push(
+                findByAddress(TYPE.TRANSACTION, txid, false, false, res).then(
+                  (pendingTransaction) => {
+                    /* 
+                    This cannot happen. Check utils/errors/index
+                    if (!pendingTransaction) {
+                      returnedError = true;
+                      return createError(req, res, {
+                        error:
+                          ERRORS.USER.LOGIC.NONEXISTENT_PENDING_TRANSACTION,
+                        params: {
+                          address: req.body.sender,
+                          param: "sender",
+                          value: req.body.sender,
+                          transactionSignature: txid,
+                        },
+                      });
+                    } */
+                    //The user created a pending transaction, owing money to pending's transaction recipient (until approved or rejected)
+                    if (
+                      pendingTransaction.sender === req.body.sender &&
+                      pendingTransaction.creator === req.body.sender
+                    ) {
+                      amountPending += pendingTransaction.amount;
+                      amountToFulfill += pendingTransaction.amount;
+                      actualBalance -= pendingTransaction.amount;
+                    }
+                  }
+                )
+              );
+            });
+
+            return Promise.all(pendingTxPromises).then(() => {
+              if (returnedError) {
+                return;
+              } else {
+                if (amountToFulfill > 0) {
+                  returnedError = true;
+                  if (amountToFulfill !== copyOfAmountToFulfill)
+                    return createError(req, res, {
+                      error:
+                        ERRORS.USER.INPUT
+                          .INSUFFICIENT_FUNDS_PENDING_TRANSACTIONS,
+                      params: {
+                        address: req.body.sender,
+                        param: "amount",
+                        value: req.body.sender,
+                        amountPending,
+                        actualBalance,
+                      },
+                    });
+                  /* 
+                  This cannot happen. Check utils/errors/index
+                  else
+                    return createError(req, res, {
+                      error:
+                        ERRORS.USER.INPUT.INSUFFICIENT_FUNDS_UNEXPECTED_BALANCE,
+                      params: {
+                        address: req.body.sender,
+                        param: "amount",
+                        value: req.body.sender,
+                        actualBalance,
+                      },
+                    }); */
+                }
+              }
+              return next();
+            });
           });
+        }
+      } else if (
+        recipientUser &&
+        recipientUser.permissions &&
+        recipientUser.permissions.coinbase !== true
+      ) {
+        return createError(req, res, {
+          error: ERRORS.USER.LOGIC.USER_DOES_NOT_HAVE_PERMISSIONS,
+          params: {
+            address: req.body.recipient,
+            param: "recipient",
+            value: req.body.recipient,
+            requiredPermission: "coinbase",
+          },
         });
+      } else {
+        return next();
       }
-    } else if (
-      recipientUser &&
-      recipientUser.permissions &&
-      recipientUser.permissions.coinbase !== true
-    ) {
-      return createError(req, res, {
-        error: ERRORS.USER.LOGIC.USER_DOES_NOT_HAVE_PERMISSIONS,
-        params: {
-          address: req.body.recipient,
-          param: "recipient",
-          value: req.body.recipient,
-          requiredPermission: "coinbase",
-        },
-      });
-    } else {
-      return next();
-    }
-  });
+    })
+    .catch(() =>
+      createError(req, res, {
+        error: ERRORS.SAWTOOTH.UNAVAILABLE,
+        statusCode: 503,
+        noLocation: true,
+      })
+    );
 };
 
 /**
@@ -371,8 +407,8 @@ const verifyPostTransaction = (req, res, next) => {
  */
 const validatePendingTransaction = async (req, res, next) => {
   const { address } = req.params;
-  return findByAddress(TYPE.TRANSACTION, address, false, false, res).then(
-    (transaction) => {
+  return findByAddress(TYPE.TRANSACTION, address, false, false, res)
+    .then((transaction) => {
       if (transaction.pending) {
         return next();
       }
@@ -384,8 +420,14 @@ const validatePendingTransaction = async (req, res, next) => {
           value: req.params.address,
         },
       });
-    }
-  );
+    })
+    .catch(() =>
+      createError(req, res, {
+        error: ERRORS.SAWTOOTH.UNAVAILABLE,
+        statusCode: 503,
+        noLocation: true,
+      })
+    );
 };
 
 /**
@@ -589,11 +631,17 @@ const validateTransactionUpdateRequest = [
 module.exports.validateTransactionAddress = validateTransactionAddress;
 module.exports.validateTransactionUpdateRequest = validateTransactionUpdateRequest;
 module.exports.verifyPostTransaction = [
-  /* Transactions signatures don't collide anymore.
   (req, res, next) =>
-    validateExistingTransaction(req, res, next, req.body.signature, false, {
-      location: "body",
-    }), */
+    validateExistingTransaction(
+      req,
+      res,
+      next,
+      createSignature(req.body.signature, req.body.creationDate),
+      false,
+      {
+        location: "body",
+      }
+    ),
   verifyPostTransaction,
   validateTransactionSignature,
 ];

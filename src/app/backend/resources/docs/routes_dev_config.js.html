@@ -7,7 +7,7 @@
   
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title> routes/users.js</title>
+  <title> routes/dev/config.js</title>
 
   <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -76,7 +76,7 @@
             <div class="content">
                 <header class="page-title">
                     <p>Source</p>
-                    <h1>routes/users.js</h1>
+                    <h1>routes/dev/config.js</h1>
                 </header>
                 
 
@@ -85,8 +85,8 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>/** Express router providing user related routes
- * @module routers/users
+            <pre class="prettyprint source linenums"><code>/** DEV ONLY: Express router providing dev config related routes.
+ * @module routers/dev/config
  * @requires express
  */
 
@@ -95,86 +95,39 @@
  * @const
  */
 const express = require("express");
+
 /**
- * Express.js router to mount user-related functions on.
+ * Express.js router to mount config-related functions on.
  * @type {object}
  * @const
- * @namespace usersRouter
+ * @namespace devConfig
  */
 const router = express.Router();
-const {
-  createUser,
-  deleteUser,
-  getUserByAddress,
-  getUsers,
-  updateUser,
-} = require("../controllers/users");
-
-const {
-  validateUserCreation,
-  validateUserRetrieval,
-  validateUserUpdate,
-  validateUserDelete,
-} = require("../validators/users");
+const { getConfig, changeConfig } = require("../../controllers/dev/config");
 
 /**
- * Route to retrieve users from the blockchain.
- * @name get/users
+ * DEV ONLY: Route to get current environment variables
+ * @name get/config
  * @function
- * @memberof module:routers/users~usersRouter
- * @inner
- * @param {String} path - Express path
- * @param {Function} callback - Express middleware.
- */
-router.get("/", getUsers);
-
-/**
- * Route to create a user from the blockchain.
- * @name post/users
- * @function
- * @memberof module:routers/users~usersRouter
+ * @memberof module:routers/dev/config~devConfig
  * @inner
  * @param {String} path - Express path
  * @param {Array} validationChain - Express middleware validation chain.
  * @param {Function} callback - Express middleware.
  */
-router.post("/", [...validateUserCreation], createUser);
+router.get("/", getConfig);
 
 /**
- * Route to retrieve a user from the blockchain.
- * @name get/users/:address
+ * DEV ONLY: Route to change environment variables.
+ * @name post/config
  * @function
- * @memberof module:routers/users~usersRouter
+ * @memberof module:routers/dev/config~devConfig
  * @inner
  * @param {String} path - Express path
  * @param {Array} validationChain - Express middleware validation chain.
  * @param {Function} callback - Express middleware.
  */
-router.get("/:address", [...validateUserRetrieval], getUserByAddress);
-
-/**
- * Route to update a user from the blockchain.
- * @name put/users/:address
- * @function
- * @memberof module:routers/users~usersRouter
- * @inner
- * @param {String} path - Express path
- * @param {Array} validationChain - Express middleware validation chain.
- * @param {Function} callback - Express middleware.
- */
-router.put("/:address", [...validateUserUpdate], updateUser);
-
-/**
- * Route to inactivate (disable) a user from the blockchain.
- * @name delete/users/:address
- * @function
- * @memberof module:routers/users~usersRouter
- * @inner
- * @param {String} path - Express path
- * @param {Array} validationChain - Express middleware validation chain.
- * @param {Function} callback - Express middleware.
- */
-router.delete("/:address", [...validateUserDelete], deleteUser);
+router.post("/", changeConfig);
 
 module.exports = router;
 </code></pre>

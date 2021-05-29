@@ -9,6 +9,8 @@ const {
 } = require("../controllers/common");
 const { TYPE, HTTP_METHODS } = require("../utils/constants");
 const { logFormatted, SEVERITY } = require("../utils/logger");
+const { createError } = require("../validators/common");
+const { ERRORS } = require("../utils/errors");
 
 /**
  * Returns the updated transaction object & asset in case its validity has changed.
@@ -176,8 +178,16 @@ const enforceValidTransactionsMiddleware = (req, res, next) => {
   return updateInvalidUsersTransactions("[ENFORCER]", users, transactions, res)
     .then(() => next())
     .catch((err) => {
-      logFormatted(`Enforcer failed with error`, SEVERITY.ERROR, err);
-      next();
+      logFormatted(
+        `Enforcer failed with error`,
+        SEVERITY.ERROR,
+        err.errno || err.message
+      );
+      return createError(req, res, {
+        error: ERRORS.SAWTOOTH.UNAVAILABLE,
+        statusCode: 503,
+        noLocation: true,
+      });
     });
 };
 

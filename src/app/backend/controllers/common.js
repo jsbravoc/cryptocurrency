@@ -104,34 +104,43 @@ const findByAddress = (
       addressToQuery = getUserAddress(txid);
       break;
   }
-  return queryState(addressToQuery).then((response) => {
-    if (!response) {
-      return null;
-    }
-    switch (type) {
-      case TYPE.TRANSACTION:
-        if (res && res.locals) {
-          if (!res.locals.transaction) res.locals.transaction = {};
-          res.locals.transaction[response.signature] = new Transaction(
-            response
+  return queryState(addressToQuery)
+    .then((response) => {
+      switch (type) {
+        case TYPE.TRANSACTION:
+          if (res && res.locals) {
+            if (!res.locals.transaction) res.locals.transaction = {};
+            res.locals.transaction[response.signature] = new Transaction(
+              response
+            );
+          }
+          response = new Transaction(response).toObject(
+            removeSignature,
+            removeType
           );
-        }
-        response = new Transaction(response).toObject(
-          removeSignature,
-          removeType
-        );
 
-        break;
-      case TYPE.USER:
-        if (res && res.locals) {
-          if (!res.locals.user) res.locals.user = {};
-          res.locals.user[response.address] = new User(response);
-        }
-        response = new User(response).toObject(removeSignature, removeType);
-        break;
-    }
-    return response;
-  });
+          break;
+        case TYPE.USER:
+          if (res && res.locals) {
+            if (!res.locals.user) res.locals.user = {};
+            res.locals.user[response.address] = new User(response);
+          }
+          response = new User(response).toObject(removeSignature, removeType);
+          break;
+      }
+      return response;
+    })
+    .catch((err) => {
+      //State not found. There is no state data at the address specified
+      if (
+        err.response &&
+        err.response.data &&
+        err.response.data.error &&
+        err.response.data.error.code === 75
+      ) {
+        return null;
+      } else return Promise.reject(err);
+    });
 };
 
 /**
@@ -385,14 +394,11 @@ const putAsset = (type, httpMethod, source, req, res) => {
       asset = new User(req.body);
       break;
   }
-  return _putAsset(type, httpMethod, source, asset)
-    .then(({ responseCode, msg, payload }) => {
+  return _putAsset(type, httpMethod, source, asset).then(
+    ({ responseCode, msg, payload }) => {
       return res.status(responseCode).json({ msg, payload });
-    })
-    .catch((err) => {
-      logFormatted(`${source} | BATCH Response: ${err}`, SEVERITY.ERROR);
-      return res.status(500).json({ err });
-    });
+    }
+  );
 };
 
 //#endregion

@@ -4,7 +4,7 @@
  */
 
 /**
- * express module
+ * express module.
  * @const
  */
 const express = require("express");

@@ -108,24 +108,15 @@ module.exports.sendTransaction = async function (transactions) {
   );
 };
 
-module.exports.queryState = async function (address) {
+module.exports.queryState = (address) => {
   const params = {
     headers: { "Content-Type": "application/json" },
   };
-  let response;
-  try {
-    response = await axios.get(
-      `${process.env.SAWTOOTH_REST}/state/${address}`,
-      params
-    );
-  } catch (error) {
-    return null;
-  }
-  if (!response || !response.data || !response.data.data) {
-    return null;
-  }
-
-  const base = Buffer.from(response.data.data, "base64");
-  const stateValue = JSON.parse(base.toString("utf8"));
-  return stateValue;
+  return axios
+    .get(`${process.env.SAWTOOTH_REST}/state/${address}`, params)
+    .then((response) => {
+      const base = Buffer.from(response.data.data, "base64");
+      const stateValue = JSON.parse(base.toString("utf8"));
+      return stateValue;
+    });
 };

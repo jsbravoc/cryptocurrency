@@ -1,10 +1,10 @@
-/** Express router providing user related routes
+/** DEV ONLY: Express router providing dev config related routes.
  * @module routers/dev/config
  * @requires express
  */
 
 /**
- * express module
+ * express module.
  * @const
  */
 const express = require("express");
@@ -19,7 +19,7 @@ const router = express.Router();
 const { getConfig, changeConfig } = require("../../controllers/dev/config");
 
 /**
- * Route to get current environment variables
+ * DEV ONLY: Route to get current environment variables
  * @name get/config
  * @function
  * @memberof module:routers/dev/config~devConfig

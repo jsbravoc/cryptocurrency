@@ -58,7 +58,7 @@
           "msg": "El usuario no tiene permisos para esta operación. Por favor, contacte al administrador para más información."
         },
         "USER_DOES_NOT_HAVE_TRANSFER_PERMISSIONS": {
-          "error": "El usuario con la dirección {{address}} no tiene permiso de transferencia_a {{recipient}}",
+          "error": "El usuario con la dirección {{address}} no tiene permiso de transferencia hacia el usuario {{recipient}}",
           "msg": "El usuario no tiene permisos para esta operación. Por favor, contacte al administrador para más información."
         },
         "NONEXISTENT_LASTEST_TRANSACTION": {
@@ -86,10 +86,12 @@
           "msg": "Se esperaba el parámetro {{property}}, pero no se recibió"
         },
         "MISSING_REQUIRED_INPUT": {
-          "error": "{{message}}"
+          "error": "El método requería el parámetro {{parameter}} pero se recibió undefined",
+          "msg": "El método requería el parámetro {{parameter}} pero se recibió undefined"
         },
         "INCORRECT_INPUT": {
-          "error": "{{message}}"
+          "error": "La propiedad {{propertyName}} recibida es inválida",
+          "msg": "La propiedad {{propertyName}} recibida es inválida"
         },
         "TRANSACTION_EXISTS": {
           "error": "La transacción con la firma {{signature}} ya existe",

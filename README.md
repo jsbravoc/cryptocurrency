@@ -142,7 +142,7 @@ docker-compose down
 
 ### Front-end integration:
 
-This application has been tested successfully with a front-end project that uses [Metamask](https://metamask.io/) in order to sign the transactions with the public/private key pair. However, if you want to use it without Metamask, be sure to read Metamask's signature implementation (namely Ethereum's `eth_sign` function) (See [getSignature function](https://github.com/jsbravoc/cryptocurrency/blob/main/src/app/backend/test/cryptocurrency.js#L62) in test/cryptocurrency) and sign the transactions in the same manner.
+This application has been tested successfully with a front-end project that uses [Metamask](https://metamask.io/) in order to sign the transactions with the public/private key pair. However, if you want to use it without Metamask, be sure to read Metamask's signature implementation (namely Ethereum's `eth_sign` function) (See [getSignature function](https://github.com/jsbravoc/cryptocurrency/blob/main/src/app/backend/test/cryptocurrency.js#L77) in test/cryptocurrency) and sign the transactions in the same manner.
 
 Recommended readings:
 * [Metamask docs](https://docs.metamask.io/guide/signing-data.html#a-brief-history)

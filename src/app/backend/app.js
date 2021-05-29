@@ -7,14 +7,14 @@ const i18next = require("i18next");
 const Backend = require("i18next-node-fs-backend");
 const i18nextMiddleware = require("i18next-express-middleware");
 const { SEVERITY, logFormatted } = require("./utils/logger");
-
+const { LOCAL_ADDRESS } = require("./utils/constants");
 const app = express();
 
 const apiAddress = `http://${require("ip").address()}:${
   process.env.PORT || "3000"
 }`;
 if (process.env.CLEAR_STARTING_LOGS === "true") {
-  logFormatted("Clearing the console in 5 seconds", SEVERITY.BOLD);
+  logFormatted("Clearing the console in 5 seconds", SEVERITY.NONE);
   setTimeout(() => {
     console.clear();
     logFormatted("Console cleared successfully", SEVERITY.BOLD);
@@ -27,7 +27,7 @@ if (process.env.HIDE_ENV_VARIABLES !== "true") {
   );
   logFormatted("Loaded environment variables", SEVERITY.BOLD, result.parsed);
 }
-logFormatted(`Server available at ${apiAddress}`, SEVERITY.URL);
+logFormatted(`Server locally available at ${apiAddress}`, SEVERITY.URL);
 
 if (process.env.DEBUG === "true") {
   logFormatted(
@@ -61,12 +61,14 @@ if (process.env.NODE_ENV !== "production") {
   app.use("/api-docs", require("./routes/docs"));
   const jsDocs = path.join(__dirname, "/resources/docs/");
   app.use("/docs", express.static(jsDocs));
+  const localAddress = `http://${LOCAL_ADDRESS}:${process.env.PORT || "3000"}`;
+  logFormatted(`Documentation available at ${localAddress}/docs`, SEVERITY.URL);
   if (process.env.ALLOW_DEV_ENV_CHANGES === "true") {
+    app.use("/config", require("./routes/dev/config"));
     logFormatted(
-      "Warning: allowing environment variables to be changed by method POST in /config. This is **only** recommended for testing, not for production.",
+      "Warning: allowing environment variables to be changed by method POST in /config. This is **only** recommended for testing, not for production. Set ALLOW_DEV_ENV_CHANGES=false to disable this feature.",
       SEVERITY.ERROR
     );
-    app.use("/config", require("./routes/dev/config"));
   }
 }
 

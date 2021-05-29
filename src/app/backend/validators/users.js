@@ -66,6 +66,21 @@ const inputValidation = validate([
       })
     )
     .bail(),
+  body("public_key").custom((value, { req }) => {
+    //public key stored in 264 bits (66 hex digits)
+    if (value.length !== 66)
+      return Promise.reject(
+        createErrorObj(req, {
+          error: ERRORS.USER.INPUT.INCORRECT_INPUT,
+          params: {
+            propertyName: "public_key",
+            value,
+            param: "public_key",
+          },
+        })
+      );
+    return true;
+  }),
   body("description").optional({ checkFalsy: true, checkNull: true }).trim(),
   body("role").optional({ checkFalsy: true, checkNull: true }).trim(),
   body("balance").customSanitizer(() => 0),

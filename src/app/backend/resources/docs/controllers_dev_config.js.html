@@ -7,7 +7,7 @@
   
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title> routes/users.js</title>
+  <title> controllers/dev/config.js</title>
 
   <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -76,7 +76,7 @@
             <div class="content">
                 <header class="page-title">
                     <p>Source</p>
-                    <h1>routes/users.js</h1>
+                    <h1>controllers/dev/config.js</h1>
                 </header>
                 
 
@@ -85,98 +85,76 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>/** Express router providing user related routes
- * @module routers/users
- * @requires express
+            <pre class="prettyprint source linenums"><code>/**
+ * DEV ONLY: Get environment variables.
+ *
+ * @param {Request} req - Http request object.
+ * @param {Response} res - Response object to handle Express request.
  */
+const getConfig = (req, res) => {
+  return res.status(200).json({
+    msg: "Current config",
+    variables: {
+      SAWTOOTH_PRIVATE_KEY: process.env.SAWTOOTH_PRIVATE_KEY,
+      SAWTOOTH_REST: process.env.SAWTOOTH_REST,
+      SAWTOOTH_REST_TIMEOUT: process.env.SAWTOOTH_REST_TIMEOUT,
+      VALIDATOR: process.env.VALIDATOR,
+      ENABLE_LOGGING: process.env.ENABLE_LOGGING,
+      DISABLE_INTEGRITY_VALIDATION: process.env.DISABLE_INTEGRITY_VALIDATION,
+      HIDE_ENV_VARIABLES: process.env.HIDE_ENV_VARIABLES,
+      DELAY_ENFORCER_MS: process.env.DELAY_ENFORCER_MS,
+    },
+  });
+};
 
 /**
- * express module.
- * @const
+ * DEV ONLY: Change environment variables with a single request.
+ *
+ * @param {Request} req - Http request object.
+ * @param {Response} res - Response object to handle Express request.
  */
-const express = require("express");
-/**
- * Express.js router to mount user-related functions on.
- * @type {object}
- * @const
- * @namespace usersRouter
- */
-const router = express.Router();
-const {
-  createUser,
-  deleteUser,
-  getUserByAddress,
-  getUsers,
-  updateUser,
-} = require("../controllers/users");
-
-const {
-  validateUserCreation,
-  validateUserRetrieval,
-  validateUserUpdate,
-  validateUserDelete,
-} = require("../validators/users");
-
-/**
- * Route to retrieve users from the blockchain.
- * @name get/users
- * @function
- * @memberof module:routers/users~usersRouter
- * @inner
- * @param {String} path - Express path
- * @param {Function} callback - Express middleware.
- */
-router.get("/", getUsers);
-
-/**
- * Route to create a user from the blockchain.
- * @name post/users
- * @function
- * @memberof module:routers/users~usersRouter
- * @inner
- * @param {String} path - Express path
- * @param {Array} validationChain - Express middleware validation chain.
- * @param {Function} callback - Express middleware.
- */
-router.post("/", [...validateUserCreation], createUser);
-
-/**
- * Route to retrieve a user from the blockchain.
- * @name get/users/:address
- * @function
- * @memberof module:routers/users~usersRouter
- * @inner
- * @param {String} path - Express path
- * @param {Array} validationChain - Express middleware validation chain.
- * @param {Function} callback - Express middleware.
- */
-router.get("/:address", [...validateUserRetrieval], getUserByAddress);
-
-/**
- * Route to update a user from the blockchain.
- * @name put/users/:address
- * @function
- * @memberof module:routers/users~usersRouter
- * @inner
- * @param {String} path - Express path
- * @param {Array} validationChain - Express middleware validation chain.
- * @param {Function} callback - Express middleware.
- */
-router.put("/:address", [...validateUserUpdate], updateUser);
-
-/**
- * Route to inactivate (disable) a user from the blockchain.
- * @name delete/users/:address
- * @function
- * @memberof module:routers/users~usersRouter
- * @inner
- * @param {String} path - Express path
- * @param {Array} validationChain - Express middleware validation chain.
- * @param {Function} callback - Express middleware.
- */
-router.delete("/:address", [...validateUserDelete], deleteUser);
-
-module.exports = router;
+const changeConfig = (req, res) => {
+  if (req.body) {
+    const {
+      SAWTOOTH_PRIVATE_KEY,
+      SAWTOOTH_REST,
+      SAWTOOTH_REST_TIMEOUT,
+      VALIDATOR,
+      ENABLE_LOGGING,
+      DISABLE_INTEGRITY_VALIDATION,
+      HIDE_ENV_VARIABLES,
+      DELAY_ENFORCER_MS,
+    } = req.body;
+    process.env.SAWTOOTH_PRIVATE_KEY =
+      SAWTOOTH_PRIVATE_KEY || process.env.SAWTOOTH_PRIVATE_KEY;
+    process.env.SAWTOOTH_REST = SAWTOOTH_REST || process.env.SAWTOOTH_REST;
+    process.env.SAWTOOTH_REST_TIMEOUT =
+      SAWTOOTH_REST_TIMEOUT || process.env.SAWTOOTH_REST_TIMEOUT;
+    process.env.VALIDATOR = VALIDATOR || process.env.VALIDATOR;
+    process.env.ENABLE_LOGGING = ENABLE_LOGGING || process.env.ENABLE_LOGGING;
+    process.env.DISABLE_INTEGRITY_VALIDATION =
+      DISABLE_INTEGRITY_VALIDATION || process.env.DISABLE_INTEGRITY_VALIDATION;
+    process.env.HIDE_ENV_VARIABLES =
+      HIDE_ENV_VARIABLES || process.env.HIDE_ENV_VARIABLES;
+    process.env.DELAY_ENFORCER_MS =
+      DELAY_ENFORCER_MS || process.env.DELAY_ENFORCER_MS;
+  }
+  return res.status(200).json({
+    msg: "Ok",
+    variables: {
+      SAWTOOTH_PRIVATE_KEY: process.env.SAWTOOTH_PRIVATE_KEY,
+      SAWTOOTH_REST: process.env.SAWTOOTH_REST,
+      SAWTOOTH_REST_TIMEOUT: process.env.SAWTOOTH_REST_TIMEOUT,
+      VALIDATOR: process.env.VALIDATOR,
+      ENABLE_LOGGING: process.env.ENABLE_LOGGING,
+      DISABLE_INTEGRITY_VALIDATION: process.env.DISABLE_INTEGRITY_VALIDATION,
+      HIDE_ENV_VARIABLES: process.env.HIDE_ENV_VARIABLES,
+      DELAY_ENFORCER_MS: process.env.DELAY_ENFORCER_MS,
+    },
+  });
+};
+module.exports.getConfig = getConfig;
+module.exports.changeConfig = changeConfig;
 </code></pre>
         </article>
     </section>

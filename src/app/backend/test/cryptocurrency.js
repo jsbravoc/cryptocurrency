@@ -12,10 +12,12 @@ const Transaction = require("../models/Transaction");
 const CRYPTO_ENDPOINT = "/cryptocurrency";
 const ENFORCER_ENDPOINT = "/validate";
 const USERS_ENDPOINT = "/users";
+const CONFIG_ENDPOINT = "/config";
 const { expect } = chai;
 const secp256k1 = require("secp256k1");
 const ethers = require("ethers");
 const users = {
+  W10000: new User({ address: uuidv4() }),
   W1000: new User({ address: uuidv4() }),
   W0: new User({ address: uuidv4() }),
   NoCoinbase: new User({ address: uuidv4() }),
@@ -57,6 +59,19 @@ for (const name in users) {
     user.private_key = Buffer.from(privKey).toString("hex");
   }
 }
+
+const createFakePublicKey = (length = 66) => {
+  const result = [];
+  const characters =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  const charactersLength = characters.length;
+  for (let i = 0; i < length; i++) {
+    result.push(
+      characters.charAt(Math.floor(Math.random() * charactersLength))
+    );
+  }
+  return result.join("");
+};
 
 //Note: This should be managed by the crypto wallet.
 const getSignature = (user, signatureObj, isTransaction = true) => {
@@ -137,6 +152,7 @@ const createTransaction = ({
   callback = null,
   valid_thru = null,
   description = null,
+  creationDate = null,
 }) => {
   let senderAddress;
   let creatorAddress;
@@ -155,6 +171,9 @@ const createTransaction = ({
   }
   if (description) {
     request.description = description;
+  }
+  if (creationDate) {
+    request.creationDate = creationDate;
   }
   if (senderAlias) {
     senderAddress = users[senderAlias]
@@ -206,7 +225,6 @@ describe(`Cryptocurrency Test Suite`, () => {
 
     const createdUserCallback = ({ res, alias, callback }) => {
       const address = users[alias].address;
-      console.log(res.body);
       return expect(res).to.satisfy((res) => {
         createdVariables.transactions.user[address] = res.body;
         if (res.statusCode === 201) {
@@ -375,7 +393,7 @@ describe(`Cryptocurrency Test Suite`, () => {
                       pending,
                       err,
                       res,
-                      callback: () => setTimeout(done, 5000),
+                      callback: () => setTimeout(done, 3500),
                     }),
                 });
               }, 2500),
@@ -625,6 +643,25 @@ describe(`Cryptocurrency Test Suite`, () => {
               },
             });
           });
+          it("Creation date transaction date without ISO 8061 format should throw an error", (done) => {
+            createTransaction({
+              senderAlias: "Anyone",
+              recipientAlias: "Another User",
+              amount: 10,
+              creationDate: "2021-17-04",
+              callback: ({ res }) => {
+                expect(res.body.errors).to.be.an("array");
+                expect(
+                  _.some(res.body.errors, {
+                    param: "creationDate",
+                    location: "body",
+                  })
+                ).to.be.true;
+                expect(res).to.have.status(400);
+                done();
+              },
+            });
+          });
           it("Past valid thru transaction date should throw an error", (done) => {
             createTransaction({
               senderAlias: "Anyone",
@@ -720,20 +757,18 @@ describe(`Cryptocurrency Test Suite`, () => {
                 done();
               });
           });
-          /*  Transactions signatures don't collide anymore.
-          it("Already existing transaction with same signature should throw an error", (done) => {
-            chai
-              .request(API_URL)
-              .post(`${CRYPTO_ENDPOINT}`)
-              .send({
-                amount: 10,
-                recipient: users.W1000.address,
-                signature:
-                  createdVariables.transactions.transaction[
-                    users.CantTransferW1000.address
-                  ].W0.payload.signature,
-              })
-              .end(function (err, res) {
+          it("Already existing transaction with same signature & contents should throw an error", (done) => {
+            /**
+             * Note that to avoid transaction address collisions, the transaction address is the hash of the creationDate & its contents
+             * Thus, a same exact transaction with the same creationDate will collide and throw an error.
+             */
+            createTransaction({
+              recipientAlias: "W1000",
+              amount: 1000,
+              creationDate:
+                createdVariables.transactions.transaction[users.W1000.address]
+                  .coinbase.payload.creationDate,
+              callback: ({ res }) => {
                 expect(res.body.errors).to.be.an("array");
                 expect(
                   _.some(res.body.errors, {
@@ -743,8 +778,9 @@ describe(`Cryptocurrency Test Suite`, () => {
                 ).to.be.true;
                 expect(res).to.have.status(400);
                 done();
-              });
-          }); */
+              },
+            });
+          });
           it("Non existing sender should throw an error", (done) => {
             createTransaction({
               senderAlias: uuidv4(),
@@ -1699,7 +1735,7 @@ describe(`Cryptocurrency Test Suite`, () => {
             chai
               .request(API_URL)
               .post(`${USERS_ENDPOINT}`)
-              .send({ public_key: uuidv4() })
+              .send({ public_key: createFakePublicKey() })
               .end(function (err, res) {
                 expect(res.body.errors).to.be.an("array");
                 expect(
@@ -1737,7 +1773,7 @@ describe(`Cryptocurrency Test Suite`, () => {
               .post(`${USERS_ENDPOINT}`)
               .send({
                 address: uuidv4(),
-                public_key: uuidv4(),
+                public_key: createFakePublicKey(),
                 permissions: { coinbase: "TRUE" },
               })
               .end(function (err, res) {
@@ -1758,7 +1794,7 @@ describe(`Cryptocurrency Test Suite`, () => {
               .post(`${USERS_ENDPOINT}`)
               .send({
                 address: uuidv4(),
-                public_key: uuidv4(),
+                public_key: createFakePublicKey(),
                 permissions: {
                   transfer_to: { [users.W1000.address]: ["true"] },
                 },
@@ -1781,7 +1817,7 @@ describe(`Cryptocurrency Test Suite`, () => {
               .post(`${USERS_ENDPOINT}`)
               .send({
                 address: uuidv4(),
-                public_key: uuidv4(),
+                public_key: createFakePublicKey(),
                 permissions: { coinbase: true },
                 return_to: { default: [uuidv4()] },
               })
@@ -1797,6 +1833,28 @@ describe(`Cryptocurrency Test Suite`, () => {
                 done();
               });
           });
+          it("public_key value that is not a 66-character string should throw an error", (done) => {
+            chai
+              .request(API_URL)
+              .post(`${USERS_ENDPOINT}`)
+              .send({
+                address: uuidv4(),
+                public_key: uuidv4(),
+                permissions: { coinbase: true },
+                return_to: { default: [uuidv4()] },
+              })
+              .end(function (err, res) {
+                expect(res.body.errors).to.be.an("array");
+                expect(
+                  _.some(res.body.errors, {
+                    param: "public_key",
+                    location: "body",
+                  })
+                ).to.be.true;
+                expect(res).to.have.status(400);
+                done();
+              });
+          });
         });
         describe("User validation", () => {
           it("Already existing user with same address should throw an error", (done) => {
@@ -1805,7 +1863,7 @@ describe(`Cryptocurrency Test Suite`, () => {
               .post(`${USERS_ENDPOINT}`)
               .send({
                 address: users.W1000.address,
-                public_key: users.W1000.address,
+                public_key: createFakePublicKey(),
               })
               .end(function (err, res) {
                 expect(res.body.errors).to.be.an("array");
@@ -1825,7 +1883,7 @@ describe(`Cryptocurrency Test Suite`, () => {
               .post(`${USERS_ENDPOINT}`)
               .send({
                 address: uuidv4(),
-                public_key: uuidv4(),
+                public_key: createFakePublicKey(),
                 permissions: { coinbase: true },
                 return_to: { default: uuidv4() },
               })
@@ -1852,7 +1910,7 @@ describe(`Cryptocurrency Test Suite`, () => {
             .post(`${USERS_ENDPOINT}`)
             .send({
               address: uuidv4(),
-              public_key: uuidv4(),
+              public_key: createFakePublicKey(),
               permissions: { coinbase: true },
             })
             .end(function (err, res) {
@@ -2065,6 +2123,25 @@ describe(`Cryptocurrency Test Suite`, () => {
                 done();
               });
           });
+          it("User without return to addresses should throw an error", (done) => {
+            chai
+              .request(API_URL)
+              .delete(`${USERS_ENDPOINT}/${users.W0.address}`)
+              .send({
+                reason: "inactive",
+              })
+              .end(function (err, res) {
+                expect(res.body.errors).to.be.an("array");
+                expect(
+                  _.some(res.body.errors, {
+                    param: "reason",
+                    location: "body",
+                  })
+                ).to.be.true;
+                expect(res).to.have.status(400);
+                done();
+              });
+          });
         });
       });
       describe("User success validations", function () {
@@ -2081,6 +2158,199 @@ describe(`Cryptocurrency Test Suite`, () => {
               expect(res).to.have.status(201);
               done();
             });
+        });
+      });
+    });
+  });
+  describe(`${CONFIG_ENDPOINT} Tests`, () => {
+    describe(`GET ${CONFIG_ENDPOINT}`, () => {
+      describe(`Successful requests`, () => {
+        describe("Get all environment variables", () => {
+          it("All environment variables should be returned", (done) => {
+            chai
+              .request(API_URL)
+              .get(`${CONFIG_ENDPOINT}`)
+              .end(function (err, res) {
+                expect(res).to.have.status(200);
+                expect(res.body.variables).to.be.an("object");
+                done();
+              });
+          });
+        });
+      });
+    });
+    describe(`POST ${CONFIG_ENDPOINT}`, () => {
+      describe(`Successful requests`, () => {
+        describe("Get all environment variable", () => {
+          it("Empty POST request should return all environment variables", (done) => {
+            chai
+              .request(API_URL)
+              .post(`${CONFIG_ENDPOINT}`)
+              .end(function (err, res) {
+                expect(res).to.have.status(200);
+                expect(res.body.variables).to.be.an("object");
+                done();
+              });
+          });
+        });
+        describe("Change environment variable", () => {
+          it("SAWTOOTH_REST environment variable should be changed", (done) => {
+            const newUrl = `http://${uuidv4()}`;
+            chai
+              .request(API_URL)
+              .post(`${CONFIG_ENDPOINT}`)
+              .send({ SAWTOOTH_REST: newUrl })
+              .end(function (err, res) {
+                expect(res).to.have.status(200);
+                expect(res.body.variables.SAWTOOTH_REST).to.eq(newUrl);
+                done();
+              });
+          });
+        });
+      });
+    });
+  });
+  describe(`Hyperledger Sawtooth Error Tests`, function () {
+    this.timeout(8000);
+    this.slow(5000);
+    describe(`${CRYPTO_ENDPOINT} errors test`, () => {
+      describe(`Sawtooth-dependant requests`, () => {
+        describe(`GET ${CRYPTO_ENDPOINT}`, () => {
+          it("Should throw an error if Sawtooth REST connection fails", (done) => {
+            chai
+              .request(API_URL)
+              .get(`${CRYPTO_ENDPOINT}`)
+              .end(function (err, res) {
+                expect(res).to.have.status(503);
+                done();
+              });
+          });
+        });
+        describe(`GET ${CRYPTO_ENDPOINT}/:address`, () => {
+          it("Should throw an error if Sawtooth REST connection fails", (done) => {
+            chai
+              .request(API_URL)
+              .get(
+                `${CRYPTO_ENDPOINT}/${
+                  createdVariables.transactions.transaction[users.W1000.address]
+                    .coinbase.payload.signature
+                }`
+              )
+              .end(function (err, res) {
+                expect(res).to.have.status(503);
+                done();
+              });
+          });
+        });
+        describe(`POST ${CRYPTO_ENDPOINT}`, () => {
+          it("Should throw an error if Sawtooth REST connection fails", (done) => {
+            createTransaction({
+              amount: 1,
+              senderAlias: "W1000",
+              recipientAlias: "W0",
+              pending: true,
+              description: "Expiring transaction",
+              callback: ({ res }) => {
+                expect(res).to.have.status(503);
+                done();
+              },
+            });
+          });
+        });
+        describe(`PUT ${CRYPTO_ENDPOINT}`, () => {
+          it("Should throw an error if Sawtooth REST connection fails", (done) => {
+            chai
+              .request(API_URL)
+              .put(
+                `${CRYPTO_ENDPOINT}/${
+                  createdVariables.transactions.transaction[users.W1000.address]
+                    .coinbase.payload.signature
+                }`
+              )
+              .end(function (err, res) {
+                expect(res).to.have.status(503);
+                done();
+              });
+          });
+        });
+      });
+    });
+    describe(`${USERS_ENDPOINT} errors test`, () => {
+      describe(`Sawtooth-dependant requests`, () => {
+        describe(`GET ${USERS_ENDPOINT}`, () => {
+          it("Should throw an error if Sawtooth REST connection fails", (done) => {
+            chai
+              .request(API_URL)
+              .get(`${USERS_ENDPOINT}`)
+              .end(function (err, res) {
+                expect(res).to.have.status(503);
+                done();
+              });
+          });
+        });
+        describe(`GET ${USERS_ENDPOINT}/:address`, () => {
+          it("Should throw an error if Sawtooth REST connection fails", (done) => {
+            chai
+              .request(API_URL)
+              .get(`${USERS_ENDPOINT}/${users.W1000.address}`)
+              .end(function (err, res) {
+                expect(res).to.have.status(503);
+                done();
+              });
+          });
+        });
+        describe(`POST ${USERS_ENDPOINT}`, () => {
+          it("Should throw an error if Sawtooth REST connection fails", (done) => {
+            createUser({
+              alias: "W10000",
+              coinbasePermission: true,
+              callback: ({ res }) => {
+                expect(res).to.have.status(503);
+                done();
+              },
+            });
+          });
+        });
+        describe(`PUT ${USERS_ENDPOINT}/:address`, () => {
+          it("Should throw an error if Sawtooth REST connection fails", (done) => {
+            chai
+              .request(API_URL)
+              .put(`${USERS_ENDPOINT}/${users.W1000.address}`)
+              .send({
+                permissions: { coinbase: true },
+              })
+              .end(function (err, res) {
+                expect(res).to.have.status(503);
+                done();
+              });
+          });
+        });
+        describe(`DELETE ${USERS_ENDPOINT}`, () => {
+          it("Should throw an error if Sawtooth REST connection fails", (done) => {
+            chai
+              .request(API_URL)
+              .delete(`${USERS_ENDPOINT}/${users.W1000.address}`)
+              .send({ reason: "default" })
+              .end(function (err, res) {
+                expect(res).to.have.status(503);
+                done();
+              });
+          });
+        });
+      });
+    });
+    describe(`${ENFORCER_ENDPOINT} errors test`, () => {
+      describe(`Sawtooth-dependant requests`, () => {
+        describe(`POST ${ENFORCER_ENDPOINT}`, () => {
+          it("Should throw an error if Sawtooth REST connection fails", (done) => {
+            chai
+              .request(API_URL)
+              .post(`${ENFORCER_ENDPOINT}`)
+              .end(function (err, res) {
+                expect(res).to.have.status(503);
+                done();
+              });
+          });
         });
       });
     });
