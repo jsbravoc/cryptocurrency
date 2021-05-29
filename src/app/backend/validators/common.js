@@ -93,8 +93,6 @@ const validateAssetExistence = (
       errorType = ERRORS.USER;
       identifier = "address";
       break;
-    default:
-      return Promise.reject(`Missing type ${type}`);
   }
   if (txid && txid !== "") {
     return findByAddress(type, txid, false, false, res)
@@ -152,8 +150,6 @@ const validateAssetExistence = (
                     value: txid,
                   },
                 };
-              break;
-            default:
               break;
           }
           return Promise.reject({ callback: createError(req, res, errorObj) });

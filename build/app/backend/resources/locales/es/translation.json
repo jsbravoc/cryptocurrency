@@ -3,12 +3,12 @@
     "USER": {
       "INPUT": {
         "NO_INPUT": {
-          "error": "Se esperaba el parámetro de usuario {{property}}, pero no se recibió",
-          "msg": "Se esperaba el parámetro {{property}}, pero no se recibió"
+          "error": "Se esperaba el parámetro de usuario {{propertyName}}, pero no se recibió",
+          "msg": "Se esperaba el parámetro {{propertyName}}, pero no se recibió"
         },
         "MISSING_REQUIRED_INPUT": {
-          "error": "El método requería el parámetro {{parameter}} pero se recibió undefined",
-          "msg": "El método requería el parámetro {{parameter}} pero se recibió undefined"
+          "error": "El método requería el parámetro {{propertyName}} pero se recibió undefined",
+          "msg": "El método requería el parámetro {{propertyName}} pero se recibió undefined"
         },
 
         "INCORRECT_INPUT": {
@@ -82,12 +82,12 @@
     "TRANSACTION": {
       "INPUT": {
         "NO_INPUT": {
-          "error": "Se esperaba el parámetro de transacción {{propiedad}}, pero se ha recibido indefinido",
-          "msg": "Se esperaba el parámetro {{property}}, pero no se recibió"
+          "error": "Se esperaba el parámetro de transacción {{propertyName}}, pero se ha recibido indefinido",
+          "msg": "Se esperaba el parámetro {{propertyName}}, pero no se recibió"
         },
         "MISSING_REQUIRED_INPUT": {
-          "error": "El método requería el parámetro {{parameter}} pero se recibió undefined",
-          "msg": "El método requería el parámetro {{parameter}} pero se recibió undefined"
+          "error": "El método requería el parámetro {{propertyName}} pero se recibió undefined",
+          "msg": "El método requería el parámetro {{propertyName}} pero se recibió undefined"
         },
         "INCORRECT_INPUT": {
           "error": "La propiedad {{propertyName}} recibida es inválida",

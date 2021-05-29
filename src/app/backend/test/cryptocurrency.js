@@ -832,6 +832,24 @@ describe(`Cryptocurrency Test Suite`, () => {
               },
             });
           });
+          it("Inactive sender should throw an error", (done) => {
+            createTransaction({
+              recipientAlias: "W1000",
+              senderAlias: "Inactive",
+              amount: 1,
+              callback: ({ res }) => {
+                expect(res.body.errors).to.be.an("array");
+                expect(
+                  _.some(res.body.errors, {
+                    param: "sender",
+                    location: "body",
+                  })
+                ).to.be.true;
+                expect(res).to.have.status(400);
+                done();
+              },
+            });
+          });
           it("Insufficient balance should throw an error", (done) => {
             createTransaction({
               senderAlias: "W1000",
@@ -1000,8 +1018,108 @@ describe(`Cryptocurrency Test Suite`, () => {
         });
       });
     });
-    describe(`PUT ${CRYPTO_ENDPOINT}/:address`, () => {
+    describe(`PUT ${CRYPTO_ENDPOINT}/:address`, function () {
+      this.slow(8000);
+      this.timeout(10000);
       describe(`Transaction error validations`, () => {
+        describe("Empty values", () => {
+          it("Empty request should throw an error", (done) => {
+            createTransaction({
+              amount: 1,
+              senderAlias: "W1000",
+              recipientAlias: "ToDeleteW1000",
+              pending: true,
+              callback: ({ res }) => {
+                expect(res).to.have.status(201);
+                const createdTransaction = res.body.payload;
+                setTimeout(() => {
+                  chai
+                    .request(API_URL)
+                    .put(`${CRYPTO_ENDPOINT}/${createdTransaction.signature}`)
+                    .end(function (err, res) {
+                      expect(res.body.errors).to.be.an("array");
+                      expect(res).to.have.status(400);
+                      done();
+                    });
+                }, 3500);
+              },
+            });
+          });
+          it("Approving a transaction without signature should throw an error", (done) => {
+            createTransaction({
+              amount: 1,
+              senderAlias: "W1000",
+              recipientAlias: "ToDeleteW1000",
+              pending: true,
+              callback: ({ res }) => {
+                expect(res).to.have.status(201);
+                const createdTransaction = res.body.payload;
+                setTimeout(() => {
+                  chai
+                    .request(API_URL)
+                    .put(`${CRYPTO_ENDPOINT}/${createdTransaction.signature}`)
+                    .query({ approve: true })
+                    .end(function (err, res) {
+                      expect(res.body.errors).to.be.an("array");
+                      expect(res).to.have.status(400);
+                      done();
+                    });
+                }, 3500);
+              },
+            });
+          });
+          it("Updating a transaction without signature should throw an error", (done) => {
+            createTransaction({
+              amount: 1,
+              senderAlias: "W1000",
+              recipientAlias: "ToDeleteW1000",
+              pending: true,
+              callback: ({ res }) => {
+                expect(res).to.have.status(201);
+                const createdTransaction = res.body.payload;
+                setTimeout(() => {
+                  chai
+                    .request(API_URL)
+                    .put(`${CRYPTO_ENDPOINT}/${createdTransaction.signature}`)
+                    .query({ description: "new description" })
+                    .end(function (err, res) {
+                      expect(res.body.errors).to.be.an("array");
+                      expect(res).to.have.status(400);
+                      done();
+                    });
+                }, 3500);
+              },
+            });
+          });
+          it("Updating a transaction without description should throw an error", (done) => {
+            createTransaction({
+              amount: 1,
+              senderAlias: "W1000",
+              recipientAlias: "ToDeleteW1000",
+              pending: true,
+              callback: ({ res }) => {
+                expect(res).to.have.status(201);
+                const createdTransaction = res.body.payload;
+                const signature = getSignature(
+                  users.W1000,
+                  { description: "new description" },
+                  false
+                );
+                setTimeout(() => {
+                  chai
+                    .request(API_URL)
+                    .put(`${CRYPTO_ENDPOINT}/${createdTransaction.signature}`)
+                    .query({ signature })
+                    .end(function (err, res) {
+                      expect(res.body.errors).to.be.an("array");
+                      expect(res).to.have.status(400);
+                      done();
+                    });
+                }, 3500);
+              },
+            });
+          });
+        });
         describe("Value validation", () => {
           it("Non existent transaction should throw an error", (done) => {
             chai
@@ -1012,6 +1130,34 @@ describe(`Cryptocurrency Test Suite`, () => {
                 expect(res).to.have.status(400);
                 done();
               });
+          });
+          it("Non boolean approve query parameter should throw an error", (done) => {
+            createTransaction({
+              amount: 1,
+              senderAlias: "W1000",
+              recipientAlias: "ToDeleteW1000",
+              pending: true,
+              callback: ({ res }) => {
+                expect(res).to.have.status(201);
+                const createdTransaction = res.body.payload;
+                setTimeout(() => {
+                  const signature = getSignature(
+                    users.ToDeleteW1000,
+                    { approve: "not-true" },
+                    false
+                  );
+                  chai
+                    .request(API_URL)
+                    .put(`${CRYPTO_ENDPOINT}/${createdTransaction.signature}`)
+                    .query({ approve: "not-true", signature })
+                    .end(function (err, res) {
+                      expect(res.body.errors).to.be.an("array");
+                      expect(res).to.have.status(400);
+                      done();
+                    });
+                }, 3500);
+              },
+            });
           });
         });
         describe("Transaction validation", function () {
@@ -1032,7 +1178,7 @@ describe(`Cryptocurrency Test Suite`, () => {
                 done();
               });
           });
-          it("Approval signature that isn't signed by sender user throw an error", (done) => {
+          it("Approval signature that isn't signed by sender user should throw an error", (done) => {
             createTransaction({
               amount: 1,
               senderAlias: "W1000",
@@ -1051,6 +1197,34 @@ describe(`Cryptocurrency Test Suite`, () => {
                     .request(API_URL)
                     .put(`${CRYPTO_ENDPOINT}/${createdTransaction.signature}`)
                     .query({ approve: true, signature })
+                    .end(function (err, res) {
+                      expect(res.body.errors).to.be.an("array");
+                      expect(res).to.have.status(400);
+                      done();
+                    });
+                }, 3500);
+              },
+            });
+          });
+          it("Rejection signature that isn't signed by sender or recipient user should throw an error", (done) => {
+            createTransaction({
+              amount: 1,
+              senderAlias: "W1000",
+              recipientAlias: "ToDeleteW1000",
+              pending: true,
+              callback: ({ res }) => {
+                expect(res).to.have.status(201);
+                const createdTransaction = res.body.payload;
+                setTimeout(() => {
+                  const signature = getSignature(
+                    users.W0,
+                    { approve: false },
+                    false
+                  );
+                  chai
+                    .request(API_URL)
+                    .put(`${CRYPTO_ENDPOINT}/${createdTransaction.signature}`)
+                    .query({ approve: false, signature })
                     .end(function (err, res) {
                       expect(res.body.errors).to.be.an("array");
                       expect(res).to.have.status(400);
@@ -1251,7 +1425,7 @@ describe(`Cryptocurrency Test Suite`, () => {
             },
           });
         });
-        it("Transaction should be rejected successfully", (done) => {
+        it("Transaction should be rejected by sender successfully", (done) => {
           createTransaction({
             amount: 1,
             senderAlias: "W1000",
@@ -1263,6 +1437,42 @@ describe(`Cryptocurrency Test Suite`, () => {
               setTimeout(() => {
                 const signature = getSignature(
                   users.W1000,
+                  { approve: false },
+                  false
+                );
+                chai
+                  .request(API_URL)
+                  .put(`${CRYPTO_ENDPOINT}/${createdTransaction.signature}`)
+                  .query({ approve: false, signature })
+                  .end(function (err, res) {
+                    expect(res).to.have.status(200);
+                    setTimeout(() => {
+                      chai
+                        .request(API_URL)
+                        .get(`${USERS_ENDPOINT}/${users.NoCoinbase.address}`)
+                        .end(function (err, res) {
+                          expect(res).to.have.status(200);
+                          res.body.should.have.property("balance").equal(0);
+                          done();
+                        });
+                    }, 3500);
+                  });
+              }, 3500);
+            },
+          });
+        });
+        it("Transaction should be rejected by recipient successfully", (done) => {
+          createTransaction({
+            amount: 1,
+            senderAlias: "W1000",
+            recipientAlias: "NoCoinbase",
+            pending: true,
+            callback: ({ res }) => {
+              expect(res).to.have.status(201);
+              const createdTransaction = res.body.payload;
+              setTimeout(() => {
+                const signature = getSignature(
+                  users.NoCoinbase,
                   { approve: false },
                   false
                 );
@@ -1767,6 +1977,27 @@ describe(`Cryptocurrency Test Suite`, () => {
           });
         });
         describe("Value validation", () => {
+          it("Permission value that is not a dictionary should throw an error", (done) => {
+            chai
+              .request(API_URL)
+              .post(`${USERS_ENDPOINT}`)
+              .send({
+                address: uuidv4(),
+                public_key: createFakePublicKey(),
+                permissions: ["coinbase"],
+              })
+              .end(function (err, res) {
+                expect(res.body.errors).to.be.an("array");
+                expect(
+                  _.some(res.body.errors, {
+                    param: "permissions",
+                    location: "body",
+                  })
+                ).to.be.true;
+                expect(res).to.have.status(400);
+                done();
+              });
+          });
           it("Permission value that is not boolean should throw an error", (done) => {
             chai
               .request(API_URL)
@@ -2054,6 +2285,23 @@ describe(`Cryptocurrency Test Suite`, () => {
               .request(API_URL)
               .delete(`${USERS_ENDPOINT}/${users.ToDeleteW1000.address}`)
               .send({})
+              .end(function (err, res) {
+                expect(res.body.errors).to.be.an("array");
+                expect(
+                  _.some(res.body.errors, {
+                    param: "reason",
+                    location: "body",
+                  })
+                ).to.be.true;
+                expect(res).to.have.status(400);
+                done();
+              });
+          });
+          it("Non string delete reason should throw an error", (done) => {
+            chai
+              .request(API_URL)
+              .delete(`${USERS_ENDPOINT}/${users.ToDeleteW1000.address}`)
+              .send({ reason: ["a reason"] })
               .end(function (err, res) {
                 expect(res.body.errors).to.be.an("array");
                 expect(

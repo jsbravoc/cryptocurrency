@@ -284,21 +284,7 @@ const createTransaction = (
   res,
   { disableSender = false, disableRecipient = false } = null
 ) => {
-  const txObj = {
-    amount: req.body.amount,
-    recipient: req.body.recipient,
-    sender: req.body.sender,
-    description: req.body.description,
-    valid: req.body.valid,
-    valid_thru: req.body.valid_thru,
-    signature: req.body.signature,
-    pending: req.body.pending,
-    creationDate: req.body.creationDate,
-    creator: req.body.creator,
-  };
-
-  //Avoid adding supporting transactions through post request
-  const newTx = new Transaction(txObj);
+  const newTx = new Transaction(req.body);
   const { sender, recipient, amount, valid } = newTx;
   let { signature } = newTx;
   //Avoid transaction collisions
@@ -495,14 +481,13 @@ const createTransactionPayload = (
               payload: changeTransactionPayload,
             };
           }
-        } else if (method === HTTP_METHODS.POST) {
-          newSenderUser.addTransaction(
-            USER_TYPE.RECIPIENT,
-            amount,
-            signature,
-            valid
-          );
         }
+        newSenderUser.addTransaction(
+          USER_TYPE.RECIPIENT,
+          amount,
+          signature,
+          valid
+        );
 
         newSenderUser = newSenderUser.toString(false, false);
         const senderAddress = getUserAddress(sender);

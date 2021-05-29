@@ -222,16 +222,7 @@ const validateDeleteReason = (req, res, next) => {
               false,
               res
             ).then((returnToUser) => {
-              if (!returnToUser) {
-                return createError(req, res, {
-                  error: ERRORS.USER.INPUT.USER_DOES_NOT_EXIST,
-                  params: {
-                    address: user.return_to[reason],
-                    param: "reason",
-                    value: user.return_to[reason],
-                  },
-                });
-              } else if (returnToUser.active !== true) {
+              if (returnToUser.active !== true) {
                 return createError(req, res, {
                   error: ERRORS.USER.LOGIC.USER_IS_NOT_ACTIVE,
                   params: {

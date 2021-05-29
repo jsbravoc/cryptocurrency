@@ -3,12 +3,12 @@
     "USER": {
       "INPUT": {
         "NO_INPUT": {
-          "error": "Expected user parameter {{property}}, but received undefined",
-          "msg": "Expected user parameter {{property}}, but did not receive it"
+          "error": "Expected user parameter {{propertyName}}, but received undefined",
+          "msg": "Expected user parameter {{propertyName}}, but did not receive it"
         },
         "MISSING_REQUIRED_INPUT": {
-          "error": "The method required the parameter {{parameter}}, but received undefined",
-          "msg": "The method required the parameter {{parameter}}, but did not receive it"
+          "error": "The method required the parameter {{propertyName}}, but received undefined",
+          "msg": "The method required the parameter {{propertyName}}, but did not receive it"
         },
 
         "INCORRECT_INPUT": {
@@ -82,12 +82,12 @@
     "TRANSACTION": {
       "INPUT": {
         "NO_INPUT": {
-          "error": "Expected transaction parameter {{property}}, but received undefined",
-          "msg": "The {{property}} parameter was expected, but did not received it"
+          "error": "Expected transaction parameter {{propertyName}}, but received undefined",
+          "msg": "The {{propertyName}} parameter was expected, but did not received it"
         },
         "MISSING_REQUIRED_INPUT": {
-          "error": "The method required the parameter {{parameter}}, but received undefined",
-          "msg": "The method required the parameter {{parameter}}, but did not receive it"
+          "error": "The method required the parameter {{propertyName}}, but received undefined",
+          "msg": "The method required the parameter {{propertyName}}, but did not receive it"
         },
 
         "INCORRECT_INPUT": {
