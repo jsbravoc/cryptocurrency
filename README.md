@@ -32,7 +32,7 @@ This projects contains the following components, required to launch the applicat
 
 This project requires [git](https://www.git-scm.com), [Docker](https://www.docker.com/why-docker), [npm](https://www.npmjs.com/get-npm), and [Node.js](https://nodejs.org/en/) <=10.23.3*. 
 
-\* `backend` project uses `sawtooth-sdk^1.0.5`, which internally uses `zeromq^4.2.1`. Unfortunately, `zeromq^4.2.1` breaks on Node.js 11+.
+\* Both `crypto-api` & `crypto-tp` projects use `sawtooth-sdk^1.0.5`, which internally use `zeromq^4.2.1`. Unfortunately, `zeromq^4.2.1` breaks on Node.js 11+.
 
 
 ## Installation & Usage

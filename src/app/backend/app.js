@@ -57,8 +57,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
+//Note that generated build excludes these paths.
 if (process.env.NODE_ENV !== "production") {
-  app.use("/api-docs", require("./routes/docs"));
+  app.use("/api-docs", require("./routes/dev/swagger"));
   const jsDocs = path.join(__dirname, "/resources/docs/");
   app.use("/docs", express.static(jsDocs));
   const localAddress = `http://${LOCAL_ADDRESS}:${process.env.PORT || "3000"}`;

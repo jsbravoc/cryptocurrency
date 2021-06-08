@@ -250,7 +250,6 @@ const verifyPostTransaction = (req, res, next) => {
         } */ else {
         let amountToFulfill = req.body.amount;
         let actualBalance = 0;
-        let returnedError = false;
         const lastestTxPromises = [];
         (senderUser.latest_transactions || []).forEach((txid) => {
           lastestTxPromises.push(
@@ -287,7 +286,6 @@ const verifyPostTransaction = (req, res, next) => {
 
           return Promise.all(pendingTxPromises).then(() => {
             if (amountToFulfill > 0) {
-              returnedError = true;
               if (amountToFulfill !== copyOfAmountToFulfill)
                 return createError(req, res, {
                   error:

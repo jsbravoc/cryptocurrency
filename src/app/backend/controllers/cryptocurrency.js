@@ -481,13 +481,14 @@ const createTransactionPayload = (
               payload: changeTransactionPayload,
             };
           }
+        } else {
+          newSenderUser.addTransaction(
+            USER_TYPE.SENDER,
+            amount,
+            signature,
+            valid
+          );
         }
-        newSenderUser.addTransaction(
-          USER_TYPE.RECIPIENT,
-          amount,
-          signature,
-          valid
-        );
 
         newSenderUser = newSenderUser.toString(false, false);
         const senderAddress = getUserAddress(sender);
