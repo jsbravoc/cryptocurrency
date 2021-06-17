@@ -7,7 +7,7 @@ coverage:
           default:
             # basic
             target: 90%
-            threshold: 1%
+            threshold: 0.01%
             if_ci_failed: error
             informational: False
             only_pulls: false

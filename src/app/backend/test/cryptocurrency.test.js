@@ -1109,7 +1109,7 @@ describe(`Cryptocurrency Test Suite`, () => {
                   chai
                     .request(API_URL)
                     .put(`${CRYPTO_ENDPOINT}/${createdTransaction.signature}`)
-                    .query({ signature })
+                    .send({ signature })
                     .end(function (err, res) {
                       expect(res.body.errors).to.be.an("array");
                       expect(res).to.have.status(400);
@@ -2062,7 +2062,7 @@ describe(`Cryptocurrency Test Suite`, () => {
               .send({
                 address: uuidv4(),
                 public_key: createFakePublicKey(),
-                permissions: ["coinbase"],
+                permissions: "coinbase",
               })
               .end(function (err, res) {
                 expect(res.body.errors).to.be.an("array");
@@ -2113,6 +2113,28 @@ describe(`Cryptocurrency Test Suite`, () => {
                 expect(
                   _.some(res.body.errors, {
                     param: "permissions",
+                    location: "body",
+                  })
+                ).to.be.true;
+                expect(res).to.have.status(400);
+                done();
+              });
+          });
+          it("Return_to property that is not a dictionary should throw an error", (done) => {
+            chai
+              .request(API_URL)
+              .post(`${USERS_ENDPOINT}`)
+              .send({
+                address: uuidv4(),
+                public_key: createFakePublicKey(),
+                permissions: { coinbase: true },
+                return_to: uuidv4(),
+              })
+              .end(function (err, res) {
+                expect(res.body.errors).to.be.an("array");
+                expect(
+                  _.some(res.body.errors, {
+                    param: "return_to",
                     location: "body",
                   })
                 ).to.be.true;
@@ -2345,6 +2367,7 @@ describe(`Cryptocurrency Test Suite`, () => {
             .send({
               role: "New role",
               description: "Updated user",
+              active: true,
               permissions: { coinbase: true },
               return_to: { default: users.NoCoinbase.address },
             })
