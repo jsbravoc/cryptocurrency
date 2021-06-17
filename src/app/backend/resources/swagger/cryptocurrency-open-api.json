@@ -1,0 +1,1611 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "version": "1.0.3",
+    "title": "CNK Cryptocurrency",
+    "description": "API to manage CNK cryptocurrency",
+    "contact": {
+      "name": "Juan Sebastián Bravo",
+      "email": "jsbravoc@gmail.com",
+      "url": "https://jsbravoc.com"
+    },
+    "license": {
+      "name": "BSD-3-Clause",
+      "url": "https://opensource.org/licenses/BSD-3-Clause"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000"
+    }
+  ],
+  "tags": [
+    {
+      "name": "users",
+      "description": "User creation and retrieval",
+      "externalDocs": {
+        "description": "Check out User docs",
+        "url": "http://localhost:3000/docs/User.html"
+      }
+    },
+    {
+      "name": "cryptocurrency",
+      "description": "Transaction creation and management",
+      "externalDocs": {
+        "description": "Check out Transaction docs",
+        "url": "http://localhost:3000/docs/Transactions.html"
+      }
+    }
+  ],
+  "paths": {
+    "/users": {
+      "get": {
+        "tags": ["users"],
+        "summary": "Retrieves all users and their transactions registered in the blockchain.",
+        "description": "Retrieves all users registered in the blockchain. Note that, by default, Hyperledger Sawtooth REST API will return up to 100 users.",
+        "operationId": "getUsers",
+        "parameters": [
+          {
+            "name": "expanded",
+            "in": "query",
+            "description": "Expand recursively the transactions",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "format": "boolean",
+              "example": true
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Limit queried users",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 100
+            }
+          },
+          {
+            "name": "hidePublicKey",
+            "in": "query",
+            "description": "Hide users' public key.",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "format": "boolean",
+              "example": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Retrieves all the users",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/ArrayOfExtendedUsers"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Sawtooth service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/Sawtooth503Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["users"],
+        "summary": "Creates a new user",
+        "description": "Allows the creation of a new user inside the blockchain. Note that cryptocurrency-sensitive properties such as `balance`, `latest_transactions` and `pending_transactions` cannot be set upon creation, thus they will default to 0 and empty arrays respectively.",
+        "operationId": "postUser",
+        "requestBody": {
+          "description": "User to create in the system",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/definitions/CreateUserInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created user successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/CreatedUser"
+                }
+              }
+            },
+            "links": {
+              "GetUserByAddress": {
+                "operationId": "getUserByAddress",
+                "parameters": {
+                  "address": "$response.body#/payload/address"
+                },
+                "description": "The `address` value returned in the response's payload can be used as the `address` parameter in `GET /users/{address}`"
+              }
+            }
+          },
+          "400": {
+            "description": "Input validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/Logic111bError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Sawtooth service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/Sawtooth503Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/{address}": {
+      "get": {
+        "tags": ["users"],
+        "summary": "Retrieves one specific user.",
+        "description": "Retrieves one specific user by their address. The user must exist in the blockchain, otherwise the endpoint's response will be a 400 error.",
+        "operationId": "getUserByAddress",
+        "parameters": [
+          {
+            "name": "address",
+            "in": "path",
+            "description": "The address of the user to retrieve",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "string",
+              "example": "jsbravoc"
+            }
+          },
+          {
+            "name": "hidePublicKey",
+            "in": "query",
+            "description": "Hide user's public key.",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "format": "boolean",
+              "example": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Retrieves the specified user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/ExtendedUserNoTransactions"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Input validation error: User does not exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/Logic111bErrorAddress"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Sawtooth service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/Sawtooth503Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["users"],
+        "summary": "Updates one specific user.",
+        "description": "Allows the update of specific user properties: `role`, `description`, `return_to` addresses, `permissions` and `active`. Note that cryptocurrency-sensitive properties such as `address`, `public_key`, `balance`, `latest_transactions` and `pending_transactions` cannot be changed/updated.",
+        "operationId": "updateUser",
+        "requestBody": {
+          "description": "Properties to update",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/definitions/UpdateUserInput"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "address",
+            "in": "path",
+            "description": "The address of the user to update",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "string",
+              "address": "jsbravoc"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Updates user information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/UpdatedUser"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Input validation error: User does not exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/Logic111bError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Sawtooth service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/Sawtooth503Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["users"],
+        "summary": "Sets a user as inactive and moves all their cryptocurrency balance to another user specified in this `return_to` addresses.",
+        "description": "Sets as inactive one specific user and transfers their CNKs to another user, specified in their `return_to` addresses. Since `return_to` addresses is a dictionary composed by {%reason%: %address%}, the user must have the specified %reason% in the query parameters defined in their `return_to` addresses to be able to use the endpoint with that %reason%.",
+        "operationId": "deleteUser",
+        "parameters": [
+          {
+            "name": "address",
+            "in": "path",
+            "description": "The address of the user to update",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "public_key"
+            }
+          },
+          {
+            "name": "reason",
+            "in": "path",
+            "description": "The reason why the user is being deleted. Must match any return_to reason of the user.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The user was deleted and the user's CNKs were transferred successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/CreatedTransaction"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Input validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/Logic111bError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Sawtooth service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/Sawtooth503Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/cryptocurrency": {
+      "get": {
+        "tags": ["cryptocurrency"],
+        "summary": "Retrieves all transactions registered in the blockchain.",
+        "description": "Retrieves all transactions registered in the blockchain. Note that, by default, Hyperledger Sawtooth REST API will return up to 100 transactions.",
+        "operationId": "getCryptocurrency",
+        "parameters": [
+          {
+            "name": "expanded",
+            "in": "query",
+            "description": "Expand recursively the transactions",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "format": "boolean",
+              "example": true
+            }
+          },
+          {
+            "name": "hidePending",
+            "in": "query",
+            "description": "Hide pending transactions",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "format": "boolean",
+              "example": true
+            }
+          },
+          {
+            "name": "hideInvalid",
+            "in": "query",
+            "description": "Hide invalid transactions",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "format": "boolean",
+              "example": true
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Limit queried transactions",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 100
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Information about the cryptocurrency flow.",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "Transaction array": {
+                    "$ref": "#/examples/NonExpandedTransactionArray"
+                  },
+                  "Expanded transaction array": {
+                    "$ref": "#/examples/ExpandedTransactionArray"
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Sawtooth service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/Sawtooth503Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["cryptocurrency"],
+        "summary": "Creates a new transaction",
+        "description": "Allows the creation of a new transaction, which can be a coinbase (no-input) transaction or a normal transaction. A coinbase transaction must not have any sender defined and also its recipient must have **coinbase** permission set to _true_. This endpoint validates balance and also existing & active users, thus `sender` must have the specified balance and both the `sender` and the `recipient` must exist and be active. **Note:** When ENV variable `DISABLE_INTEGRITY_VALIDATION` is set to _false_, the signature of the transaction must be created with the user's private key (thus, decryptable with their public_key) and its contents must match the transactions sensitive info (`sender`, `recipient`, `amount`, `creator`).",
+        "operationId": "createTransaction",
+        "requestBody": {
+          "description": "New transaction to add to the blockchain",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/definitions/SimpleTransaction"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Transaction created successfully",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "Transaction with supporting_transactions": {
+                    "$ref": "#/examples/CreatedTransaction"
+                  },
+                  "Coinbase transaction": {
+                    "$ref": "#/examples/CreatedCoinbaseTransaction"
+                  }
+                }
+              }
+            },
+            "links": {
+              "GetTransactionByAddress": {
+                "operationId": "getTransactionByAddress",
+                "parameters": {
+                  "address": "$response.body#/payload/signature"
+                },
+                "description": "The `signature` value returned in the response's payload can be used as the `address` parameter in `GET /cryptocurrency/{address}`"
+              }
+            }
+          },
+          "400": {
+            "description": "Input validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/Logic111bErrorRecipient"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Sawtooth service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/Sawtooth503Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/cryptocurrency/{address}": {
+      "get": {
+        "tags": ["cryptocurrency"],
+        "summary": "Retrieves one specific transaction",
+        "description": "Retrieves one specific transaction by its signature. The transaction must exist in the blockchain, otherwise the endpoint's response will be a 400 error.",
+        "operationId": "getTransactionByAddress",
+        "parameters": [
+          {
+            "name": "address",
+            "in": "path",
+            "description": "The signature of the transaction to retrieve",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Retrieves the specified transaction",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/NonExpandedTransaction"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Sawtooth service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/Sawtooth503Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["cryptocurrency"],
+        "summary": "Updates and or approves or rejects a transaction",
+        "description": "This endpoint allows to update non sensitive information of the transaction, such as its `description` **only** if the transaction has not be approved. Also, pending transactions can be approved or rejected using this endpoint.",
+        "operationId": "modifyTransaction",
+        "parameters": [
+          {
+            "name": "address",
+            "in": "path",
+            "description": "The signature of the transaction to update.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "sha_256"
+            }
+          },
+          {
+            "in": "query",
+            "name": "approve",
+            "description": "Boolean representing whether the transaction should be approved or not",
+            "required": false,
+            "type": "boolean",
+            "enum": ["true", "false"]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated transaction",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/UpdatedTransaction"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Sawtooth service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/Sawtooth503Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/config": {
+      "get": {
+        "tags": ["config"],
+        "summary": "**DEV ONLY** path to retrieve the current value of env variables.",
+        "description": "Available only if `ALLOW_DEV_ENV_CHANGES` env variable is set to _true_, this endpoint allows to retrieve the current value of env variables.",
+        "operationId": "getConfig",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Retrieves all the env variables",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/CurrentEnvVariables"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["config"],
+        "summary": "**DEV ONLY** path to edit the value of env variables.",
+        "description": "Available only if `ALLOW_DEV_ENV_CHANGES` env variable is set to _true_, this endpoint allows to edit the value of env variables.",
+        "operationId": "postConfig",
+        "requestBody": {
+          "description": "Dictionary of variables to edit.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/definitions/EnvVariables"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Edit the variable(s) successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/ChangedEnvVariables"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "SimpleTransaction": {
+      "type": "object",
+      "required": ["amount", "sender"],
+      "properties": {
+        "sender": {
+          "type": "number",
+          "format": "double",
+          "example": "jsbravoc"
+        },
+        "amount": {
+          "type": "number",
+          "format": "double",
+          "example": "2.8"
+        },
+        "recipient": {
+          "type": "string",
+          "format": "string",
+          "example": "jsbravoc2"
+        },
+        "pending": {
+          "type": "boolean",
+          "format": "boolean",
+          "example": false
+        },
+        "signature": {
+          "type": "string",
+          "format": "string",
+          "example": "0xc79eec8f62d09794feeb0677f2330d70cee5c640a03b2f35e508f8fe12140ff8754d37904ed443d942363ad3ebbd5f006536794f4110355343c0b91f4f2a48221b"
+        },
+        "valid_thru": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "Transaction": {
+      "type": "object",
+      "required": ["sender", "amount", "recipient"],
+      "properties": {
+        "sender": {
+          "type": "string",
+          "format": "string",
+          "example": "jsbravoc"
+        },
+        "amount": {
+          "type": "number",
+          "format": "double",
+          "example": "2.8",
+          "minimum": 0
+        },
+        "recipient": {
+          "type": "string",
+          "format": "string",
+          "example": "jsbravoc2"
+        },
+        "valid_thru": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "valid": {
+          "type": "boolean",
+          "format": "string",
+          "example": "true"
+        },
+        "signature": {
+          "type": "string",
+          "format": "string",
+          "example": "0xc79eec8fsa979saeeb8477f2330d70cee5c640a03b2f35e508dase12140ff8as4d37904ed443d942363ac3ebbd5f006536794f4110355553d08ff658ta5414fs"
+        },
+        "supporting_transactions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "string",
+            "example": "0xc79eec8f62d09794feeb0677f2330d70cee5c640a03b2f35e508f8fe12140ff8754d37904ed443d942363ad3ebbd5f006536794f4110355343c0b91f4f2a48221b"
+          }
+        }
+      }
+    },
+    "NonExpandedTransaction": {
+      "type": "object",
+      "required": ["sender", "amount", "recipient"],
+      "properties": {
+        "sender": {
+          "type": "string",
+          "format": "string",
+          "example": "jsbravoc"
+        },
+        "amount": {
+          "type": "number",
+          "format": "double",
+          "example": "2.8",
+          "minimum": 0
+        },
+        "recipient": {
+          "type": "string",
+          "format": "string",
+          "example": "jsbravoc2"
+        },
+        "valid_thru": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "valid": {
+          "type": "boolean",
+          "format": "string",
+          "example": "true"
+        },
+        "signature": {
+          "type": "string",
+          "format": "string",
+          "example": "0xc79eec8fsa979saeeb8477f2330d70cee5c640a03b2f35e508dase12140ff8as4d37904ed443d942363ac3ebbd5f006536794f4110355553d08ff658ta5414fs"
+        },
+        "supporting_transactions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "string",
+            "example": "0xc79eec8f62d09794feeb0677f2330d70cee5c640a03b2f35e508f8fe12140ff8754d37904ed443d942363ad3ebbd5f006536794f4110355343c0b91f4f2a48221b"
+          }
+        }
+      }
+    },
+    "ExpandedTransaction": {
+      "type": "object",
+      "required": ["sender", "amount", "recipient"],
+      "properties": {
+        "sender": {
+          "type": "string",
+          "format": "string",
+          "example": "jsbravoc"
+        },
+        "amount": {
+          "type": "number",
+          "format": "double",
+          "example": "2.8",
+          "minimum": 0
+        },
+        "recipient": {
+          "type": "string",
+          "format": "string",
+          "example": "jsbravoc2"
+        },
+        "valid_thru": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "valid": {
+          "type": "boolean",
+          "format": "string",
+          "example": "true"
+        },
+        "signature": {
+          "type": "string",
+          "format": "string",
+          "example": "0xc79eec8fsa979saeeb8477f2330d70cee5c640a03b2f35e508dase12140ff8as4d37904ed443d942363ac3ebbd5f006536794f4110355553d08ff658ta5414fs"
+        },
+        "supporting_transactions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ExpandedTransaction"
+          }
+        }
+      }
+    },
+    "UpdateUserInput": {
+      "type": "object",
+      "properties": {
+        "role": {
+          "type": "string",
+          "format": "string",
+          "example": "Student"
+        },
+        "description": {
+          "type": "string",
+          "format": "string",
+          "example": "Developer of this API"
+        },
+        "return_to": {
+          "$ref": "#/definitions/ReturnTo"
+        },
+        "permissions": {
+          "$ref": "#/definitions/Permissions"
+        }
+      }
+    },
+    "CoinbaseTransaction": {
+      "type": "object",
+      "required": ["amount", "recipient"],
+      "properties": {
+        "amount": {
+          "type": "number",
+          "format": "double",
+          "example": "2.8"
+        },
+        "recipient": {
+          "type": "string",
+          "format": "string",
+          "example": "jsbravoc"
+        },
+        "valid_thru": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "TransactionWithId": {
+      "type": "object",
+      "required": ["sender", "amount", "recipient"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "string",
+          "example": "7bb348fa-e8ca-4cbb-9867-c027cc387b55"
+        },
+        "sender": {
+          "type": "string",
+          "format": "string",
+          "example": "juan.bravo"
+        },
+        "amount": {
+          "type": "number",
+          "format": "double",
+          "example": "2.8"
+        },
+        "recipient": {
+          "type": "string",
+          "format": "string",
+          "example": "jsbravoc"
+        },
+        "valid": {
+          "type": "boolean",
+          "format": "string",
+          "example": "true"
+        },
+        "valid_thru": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "approver": {
+          "type": "string",
+          "format": "string",
+          "example": "my.approver"
+        },
+        "signature": {
+          "type": "string",
+          "format": "string",
+          "example": "b221d9dbb083a7f33428d7c2a3c3198ae925614d70210e28716ccaa7cd4ddb79"
+        }
+      }
+    },
+    "ExtendedTransaction": {
+      "type": "object",
+      "required": [
+        "id",
+        "sender",
+        "amount",
+        "recipient",
+        "valid",
+        "supporting_transactions"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "string",
+          "example": "bf000a52-6e7b-4d69-95c4-6f9e8318996b"
+        },
+        "sender": {
+          "type": "string",
+          "format": "string",
+          "example": "jsbravoc"
+        },
+        "amount": {
+          "type": "number",
+          "format": "double",
+          "example": "2.8"
+        },
+        "recipient": {
+          "type": "string",
+          "format": "string",
+          "example": "juan.bravo"
+        },
+        "valid": {
+          "type": "boolean",
+          "format": "string",
+          "example": "false"
+        },
+        "supporting_transactions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TransactionWithId"
+          }
+        },
+        "valid_thru": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "approver": {
+          "type": "string",
+          "format": "string",
+          "example": "my.approver"
+        },
+        "signature": {
+          "type": "string",
+          "format": "string",
+          "example": "b221d9dbb083a7f33428d7c2a3c3198ae925614d70210e28716ccaa7cd4ddb79"
+        }
+      }
+    },
+    "111bError": {
+      "type": "object",
+      "required": ["errorCode", "msg", "error"],
+      "properties": {
+        "errorCode": {
+          "type": "string",
+          "format": "string",
+          "example": "111b"
+        },
+        "msg": {
+          "type": "string",
+          "format": "string",
+          "example": "User with address created.user does not exist"
+        },
+        "error": {
+          "type": "string",
+          "format": "string",
+          "example": "The user created.user does not exist"
+        },
+        "location": {
+          "type": "string",
+          "format": "string",
+          "example": "body"
+        },
+        "param": {
+          "type": "string",
+          "format": "string",
+          "example": "return_to"
+        },
+        "value": {
+          "type": "string",
+          "format": "string",
+          "example": "created.user"
+        }
+      }
+    },
+    "111bErrorAddress": {
+      "type": "object",
+      "required": ["errorCode", "msg", "error"],
+      "properties": {
+        "errorCode": {
+          "type": "string",
+          "format": "string",
+          "example": "111b"
+        },
+        "msg": {
+          "type": "string",
+          "format": "string",
+          "example": "User with address created.user does not exist"
+        },
+        "error": {
+          "type": "string",
+          "format": "string",
+          "example": "The user created.user does not exist"
+        },
+        "location": {
+          "type": "string",
+          "format": "string",
+          "example": "query"
+        },
+        "param": {
+          "type": "string",
+          "format": "string",
+          "example": "address"
+        },
+        "value": {
+          "type": "string",
+          "format": "string",
+          "example": "created.user"
+        }
+      }
+    },
+    "111bErrorRecipient": {
+      "type": "object",
+      "required": ["errorCode", "msg", "error"],
+      "properties": {
+        "errorCode": {
+          "type": "string",
+          "format": "string",
+          "example": "111b"
+        },
+        "msg": {
+          "type": "string",
+          "format": "string",
+          "example": "User with address created.user does not exist"
+        },
+        "error": {
+          "type": "string",
+          "format": "string",
+          "example": "The user created.user does not exist"
+        },
+        "location": {
+          "type": "string",
+          "format": "string",
+          "example": "body"
+        },
+        "param": {
+          "type": "string",
+          "format": "string",
+          "example": "recipient"
+        },
+        "value": {
+          "type": "string",
+          "format": "string",
+          "example": "created.user"
+        }
+      }
+    },
+    "503Error": {
+      "type": "object",
+      "required": ["errorCode", "msg", "error"],
+      "properties": {
+        "errorCode": {
+          "type": "string",
+          "format": "string",
+          "example": "503"
+        },
+        "msg": {
+          "type": "string",
+          "format": "string",
+          "example": "Hyperledger Sawtooth REST API is temporarily unavailable"
+        },
+        "error": {
+          "type": "string",
+          "format": "string",
+          "example": "Hyperledger Sawtooth REST API is temporarily unavailable"
+        }
+      }
+    },
+    "ArrayOfExtendedTransactions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/ExtendedTransaction"
+      }
+    },
+    "ExtendedCoinbaseTransaction": {
+      "type": "object",
+      "required": ["amount", "recipient", "valid", "signature"],
+      "properties": {
+        "amount": {
+          "type": "number",
+          "format": "double",
+          "example": "2.8"
+        },
+        "recipient": {
+          "type": "string",
+          "format": "string",
+          "example": "juan.bravo"
+        },
+        "valid": {
+          "type": "boolean",
+          "format": "boolean",
+          "example": true
+        },
+        "valid_thru": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "signature": {
+          "type": "string",
+          "format": "string",
+          "example": "0xc79eec8fsa979saeeb8477f2330d70cee5c640a03b2f35e508dase12140ff8as4d37904ed443d942363ac3ebbd5f006536794f4110355553d08ff658ta5414fs"
+        }
+      }
+    },
+    "User": {
+      "type": "object",
+      "properties": {
+        "address": {
+          "type": "string",
+          "format": "string",
+          "example": "jsbravoc"
+        },
+        "return_to": {
+          "type": "string",
+          "format": "string",
+          "example": "depto_sistemas"
+        }
+      }
+    },
+    "CreatedUser": {
+      "type": "object",
+      "properties": {
+        "msg": {
+          "type": "string",
+          "format": "string",
+          "example": "User created"
+        },
+        "payload": {
+          "$ref": "#/definitions/ExtendedUserNoTransactions"
+        }
+      }
+    },
+    "CreatedTransaction": {
+      "type": "object",
+      "properties": {
+        "msg": {
+          "type": "string",
+          "format": "string",
+          "example": "Transaction created"
+        },
+        "payload": {
+          "$ref": "#/definitions/NonExpandedTransaction"
+        }
+      }
+    },
+    "UpdatedUser": {
+      "type": "object",
+      "properties": {
+        "msg": {
+          "type": "string",
+          "format": "string",
+          "example": "User updated"
+        },
+        "payload": {
+          "$ref": "#/definitions/ExtendedUser"
+        }
+      }
+    },
+    "UpdatedTransaction": {
+      "type": "object",
+      "properties": {
+        "msg": {
+          "type": "string",
+          "format": "string",
+          "example": "Transaction updated"
+        },
+        "payload": {
+          "$ref": "#/definitions/NonExpandedTransaction"
+        }
+      }
+    },
+    "ExtendedUser": {
+      "type": "object",
+      "properties": {
+        "active": {
+          "type": "boolean",
+          "format": "boolean",
+          "example": "true"
+        },
+        "balance": {
+          "type": "number",
+          "format": "double",
+          "example": 0
+        },
+        "address": {
+          "type": "string",
+          "format": "string",
+          "example": "jsbravoc"
+        },
+        "description": {
+          "type": "string",
+          "format": "string",
+          "example": "Developer of this API"
+        },
+        "return_to": {
+          "type": "object"
+        },
+        "latest_transactions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "string",
+            "example": "0xc79eec8f62d09794feeb0677f2330d70cee5c640a03b2f35e508f8fe12140ff8754d37904ed443d942363ad3ebbd5f006536794f4110355343c0b91f4f2a48221b"
+          }
+        },
+        "pending_transactions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "string",
+            "example": "0xcsa8f62d09sasfb0677f2330d70cee5c640a03b2f35e508f8fe12140ff8754d37904ed443d942363ad3ebbd5f006536794f4110355343c0b91f4f2a48221b"
+          }
+        },
+        "public_key": {
+          "type": "string",
+          "format": "string",
+          "example": "023758f7c69eef837bb3ed6d684059b74272538df147e3a56705f80b5649dae6d2"
+        },
+        "permissions": {
+          "$ref": "#/definitions/Permissions"
+        }
+      }
+    },
+    "ExtendedUserNoTransactions": {
+      "type": "object",
+      "properties": {
+        "active": {
+          "type": "boolean",
+          "format": "boolean",
+          "example": "true"
+        },
+        "balance": {
+          "type": "number",
+          "format": "double",
+          "example": 0
+        },
+        "address": {
+          "type": "string",
+          "format": "string",
+          "example": "jsbravoc"
+        },
+        "description": {
+          "type": "string",
+          "format": "string",
+          "example": "Developer of this API"
+        },
+        "return_to": {
+          "type": "object"
+        },
+        "latest_transactions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "string",
+            "example": "0xc79eec8f62d09794feeb0677f2330d70cee5c640a03b2f35e508f8fe12140ff8754d37904ed443d942363ad3ebbd5f006536794f4110355343c0b91f4f2a48221b"
+          },
+          "example": []
+        },
+        "pending_transactions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "string",
+            "example": "0xc79eec8fdass4feeb0677f2330d70cee5c640a03b2f35e508f8fe12140ff8754d37904ed443d942363ad3ebbd5f006536794f4110355343c0b91f4f2a48221b"
+          },
+          "example": []
+        },
+        "public_key": {
+          "type": "string",
+          "format": "string",
+          "example": "023758f7c69eef837bb3ed6d684059b74272538df147e3a56705f80b5649dae6d2"
+        },
+        "permissions": {
+          "$ref": "#/definitions/Permissions"
+        }
+      }
+    },
+    "CreateUserInput": {
+      "type": "object",
+      "properties": {
+        "return_to": {
+          "$ref": "#/definitions/ReturnTo"
+        },
+        "address": {
+          "type": "string",
+          "format": "string",
+          "example": "jsbravoc"
+        },
+        "public_key": {
+          "type": "string",
+          "format": "string",
+          "example": "023758f7c69eef837bb3ed6d684059b74272538df147e3a56705f80b5649dae6d2"
+        },
+        "role": {
+          "type": "string",
+          "format": "string",
+          "example": "Student"
+        },
+        "description": {
+          "type": "string",
+          "format": "string",
+          "example": "Developer of this API"
+        },
+        "permissions": {
+          "$ref": "#/definitions/Permissions"
+        }
+      }
+    },
+    "Permissions": {
+      "type": "object",
+      "properties": {
+        "coinbase": {
+          "type": "boolean",
+          "format": "boolean",
+          "example": "true"
+        },
+        "transfer_to": {
+          "$ref": "#/definitions/TransferTo"
+        }
+      }
+    },
+    "TransferTo": {
+      "type": "object",
+      "properties": {
+        "created.user": {
+          "type": "boolean",
+          "format": "boolean",
+          "example": "false"
+        }
+      }
+    },
+    "ReturnTo": {
+      "type": "object",
+      "properties": {
+        "reason_to_return": {
+          "type": "string",
+          "format": "string",
+          "example": "created.user"
+        }
+      }
+    },
+    "Sawtooth503Error": {
+      "type": "object",
+      "properties": {
+        "errors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/503Error"
+          }
+        }
+      }
+    },
+    "Logic111bError": {
+      "type": "object",
+      "properties": {
+        "errors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/111bError"
+          }
+        }
+      }
+    },
+    "Logic111bErrorAddress": {
+      "type": "object",
+      "properties": {
+        "errors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/111bErrorAddress"
+          }
+        }
+      }
+    },
+    "Logic111bErrorRecipient": {
+      "type": "object",
+      "properties": {
+        "errors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/111bErrorRecipient"
+          }
+        }
+      }
+    },
+    "ArrayOfExtendedUsers": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/ExtendedUser"
+      }
+    },
+    "CurrentEnvVariables": {
+      "type": "object",
+      "properties": {
+        "msg": {
+          "type": "string",
+          "format": "string",
+          "example": "Current config"
+        },
+        "variables": {
+          "$ref": "#/definitions/EnvVariables"
+        }
+      }
+    },
+    "EnvVariables": {
+      "type": "object",
+      "properties": {
+        "SAWTOOTH_PRIVATE_KEY": {
+          "type": "string",
+          "format": "string",
+          "example": "0x7f664d71e4200b4a2989558d1f6006d0dac9771a36a546b1a47c384ec9c4f04b"
+        },
+        "SAWTOOTH_REST": {
+          "type": "string",
+          "format": "string",
+          "example": "http://localhost:8008"
+        },
+        "SAWTOOTH_REST_TIMEOUT": {
+          "type": "string",
+          "format": "number",
+          "example": "5000"
+        },
+        "VALIDATOR": {
+          "type": "string",
+          "format": "string",
+          "example": "tcp://localhost:4004"
+        },
+        "ENABLE_LOGGING": {
+          "type": "string",
+          "format": "boolean",
+          "example": "true"
+        },
+        "DISABLE_INTEGRITY_VALIDATION": {
+          "type": "string",
+          "format": "string",
+          "example": "false"
+        },
+        "HIDE_ENV_VARIABLES": {
+          "type": "string",
+          "format": "string",
+          "example": "true"
+        }
+      }
+    },
+    "ChangedEnvVariables": {
+      "type": "object",
+      "properties": {
+        "msg": {
+          "type": "string",
+          "format": "string",
+          "example": "Ok"
+        },
+        "variables": {
+          "$ref": "#/definitions/EnvVariables"
+        }
+      }
+    },
+    "ExtendedUserWithTransactions": {
+      "type": "object",
+      "properties": {
+        "active": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "return_to": {
+          "type": "string",
+          "format": "string",
+          "example": "depto_sistemas"
+        },
+        "balance": {
+          "type": "number",
+          "format": "double",
+          "example": 0
+        },
+        "address": {
+          "type": "string",
+          "format": "string",
+          "example": "jsbravoc"
+        },
+        "public_key": {
+          "type": "string",
+          "format": "string",
+          "example": 3.800772969568567e46
+        },
+        "latest_transactions": {
+          "$ref": "#/definitions/ArrayOfExtendedTransactions"
+        }
+      }
+    },
+    "ArrayOfExtendedUserWithTransactions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/ExtendedUserWithTransactions"
+      }
+    }
+  },
+  "examples": {
+    "Sawtooth503Error": {
+      "value": {
+        "errors": [
+          {
+            "errorCode": "503",
+            "error": "Hyperledger Sawtooth REST API is temporarily unavailable",
+            "msg": "Hyperledger Sawtooth REST API is temporarily unavailable"
+          }
+        ]
+      }
+    },
+    "NonExpandedTransactionArray": {
+      "value": [
+        {
+          "sender": "jsbravoc",
+          "amount": 2.8,
+          "recipient": "jsbravoc2",
+          "valid": true,
+          "signature": "0xc79eec8fsa979saeeb8477f2330d70cee5c640a03b2f35e508dase12140ff8as4d37904ed443d942363ac3ebbd5f006536794f4110355553d08ff658ta5414fs",
+          "supporting_transactions": [
+            "0xc79eec8f62d09794feeb0677f2330d70cee5c640a03b2f35e508f8fe12140ff8754d37904ed443d942363ad3ebbd5f006536794f4110355343c0b91f4f2a48221b"
+          ]
+        }
+      ]
+    },
+    "NonExpandedTransaction": {
+      "value": {
+        "sender": "jsbravoc",
+        "amount": 2.8,
+        "recipient": "jsbravoc2",
+        "valid": true,
+        "signature": "0xc79eec8fsa979saeeb8477f2330d70cee5c640a03b2f35e508dase12140ff8as4d37904ed443d942363ac3ebbd5f006536794f4110355553d08ff658ta5414fs",
+        "supporting_transactions": [
+          "0xc79eec8f62d09794feeb0677f2330d70cee5c640a03b2f35e508f8fe12140ff8754d37904ed443d942363ad3ebbd5f006536794f4110355343c0b91f4f2a48221b"
+        ]
+      }
+    },
+    "CreatedTransaction": {
+      "value": {
+        "msg": "Transaction created",
+        "payload": {
+          "sender": "jsbravoc",
+          "amount": 2.8,
+          "recipient": "jsbravoc2",
+          "valid": true,
+          "signature": "0xc79eec8fsa979saeeb8477f2330d70cee5c640a03b2f35e508dase12140ff8as4d37904ed443d942363ac3ebbd5f006536794f4110355553d08ff658ta5414fs",
+          "supporting_transactions": [
+            "0xc79eec8f62d09794feeb0677f2330d70cee5c640a03b2f35e508f8fe12140ff8754d37904ed443d942363ad3ebbd5f006536794f4110355343c0b91f4f2a48221b"
+          ]
+        }
+      }
+    },
+    "CreatedCoinbaseTransaction": {
+      "value": {
+        "msg": "Transaction created",
+        "payload": {
+          "amount": 2.8,
+          "recipient": "jsbravoc2",
+          "valid": true,
+          "signature": "0xc79eec8fsa979saeeb8477f2330d70cee5c640a03b2f35e508dase12140ff8as4d37904ed443d942363ac3ebbd5f006536794f4110355553d08ff658ta5414fs"
+        }
+      }
+    },
+    "ExpandedTransaction": {
+      "value": {
+        "sender": "jsbravoc2",
+        "amount": 1.8,
+        "recipient": "jsbravoc",
+        "valid": true,
+        "signature": "0xc79eec8fsa979saeeb8477f2330d70cee5c640a03b2f35e508dase12140ff8as4d37904ed443d942363ac3ebbd5f006536794f4110355553d08ff658ta5414fs",
+        "supporting_transactions": [
+          {
+            "recipient": "jsbravoc",
+            "amount": 100,
+            "valid": true,
+            "signature": "0xc79eec8f62d09794feeb0677f2330d70cee5c640a03b2f35e508f8fe12140ff8754d37904ed443d942363ad3ebbd5f006536794f4110355343c0b91f4f2a48221b"
+          }
+        ]
+      }
+    },
+    "ExpandedTransactionArray": {
+      "value": [
+        {
+          "sender": "jsbravoc2",
+          "amount": 1.8,
+          "recipient": "jsbravoc",
+          "valid": true,
+          "signature": "0xc79eec8fsa979saeeb8477f2330d70cee5c640a03b2f35e508dase12140ff8as4d37904ed443d942363ac3ebbd5f006536794f4110355553d08ff658ta5414fs",
+          "supporting_transactions": [
+            {
+              "recipient": "jsbravoc",
+              "amount": 100,
+              "valid": true,
+              "signature": "0xc79eec8f62d09794feeb0677f2330d70cee5c640a03b2f35e508f8fe12140ff8754d37904ed443d942363ad3ebbd5f006536794f4110355343c0b91f4f2a48221b"
+            }
+          ]
+        }
+      ]
+    },
+    "CoinbaseTransaction": {
+      "value": {
+        "recipient": "jsbravoc",
+        "amount": 100,
+        "valid": true,
+        "signature": "0xc79eec8f62d09794feeb0677f2330d70cee5c640a03b2f35e508f8fe12140ff8754d37904ed443d942363ad3ebbd5f006536794f4110355343c0b91f4f2a48221b"
+      }
+    }
+  }
+}

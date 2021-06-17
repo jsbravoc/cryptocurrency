@@ -42,7 +42,7 @@ const {
 router.get("/", getUsers);
 
 /**
- * Route to create a user from the blockchain.
+ * Route to create a user inside the blockchain.
  * @name post/users
  * @function
  * @memberof module:routers/users~usersRouter

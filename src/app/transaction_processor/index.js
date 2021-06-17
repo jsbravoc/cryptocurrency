@@ -7,12 +7,6 @@ const TPHandler = require("./handler");
 const TPKeyHandler = require("./helpers/TPKeyHandler");
 const { logFormatted } = require("./utils/logger");
 
-// if (typeof process.env.VALIDATOR === "undefined") {
-//   console.log("missing a validator address");
-//   process.exit(1);
-// }
-// console.log(process.env.VALIDATOR);
-
 const transactionProcessor = new TransactionProcessor(process.env.VALIDATOR);
 
 transactionProcessor.addHandler(new (TPKeyHandler(TPHandler))());

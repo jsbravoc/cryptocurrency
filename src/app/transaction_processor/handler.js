@@ -22,9 +22,9 @@ const getUserAddress = (name) => `${TP_NAMESPACE}01${getAddress(name, 62)}`;
 
 const addressIntKey = (key, addressType) => {
   switch (addressType) {
-    case "TRANSACTION":
+    case TYPE.TRANSACTION:
       return getTransactionAddress(key);
-    case "USER":
+    case TYPE.USER:
       return getUserAddress(key);
   }
 };
@@ -89,11 +89,7 @@ const handlers = {
     const { type, ...transactionObject } = JSON.parse(transaction);
     await contextHandler.putState(txid, transactionObject);
 
-    logFormatted(
-      `Added state ${txid} -> ${getUserAddress(txid)} ->`,
-      SEVERITY.SUCCESS,
-      transactionObject
-    );
+    logFormatted(`Added state ${txid} ->`, SEVERITY.SUCCESS, transactionObject);
   },
   async put([transactionContext, userContext], { transaction, txid }) {
     logFormatted("Handling put transaction", SEVERITY.NOTIFY, {
@@ -109,7 +105,7 @@ const handlers = {
     await contextHandler.putState(txid, transactionObject);
 
     logFormatted(
-      `Updated state ${txid} -> ${getUserAddress(txid)} ->`,
+      `Updated state ${txid} ->`,
       SEVERITY.SUCCESS,
       transactionObject
     );

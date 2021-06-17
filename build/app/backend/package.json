@@ -1,6 +1,6 @@
 {
-  "name": "backend",
-  "version": "0.0.0",
+  "name": "crypto-api",
+  "version": "1.0.3",
   "private": true,
   "scripts": {
     "start": "NODE_ENV=production node ./bin/www.js",

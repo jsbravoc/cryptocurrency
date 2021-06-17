@@ -4,9 +4,9 @@ const router = express.Router();
 
 /* GET users listing. */
 const swaggerUi = require("swagger-ui-express");
-const swaggerDocument = require("../resources/docs/swagger/swagger.json");
-const { SEVERITY, logFormatted } = require("../utils/logger");
-const { LOCAL_ADDRESS } = require("../utils/constants");
+const swaggerDocument = require("../../resources/swagger/cryptocurrency-open-api.json");
+const { SEVERITY, logFormatted } = require("../../utils/logger");
+const { LOCAL_ADDRESS } = require("../../utils/constants");
 
 const localAddress = `http://${LOCAL_ADDRESS}:${process.env.PORT || "3000"}`;
 swaggerDocument.host = localAddress;
@@ -27,6 +27,24 @@ require("public-ip")
       {
         url: publicAddress,
         description: "Public address server",
+      },
+    ];
+    swaggerDocument.tags = [
+      {
+        name: "users",
+        description: "User creation and retrieval",
+        externalDocs: {
+          description: "Check out User docs",
+          url: `${localAddress}/docs/User.html`,
+        },
+      },
+      {
+        name: "cryptocurrency",
+        description: "Transaction creation and management",
+        externalDocs: {
+          description: "Check out Transaction docs",
+          url: `${localAddress}/docs/Transaction.html`,
+        },
       },
     ];
     router.use("/", swaggerUi.serve, swaggerUi.setup(swaggerDocument));

@@ -1,7 +1,7 @@
 {
-  "name": "cryptocurrency",
-  "version": "1.0.0",
-  "description": "",
+  "name": "cnk-cryptocurrency",
+  "version": "1.0.3",
+  "description": "Express.js API to manage a cryptocurrency inside a consortium or private blockchain using Hyperledger Sawtooth",
   "main": "index.js",
   "dependencies": {},
   "devDependencies": {
@@ -27,12 +27,6 @@
     "prettier": "^2.2.1"
   },
   "scripts": {
-    "start": "concurrently --kill-others 'npm:start-backend' 'npm:start-tp' 'npm:start-network'",
-    "start-backend": "cd src/app/backend && npm start",
-    "start-tp": "cd src/app/transaction_processor && npm start",
-    "start-network": "cd blockchain_network/docker-compose-dev/sawtooth; sudo docker-compose up",
-    "stop": "cd blockchain_network/docker-compose-dev/sawtooth; sudo docker-compose down",
-    "test": "tap test/*.js",
     "prepare": "husky install"
   },
   "repository": {
@@ -40,7 +34,7 @@
     "url": "git+https://github.com/jsbravoc/cryptocurrency.git"
   },
   "author": "",
-  "license": "ISC",
+  "license": "bsd-3-clause",
   "bugs": {
     "url": "https://github.com/jsbravoc/cryptocurrency/issues"
   },

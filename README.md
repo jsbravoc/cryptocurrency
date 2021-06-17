@@ -11,6 +11,21 @@
 
 </div>
 
+## Screenshots
+
+<div align="center">
+
+<table align="center">
+  <tr>
+    <td> <img src="readme_assets/swagger_ui.png"  alt="Swagger UI API" width = 480px height = 244px ></td>
+    <td> <img src="readme_assets/jsdocs.png"  alt="Swagger UI API" width = 480px height = 244px ></td>
+    
+   </tr> 
+</table> 
+
+
+</div>
+
 **[Hyperledger Sawtooth](https://www.hyperledger.org/use/sawtooth) blockchain application to handle a private cryptocurrency, featuring:**
 
 - Transaction input validation to keep the cryptocurrency flow coherent (All non-coinbase transactions must be supported by another transaction).
@@ -32,7 +47,7 @@ This projects contains the following components, required to launch the applicat
 
 This project requires [git](https://www.git-scm.com), [Docker](https://www.docker.com/why-docker), [npm](https://www.npmjs.com/get-npm), and [Node.js](https://nodejs.org/en/) <=10.23.3*. 
 
-\* Both `crypto-api` & `crypto-tp` projects use `sawtooth-sdk^1.0.5`, which internally use `zeromq^4.2.1`. Unfortunately, `zeromq^4.2.1` breaks on Node.js 11+.
+\* Both `crypto-api` & `crypto-tp` projects use `sawtooth-sdk^1.0.5`, which internally uses `zeromq^4.2.1`. Unfortunately, `zeromq^4.2.1` breaks on Node.js 11+.
 
 
 ## Installation & Usage
@@ -60,13 +75,11 @@ Then, the application will be started at the port mapped in the docker-compose.y
 
 To pause the execution of the application, you need to execute the following command:
 ```sh
-cd blockchain_network/docker-compose-dev/sawtooth
 docker-compose pause
 ```
 
 Please note that if you paused the application on Docker, the correct way to start it up again is:
 ```sh
-cd blockchain_network/docker-compose-dev/sawtooth
 docker-compose unpause
 ```
 
@@ -159,8 +172,6 @@ In order to understand the functions used inside the `backend` component, please
 
 **Recommendation:** Avoid integrity errors by editing .env file, setting `DISABLE_INTEGRITY_VALIDATION=true`. By doing this, the transaction's signature will not be validated. Note that if the variable is set to `false`, transactions' signatures **must** be verifiable with the corresponding user's public_key.
 
-In order to test and use the API, please check the [Postman](https://www.postman.com/) collection available [here](https://github.com/jsbravoc/cryptocurrency/tree/main/build/app/backend).
-
 Also, if you want to test the application directly, please go to `localhost:3000/api-docs` or to the URL of where the application was started. There, you will find a [Swagger UI](https://swagger.io/tools/swagger-ui/) application to test the API and see the API definitions.
 
 
@@ -194,3 +205,35 @@ npm test
 
 ## License
 BSD-3-Clause License © [Juan Sebastián Bravo](https://github.com/jsbravoc)
+
+```
+BSD 3-Clause License
+
+Copyright (c) 2021, Juan Sebastián Bravo Castelo
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+3. Neither the name of the copyright holder nor the names of its
+   contributors may be used to endorse or promote products derived from
+   this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+```

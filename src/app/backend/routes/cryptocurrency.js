@@ -41,7 +41,7 @@ const {
 router.get("/", getTransactions);
 
 /**
- * Route to create a transaction from the blockchain.
+ * Route to create a transaction inside the blockchain.
  * @name post/cryptocurrency
  * @function
  * @memberof module:routers/cryptocurrency~cryptoRouter

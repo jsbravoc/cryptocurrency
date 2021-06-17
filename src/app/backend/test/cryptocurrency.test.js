@@ -1852,6 +1852,22 @@ describe(`Cryptocurrency Test Suite`, () => {
               });
           });
         });
+        describe("Get all users and hide their public keys (non expanded)", () => {
+          it("Non expanded users should be returned without exposing their public keys", (done) => {
+            chai
+              .request(API_URL)
+              .get(`${USERS_ENDPOINT}`)
+              .query({ limit: 5, hidePublicKey: true })
+              .end(function (err, res) {
+                expect(res.body).to.be.an("array");
+                expect(res).to.have.status(200);
+                res.body.forEach((user) => {
+                  expect(user).not.to.have.property("public_key");
+                });
+                done();
+              });
+          });
+        });
         describe("Get all users (expanded)", function () {
           this.slow(1500);
           this.timeout(5000);
@@ -1861,14 +1877,42 @@ describe(`Cryptocurrency Test Suite`, () => {
               .get(`${USERS_ENDPOINT}`)
               .query({ expanded: true, limit: 5 })
               .end(function (err, res) {
-                expect(res.body).to.be.an("array");
-                /* res.body.forEach(user => {
-                  const retrievedUser = new User(user);
-                  console.log("USER LT", );
-                  (Array.from(retrievedUser.latest_transactions)||[]).forEach(transaction => expect(transaction).to.be.an("object"))
-                  (Array.from(retrievedUser.pending_transactions)||[]).forEach(transaction => expect(transaction).to.be.an("object"))
-                }) */
                 expect(res).to.have.status(200);
+                expect(res.body).to.be.an("array");
+                res.body.forEach((user) => {
+                  Array.from(user.latest_transactions).forEach((transaction) =>
+                    expect(transaction).not.to.be.a("string")
+                  );
+                  Array.from(user.pending_transactions).forEach((transaction) =>
+                    expect(transaction).not.to.be.a("string")
+                  );
+                });
+
+                done();
+              });
+          });
+        });
+        describe("Get all users and hide their public keys (expanded)", function () {
+          this.slow(1500);
+          this.timeout(5000);
+          it("All users returned should be expanded without exposing their public keys", (done) => {
+            chai
+              .request(API_URL)
+              .get(`${USERS_ENDPOINT}`)
+              .query({ expanded: true, limit: 5, hidePublicKey: true })
+              .end(function (err, res) {
+                expect(res).to.have.status(200);
+                expect(res.body).to.be.an("array");
+                res.body.forEach((user) => {
+                  expect(user).not.to.have.property("public_key");
+                  Array.from(user.latest_transactions).forEach((transaction) =>
+                    expect(transaction).not.to.be.a("string")
+                  );
+                  Array.from(user.pending_transactions).forEach((transaction) =>
+                    expect(transaction).not.to.be.a("string")
+                  );
+                });
+
                 done();
               });
           });
@@ -1883,7 +1927,6 @@ describe(`Cryptocurrency Test Suite`, () => {
               .request(API_URL)
               .get(`${USERS_ENDPOINT}/${uuidv4()}`)
               .end(function (err, res) {
-                //expect(res.body.errors).to.be.an("array");
                 expect(res).to.have.status(400);
                 done();
               });
@@ -1911,6 +1954,18 @@ describe(`Cryptocurrency Test Suite`, () => {
               done();
             });
         });
+        it("User should be retrieved successfully without exposing public key", (done) => {
+          chai
+            .request(API_URL)
+            .get(`${USERS_ENDPOINT}/${users.W1000.address}`)
+            .query({ hidePublicKey: true })
+            .end(function (err, res) {
+              expect(res).to.have.status(200);
+              expect(res.body).to.be.an("object");
+              expect(res.body).not.to.have.property("public_key");
+              done();
+            });
+        });
         it("User should be retrieved and expanded successfully", (done) => {
           chai
             .request(API_URL)
@@ -1918,10 +1973,33 @@ describe(`Cryptocurrency Test Suite`, () => {
             .query({ expanded: true })
             .end(function (err, res) {
               expect(res).to.have.status(200);
-              const retrievedUser = new User(res.body);
+              const user = res.body;
               expect(res.body).to.be.an("object");
-              /*  (Array.from(retrievedUser.latest_transactions)).forEach(transaction => expect(transaction).to.be.an("object"))
-              (Array.from(retrievedUser.pending_transactions)).forEach(transaction => expect(transaction).to.be.an("object")) */
+              Array.from(user.latest_transactions).forEach((transaction) =>
+                expect(transaction).not.to.be.a("string")
+              );
+              Array.from(user.pending_transactions).forEach((transaction) =>
+                expect(transaction).not.to.be.a("string")
+              );
+              done();
+            });
+        });
+        it("User should be retrieved and expanded successfully without exposing public key", (done) => {
+          chai
+            .request(API_URL)
+            .get(`${USERS_ENDPOINT}/${users.W1000.address}`)
+            .query({ expanded: true, hidePublicKey: true })
+            .end(function (err, res) {
+              expect(res).to.have.status(200);
+              const user = res.body;
+              expect(res.body).to.be.an("object");
+              expect(res.body).not.to.have.property("public_key");
+              Array.from(user.latest_transactions).forEach((transaction) =>
+                expect(transaction).not.to.be.a("string")
+              );
+              Array.from(user.pending_transactions).forEach((transaction) =>
+                expect(transaction).not.to.be.a("string")
+              );
               done();
             });
         });

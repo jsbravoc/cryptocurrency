@@ -152,7 +152,6 @@ module.exports = function ({
             if (!state) {
               return;
             }
-            console.log("state: ", state);
             return JSON.parse(Buffer.from(state).toString("utf8"));
           };
           _putState = (context, address, key, value, timeout) =>

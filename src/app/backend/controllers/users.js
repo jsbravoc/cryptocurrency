@@ -70,6 +70,7 @@ const getUsers = (req, res) => {
   const limit = Number.isNaN(Number(req.query.limit))
     ? 0
     : Number(req.query.limit);
+  const hidePublicKey = req.query.hidePublicKey === "true" || false;
   const assetArray = [
     findAllAssets(TYPE.USER, "GET /users", limit, true, true, res),
   ];
@@ -83,6 +84,7 @@ const getUsers = (req, res) => {
   return Promise.all(assetArray)
     .then(([userList, transactionList]) => {
       if (!expanded) {
+        hidePublicKey && userList.forEach((user) => delete user.public_key);
         return res.status(200).json(userList);
       }
       const dictionaryOfTransactions = {};
@@ -137,6 +139,7 @@ const getUsers = (req, res) => {
           });
           const userPromises = [];
           Promise.all(userPromises).then(() => {
+            hidePublicKey && userList.forEach((user) => delete user.public_key);
             return res.status(200).json(userList);
           });
         });
@@ -158,8 +161,10 @@ const getUsers = (req, res) => {
  * @post Returns the user in res object. If an error happens, response object has the error.
  */
 const getUserByAddress = (req, res) => {
+  const expanded = req.query.expanded === "true" || false;
+  const hidePublicKey = req.query.hidePublicKey === "true" || false;
   return findUser(req.params.address, true, true, res).then((user) => {
-    const expanded = req.query.expanded === "true" || false;
+    hidePublicKey && delete user.public_key;
     if (!expanded) {
       return res.status(200).json(user);
     }
@@ -224,18 +229,21 @@ const createUser = (req, res) =>
 
 const updateUser = (req, res) => {
   return findUser(req.params.address, true, true, res).then((existingUser) => {
-    const { role, description, permissions, return_to } = req.body;
-    if (role) {
+    const { role, description, permissions, return_to, active } = req.body;
+    if (role !== undefined) {
       existingUser.role = role;
     }
-    if (description) {
+    if (description !== undefined) {
       existingUser.description = description;
     }
-    if (permissions) {
+    if (permissions !== undefined) {
       existingUser.permissions = permissions;
     }
-    if (return_to) {
+    if (return_to !== undefined) {
       existingUser.return_to = return_to;
+    }
+    if (active !== undefined) {
+      existingUser.active = active;
     }
     return _updateUser(existingUser, res, "PUT /users");
   });
@@ -273,8 +281,6 @@ const deleteUser = (req, res) => {
 };
 
 //#endregion
-
-module.exports.getUserHistory = async function () {};
 
 module.exports.findUser = findUser;
 module.exports.getUsers = getUsers;

@@ -1,3 +1,6 @@
+/** Config controller functionality
+ * @module config
+ */
 /**
  * DEV ONLY: Get environment variables.
  *
@@ -15,7 +18,6 @@ const getConfig = (req, res) => {
       ENABLE_LOGGING: process.env.ENABLE_LOGGING,
       DISABLE_INTEGRITY_VALIDATION: process.env.DISABLE_INTEGRITY_VALIDATION,
       HIDE_ENV_VARIABLES: process.env.HIDE_ENV_VARIABLES,
-      DELAY_ENFORCER_MS: process.env.DELAY_ENFORCER_MS,
     },
   });
 };
@@ -35,7 +37,6 @@ const changeConfig = (req, res) => {
     ENABLE_LOGGING,
     DISABLE_INTEGRITY_VALIDATION,
     HIDE_ENV_VARIABLES,
-    DELAY_ENFORCER_MS,
   } = req.body;
   process.env.SAWTOOTH_PRIVATE_KEY =
     SAWTOOTH_PRIVATE_KEY || process.env.SAWTOOTH_PRIVATE_KEY;
@@ -48,8 +49,6 @@ const changeConfig = (req, res) => {
     DISABLE_INTEGRITY_VALIDATION || process.env.DISABLE_INTEGRITY_VALIDATION;
   process.env.HIDE_ENV_VARIABLES =
     HIDE_ENV_VARIABLES || process.env.HIDE_ENV_VARIABLES;
-  process.env.DELAY_ENFORCER_MS =
-    DELAY_ENFORCER_MS || process.env.DELAY_ENFORCER_MS;
 
   return res.status(200).json({
     msg: "Ok",
@@ -61,7 +60,6 @@ const changeConfig = (req, res) => {
       ENABLE_LOGGING: process.env.ENABLE_LOGGING,
       DISABLE_INTEGRITY_VALIDATION: process.env.DISABLE_INTEGRITY_VALIDATION,
       HIDE_ENV_VARIABLES: process.env.HIDE_ENV_VARIABLES,
-      DELAY_ENFORCER_MS: process.env.DELAY_ENFORCER_MS,
     },
   });
 };

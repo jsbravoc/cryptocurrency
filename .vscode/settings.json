@@ -25,7 +25,7 @@
         "**/node_modules": true,
         "**/public": true,
         "**/build": true,
-        "**/resources/docs": true,
+        "**/resources/docs": false,
         "**/coverage": true,
         "**/.nyc_output": true,
         "**/blockchain_network": true,

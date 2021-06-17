@@ -152,7 +152,9 @@ const validateAssetExistence = (
                 };
               break;
           }
-          return Promise.reject({ callback: createError(req, res, errorObj) });
+          return Promise.reject({
+            callback: () => createError(req, res, errorObj),
+          });
         }
         const obj = {};
         obj[type] = existingAsset;

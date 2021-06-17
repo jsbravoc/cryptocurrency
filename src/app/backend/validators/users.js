@@ -88,6 +88,9 @@ const inputValidation = validate([
   body("pending_transactions").customSanitizer(() => []),
 ]);
 
+const activeInputValidation = validate([
+  body("active").optional({ checkNull: true }).isBoolean(),
+]);
 const validateUserReturnTo = (req, res, next) => {
   if (req.body.return_to) {
     const promises = [];
@@ -287,6 +290,7 @@ const validateUserUpdate = [
     }),
   validateUserPermissions,
   validateUserReturnTo,
+  activeInputValidation,
 ];
 
 const validateUserDelete = [

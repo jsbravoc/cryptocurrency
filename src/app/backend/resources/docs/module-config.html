@@ -5,7 +5,7 @@
   
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title> Permissions</title>
+  <title> config</title>
 
   <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -73,8 +73,8 @@
         <div class="core" id="main-content-wrapper">
             <div class="content">
                 <header class="page-title">
-                    <p>Class</p>
-                    <h1>Permissions</h1>
+                    <p>Module</p>
+                    <h1>config</h1>
                 </header>
                 
 
@@ -85,9 +85,8 @@
 
 <header>
     
-        <h2><span class="attribs"><span class="type-signature"></span></span>Permissions<span class="signature">(permissions)</span><span class="type-signature"></span></h2>
         
-            <div class="class-description"><p>Represents the dictionary of permissions that a user has.</p></div>
+            
         
     
 </header>
@@ -96,28 +95,136 @@
     <div class="container-overview">
     
         
-            <div class='vertical-section'>
-                <div class="members">
-                    <div class="member">
-                        <div class=name>
-                            <span class="tag">Constructor</span>
-                        </div>
-                        
+            <div class="description"><p>Config controller functionality</p></div>
+        
+
+        
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+
+    
+
+    
+
+    
+        <p class="tag-source">
+            <a href="controllers_dev_config.js.html" class="button">View Source</a>
+            <span>
+                <a href="controllers_dev_config.js.html">controllers/dev/config.js</a>, <a href="controllers_dev_config.js.html#line1">line 1</a>
+            </span>
+        </p>
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+    
+    </div>
+    
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <div class='vertical-section'>
+            <h1>Methods</h1>
+            <div class="members">
+            
+                <div class="member">
 
 
     
-    <h4 class="name" id="Permissions">
-        <a class="href-link" href="#Permissions">#</a>
+    <h4 class="name" id="~changeConfig">
+        <a class="href-link" href="#~changeConfig">#</a>
+        
+            
+                <span class='tag'>inner</span>
+            
         
         <span class="code-name">
             
-                new Permissions<span class="signature">(permissions)</span><span class="type-signature"></span>
+                changeConfig<span class="signature">(req, res)</span><span class="type-signature"></span>
             
         </span>
     </h4>
     
 
     
+    <p class="summary">DEV ONLY: Change environment variables with a single request.</p>
+    
+    
+    <div class="description">
+        <p>DEV ONLY: Change environment variables with a single request.</p>
+    </div>
     
 
 
@@ -154,13 +261,13 @@
             
 <tr class="deep-level-0">
   
-      <td class="name"><code>permissions</code></td>
+      <td class="name"><code>req</code></td>
   
 
   <td class="type">
   
       
-<span class="param-type">Object</span>
+<span class="param-type">Request</span>
 
 
   
@@ -170,7 +277,32 @@
 
   
 
-  <td class="description last"><p>Object or dictionary of permissions.</p></td>
+  <td class="description last"><p>Http request object.</p></td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>res</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">Response</span>
+
+
+  
+  </td>
+
+  
+
+  
+
+  <td class="description last"><p>Response object to handle Express request.</p></td>
 </tr>
 
 
@@ -216,9 +348,9 @@
 
     
         <p class="tag-source">
-            <a href="models_Permissions.js.html" class="button">View Source</a>
+            <a href="controllers_dev_config.js.html" class="button">View Source</a>
             <span>
-                <a href="models_Permissions.js.html">models/Permissions.js</a>, <a href="models_Permissions.js.html#line6">line 6</a>
+                <a href="controllers_dev_config.js.html">controllers/dev/config.js</a>, <a href="controllers_dev_config.js.html#line31">line 31</a>
             </span>
         </p>
     
@@ -244,15 +376,125 @@
 
 
 
+</div>
+            
+                <div class="member">
 
-                    </div>
-                </div>
-            </div>
-        
+
     
+    <h4 class="name" id="~getConfig">
+        <a class="href-link" href="#~getConfig">#</a>
+        
+            
+                <span class='tag'>inner</span>
+            
+        
+        <span class="code-name">
+            
+                getConfig<span class="signature">(req, res)</span><span class="type-signature"></span>
+            
+        </span>
+    </h4>
+    
+
+    
+    <p class="summary">DEV ONLY: Get environment variables.</p>
+    
+    
+    <div class="description">
+        <p>DEV ONLY: Get environment variables.</p>
     </div>
     
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
     
+<div class="table-container">
+    <table class="params table">
+        <thead>
+        <tr>
+            
+            <th>Name</th>
+            
+
+            <th>Type</th>
+
+            
+
+            
+
+            <th class="last">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>req</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">Request</span>
+
+
+  
+  </td>
+
+  
+
+  
+
+  <td class="description last"><p>Http request object.</p></td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>res</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">Response</span>
+
+
+  
+  </td>
+
+  
+
+  
+
+  <td class="description last"><p>Response object to handle Express request.</p></td>
+</tr>
+
+
+        
+        </tbody>
+    </table>
+</div>
+
+
+
+
+
+<dl class="details">
 
     
 
@@ -266,6 +508,57 @@
 
     
 
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+
+    
+
+    
+
+    
+        <p class="tag-source">
+            <a href="controllers_dev_config.js.html" class="button">View Source</a>
+            <span>
+                <a href="controllers_dev_config.js.html">controllers/dev/config.js</a>, <a href="controllers_dev_config.js.html#line10">line 10</a>
+            </span>
+        </p>
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+            
+            </div>
+        </div>
     
 
     

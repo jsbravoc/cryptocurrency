@@ -68,7 +68,7 @@
             
             <nav>
                 
-                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Modules</h3><ul><li><a href="module-controllers_common.html">controllers/common</a></li><li><a href="module-controllers_cryptocurrency.html">controllers/cryptocurrency</a></li><li><a href="module-controllers_users.html">controllers/users</a></li><li><a href="module-enforcer_cryptocurrency.html">enforcer/cryptocurrency</a></li><li><a href="module-routers_cryptocurrency.html">routers/cryptocurrency</a></li><li><a href="module-routers_dev_config.html">routers/dev/config</a></li><li><a href="module-routers_enforcer.html">routers/enforcer</a></li><li><a href="module-routers_users.html">routers/users</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-routers_cryptocurrency-cryptoRouter.html">cryptoRouter</a></li><li><a href="module-routers_dev_config-devConfig.html">devConfig</a></li><li><a href="module-routers_enforcer-enforcerRouter.html">enforcerRouter</a></li><li><a href="module-routers_users-usersRouter.html">usersRouter</a></li></ul><h3>Classes</h3><ul><li><a href="Asset.html">Asset</a></li><li><a href="BaseModel.html">BaseModel</a></li><li><a href="Permissions.html">Permissions</a></li><li><a href="Transaction.html">Transaction</a></li><li><a href="User.html">User</a></li></ul><h3>Global</h3><ul><li><a href="global.html#changeConfig">changeConfig</a></li><li><a href="global.html#getConfig">getConfig</a></li><li><a href="global.html#http">http</a></li><li><a href="global.html#HTTP_METHODS">HTTP_METHODS</a></li><li><a href="global.html#inputValidation">inputValidation</a></li><li><a href="global.html#normalizePort">normalizePort</a></li><li><a href="global.html#onError">onError</a></li><li><a href="global.html#port">port</a></li><li><a href="global.html#server">server</a></li><li><a href="global.html#TYPE">TYPE</a></li><li><a href="global.html#USER_TYPE">USER_TYPE</a></li><li><a href="global.html#validate">validate</a></li><li><a href="global.html#validateAssetExistence">validateAssetExistence</a></li><li><a href="global.html#validateExistingTransaction">validateExistingTransaction</a></li><li><a href="global.html#validatePendingTransaction">validatePendingTransaction</a></li><li><a href="global.html#validateTransactionAddress">validateTransactionAddress</a></li><li><a href="global.html#validateTransactionUpdateRequest">validateTransactionUpdateRequest</a></li><li><a href="global.html#validateUserCreation">validateUserCreation</a></li></ul></div>
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Modules</h3><ul><li><a href="module-config.html">config</a></li><li><a href="module-controllers_common.html">controllers/common</a></li><li><a href="module-controllers_cryptocurrency.html">controllers/cryptocurrency</a></li><li><a href="module-controllers_users.html">controllers/users</a></li><li><a href="module-enforcer_cryptocurrency.html">enforcer/cryptocurrency</a></li><li><a href="module-routers_cryptocurrency.html">routers/cryptocurrency</a></li><li><a href="module-routers_dev_config.html">routers/dev/config</a></li><li><a href="module-routers_enforcer.html">routers/enforcer</a></li><li><a href="module-routers_users.html">routers/users</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-routers_cryptocurrency-cryptoRouter.html">cryptoRouter</a></li><li><a href="module-routers_dev_config-devConfig.html">devConfig</a></li><li><a href="module-routers_enforcer-enforcerRouter.html">enforcerRouter</a></li><li><a href="module-routers_users-usersRouter.html">usersRouter</a></li></ul><h3>Classes</h3><ul><li><a href="Asset.html">Asset</a></li><li><a href="BaseModel.html">BaseModel</a></li><li><a href="Permissions.html">Permissions</a></li><li><a href="Transaction.html">Transaction</a></li><li><a href="User.html">User</a></li></ul><h3>Global</h3><ul><li><a href="global.html#http">http</a></li><li><a href="global.html#HTTP_METHODS">HTTP_METHODS</a></li><li><a href="global.html#inputValidation">inputValidation</a></li><li><a href="global.html#normalizePort">normalizePort</a></li><li><a href="global.html#onError">onError</a></li><li><a href="global.html#port">port</a></li><li><a href="global.html#server">server</a></li><li><a href="global.html#TYPE">TYPE</a></li><li><a href="global.html#USER_TYPE">USER_TYPE</a></li><li><a href="global.html#validate">validate</a></li><li><a href="global.html#validateAssetExistence">validateAssetExistence</a></li><li><a href="global.html#validateExistingTransaction">validateExistingTransaction</a></li><li><a href="global.html#validatePendingTransaction">validatePendingTransaction</a></li><li><a href="global.html#validateTransactionAddress">validateTransactionAddress</a></li><li><a href="global.html#validateTransactionUpdateRequest">validateTransactionUpdateRequest</a></li><li><a href="global.html#validateUserCreation">validateUserCreation</a></li></ul></div>
                 
             </nav>
         </div>
@@ -157,6 +157,7 @@ const getUsers = (req, res) => {
   const limit = Number.isNaN(Number(req.query.limit))
     ? 0
     : Number(req.query.limit);
+  const hidePublicKey = req.query.hidePublicKey === "true" || false;
   const assetArray = [
     findAllAssets(TYPE.USER, "GET /users", limit, true, true, res),
   ];
@@ -170,6 +171,7 @@ const getUsers = (req, res) => {
   return Promise.all(assetArray)
     .then(([userList, transactionList]) => {
       if (!expanded) {
+        hidePublicKey &amp;&amp; userList.forEach((user) => delete user.public_key);
         return res.status(200).json(userList);
       }
       const dictionaryOfTransactions = {};
@@ -224,6 +226,7 @@ const getUsers = (req, res) => {
           });
           const userPromises = [];
           Promise.all(userPromises).then(() => {
+            hidePublicKey &amp;&amp; userList.forEach((user) => delete user.public_key);
             return res.status(200).json(userList);
           });
         });
@@ -245,8 +248,10 @@ const getUsers = (req, res) => {
  * @post Returns the user in res object. If an error happens, response object has the error.
  */
 const getUserByAddress = (req, res) => {
+  const expanded = req.query.expanded === "true" || false;
+  const hidePublicKey = req.query.hidePublicKey === "true" || false;
   return findUser(req.params.address, true, true, res).then((user) => {
-    const expanded = req.query.expanded === "true" || false;
+    hidePublicKey &amp;&amp; delete user.public_key;
     if (!expanded) {
       return res.status(200).json(user);
     }
@@ -311,18 +316,21 @@ const createUser = (req, res) =>
 
 const updateUser = (req, res) => {
   return findUser(req.params.address, true, true, res).then((existingUser) => {
-    const { role, description, permissions, return_to } = req.body;
-    if (role) {
+    const { role, description, permissions, return_to, active } = req.body;
+    if (role !== undefined) {
       existingUser.role = role;
     }
-    if (description) {
+    if (description !== undefined) {
       existingUser.description = description;
     }
-    if (permissions) {
+    if (permissions !== undefined) {
       existingUser.permissions = permissions;
     }
-    if (return_to) {
+    if (return_to !== undefined) {
       existingUser.return_to = return_to;
+    }
+    if (active !== undefined) {
+      existingUser.active = active;
     }
     return _updateUser(existingUser, res, "PUT /users");
   });
@@ -360,8 +368,6 @@ const deleteUser = (req, res) => {
 };
 
 //#endregion
-
-module.exports.getUserHistory = async function () {};
 
 module.exports.findUser = findUser;
 module.exports.getUsers = getUsers;

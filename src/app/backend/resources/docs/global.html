@@ -66,7 +66,7 @@
             
             <nav>
                 
-                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Modules</h3><ul><li><a href="module-controllers_common.html">controllers/common</a></li><li><a href="module-controllers_cryptocurrency.html">controllers/cryptocurrency</a></li><li><a href="module-controllers_users.html">controllers/users</a></li><li><a href="module-enforcer_cryptocurrency.html">enforcer/cryptocurrency</a></li><li><a href="module-routers_cryptocurrency.html">routers/cryptocurrency</a></li><li><a href="module-routers_dev_config.html">routers/dev/config</a></li><li><a href="module-routers_enforcer.html">routers/enforcer</a></li><li><a href="module-routers_users.html">routers/users</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-routers_cryptocurrency-cryptoRouter.html">cryptoRouter</a></li><li><a href="module-routers_dev_config-devConfig.html">devConfig</a></li><li><a href="module-routers_enforcer-enforcerRouter.html">enforcerRouter</a></li><li><a href="module-routers_users-usersRouter.html">usersRouter</a></li></ul><h3>Classes</h3><ul><li><a href="Asset.html">Asset</a></li><li><a href="BaseModel.html">BaseModel</a></li><li><a href="Permissions.html">Permissions</a></li><li><a href="Transaction.html">Transaction</a></li><li><a href="User.html">User</a></li></ul><h3>Global</h3><ul><li><a href="global.html#changeConfig">changeConfig</a></li><li><a href="global.html#getConfig">getConfig</a></li><li><a href="global.html#http">http</a></li><li><a href="global.html#HTTP_METHODS">HTTP_METHODS</a></li><li><a href="global.html#inputValidation">inputValidation</a></li><li><a href="global.html#normalizePort">normalizePort</a></li><li><a href="global.html#onError">onError</a></li><li><a href="global.html#port">port</a></li><li><a href="global.html#server">server</a></li><li><a href="global.html#TYPE">TYPE</a></li><li><a href="global.html#USER_TYPE">USER_TYPE</a></li><li><a href="global.html#validate">validate</a></li><li><a href="global.html#validateAssetExistence">validateAssetExistence</a></li><li><a href="global.html#validateExistingTransaction">validateExistingTransaction</a></li><li><a href="global.html#validatePendingTransaction">validatePendingTransaction</a></li><li><a href="global.html#validateTransactionAddress">validateTransactionAddress</a></li><li><a href="global.html#validateTransactionUpdateRequest">validateTransactionUpdateRequest</a></li><li><a href="global.html#validateUserCreation">validateUserCreation</a></li></ul></div>
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Modules</h3><ul><li><a href="module-config.html">config</a></li><li><a href="module-controllers_common.html">controllers/common</a></li><li><a href="module-controllers_cryptocurrency.html">controllers/cryptocurrency</a></li><li><a href="module-controllers_users.html">controllers/users</a></li><li><a href="module-enforcer_cryptocurrency.html">enforcer/cryptocurrency</a></li><li><a href="module-routers_cryptocurrency.html">routers/cryptocurrency</a></li><li><a href="module-routers_dev_config.html">routers/dev/config</a></li><li><a href="module-routers_enforcer.html">routers/enforcer</a></li><li><a href="module-routers_users.html">routers/users</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-routers_cryptocurrency-cryptoRouter.html">cryptoRouter</a></li><li><a href="module-routers_dev_config-devConfig.html">devConfig</a></li><li><a href="module-routers_enforcer-enforcerRouter.html">enforcerRouter</a></li><li><a href="module-routers_users-usersRouter.html">usersRouter</a></li></ul><h3>Classes</h3><ul><li><a href="Asset.html">Asset</a></li><li><a href="BaseModel.html">BaseModel</a></li><li><a href="Permissions.html">Permissions</a></li><li><a href="Transaction.html">Transaction</a></li><li><a href="User.html">User</a></li></ul><h3>Global</h3><ul><li><a href="global.html#http">http</a></li><li><a href="global.html#HTTP_METHODS">HTTP_METHODS</a></li><li><a href="global.html#inputValidation">inputValidation</a></li><li><a href="global.html#normalizePort">normalizePort</a></li><li><a href="global.html#onError">onError</a></li><li><a href="global.html#port">port</a></li><li><a href="global.html#server">server</a></li><li><a href="global.html#TYPE">TYPE</a></li><li><a href="global.html#USER_TYPE">USER_TYPE</a></li><li><a href="global.html#validate">validate</a></li><li><a href="global.html#validateAssetExistence">validateAssetExistence</a></li><li><a href="global.html#validateExistingTransaction">validateExistingTransaction</a></li><li><a href="global.html#validatePendingTransaction">validatePendingTransaction</a></li><li><a href="global.html#validateTransactionAddress">validateTransactionAddress</a></li><li><a href="global.html#validateTransactionUpdateRequest">validateTransactionUpdateRequest</a></li><li><a href="global.html#validateUserCreation">validateUserCreation</a></li></ul></div>
                 
             </nav>
         </div>
@@ -449,6 +449,85 @@
 </h4>
 
 
+<p class="summary">Verifies if a user's request body is valid.</p>
+
+
+
+<div class="description">
+    <p>Verifies if a user's request body is valid.
+Conditions:
+address must be a non-empty String
+public_key must be a non-empty String
+signature must be a non-empty String</p>
+</div>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+
+    
+
+    
+
+    
+        <p class="tag-source">
+            <a href="validators_users.js.html" class="button">View Source</a>
+            <span>
+                <a href="validators_users.js.html">validators/users.js</a>, <a href="validators_users.js.html#line40">line 40</a>
+            </span>
+        </p>
+    
+</dl>
+
+
+
+
+
+</div>
+            
+                <div class="member">
+
+<h4 class="name" id="inputValidation">
+    <a class="href-link" href="#inputValidation">#</a>
+    
+        
+            <span class='tag'>constant</span>
+        
+    
+    <span class="code-name">
+        inputValidation
+    </span>
+    
+</h4>
+
+
 <p class="summary">Verifies if a transaction's request body is valid.</p>
 
 
@@ -506,85 +585,6 @@ valid must be a boolean</p>
             <a href="validators_cryptocurrency.js.html" class="button">View Source</a>
             <span>
                 <a href="validators_cryptocurrency.js.html">validators/cryptocurrency.js</a>, <a href="validators_cryptocurrency.js.html#line27">line 27</a>
-            </span>
-        </p>
-    
-</dl>
-
-
-
-
-
-</div>
-            
-                <div class="member">
-
-<h4 class="name" id="inputValidation">
-    <a class="href-link" href="#inputValidation">#</a>
-    
-        
-            <span class='tag'>constant</span>
-        
-    
-    <span class="code-name">
-        inputValidation
-    </span>
-    
-</h4>
-
-
-<p class="summary">Verifies if a user's request body is valid.</p>
-
-
-
-<div class="description">
-    <p>Verifies if a user's request body is valid.
-Conditions:
-address must be a non-empty String
-public_key must be a non-empty String
-signature must be a non-empty String</p>
-</div>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    
-
-    
-
-    
-
-    
-        <p class="tag-source">
-            <a href="validators_users.js.html" class="button">View Source</a>
-            <span>
-                <a href="validators_users.js.html">validators/users.js</a>, <a href="validators_users.js.html#line40">line 40</a>
             </span>
         </p>
     
@@ -1125,7 +1125,7 @@ signature must be a non-empty String</p>
         <p class="tag-source">
             <a href="validators_cryptocurrency.js.html" class="button">View Source</a>
             <span>
-                <a href="validators_cryptocurrency.js.html">validators/cryptocurrency.js</a>, <a href="validators_cryptocurrency.js.html#line436">line 436</a>
+                <a href="validators_cryptocurrency.js.html">validators/cryptocurrency.js</a>, <a href="validators_cryptocurrency.js.html#line354">line 354</a>
             </span>
         </p>
     
@@ -1200,7 +1200,7 @@ signature must be a non-empty String</p>
         <p class="tag-source">
             <a href="validators_cryptocurrency.js.html" class="button">View Source</a>
             <span>
-                <a href="validators_cryptocurrency.js.html">validators/cryptocurrency.js</a>, <a href="validators_cryptocurrency.js.html#line626">line 626</a>
+                <a href="validators_cryptocurrency.js.html">validators/cryptocurrency.js</a>, <a href="validators_cryptocurrency.js.html#line548">line 548</a>
             </span>
         </p>
     
@@ -1275,7 +1275,7 @@ signature must be a non-empty String</p>
         <p class="tag-source">
             <a href="validators_users.js.html" class="button">View Source</a>
             <span>
-                <a href="validators_users.js.html">validators/users.js</a>, <a href="validators_users.js.html#line275">line 275</a>
+                <a href="validators_users.js.html">validators/users.js</a>, <a href="validators_users.js.html#line269">line 269</a>
             </span>
         </p>
     
@@ -1295,356 +1295,6 @@ signature must be a non-empty String</p>
         <div class='vertical-section'>
             <h1>Methods</h1>
             <div class="members">
-            
-                <div class="member">
-
-
-    
-    <h4 class="name" id="changeConfig">
-        <a class="href-link" href="#changeConfig">#</a>
-        
-        <span class="code-name">
-            
-                changeConfig<span class="signature">(req, res)</span><span class="type-signature"></span>
-            
-        </span>
-    </h4>
-    
-
-    
-    <p class="summary">DEV ONLY: Change environment variables with a single request.</p>
-    
-    
-    <div class="description">
-        <p>DEV ONLY: Change environment variables with a single request.</p>
-    </div>
-    
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-<div class="table-container">
-    <table class="params table">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
-
-            <th>Type</th>
-
-            
-
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>req</code></td>
-  
-
-  <td class="type">
-  
-      
-<span class="param-type">Request</span>
-
-
-  
-  </td>
-
-  
-
-  
-
-  <td class="description last"><p>Http request object.</p></td>
-</tr>
-
-
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>res</code></td>
-  
-
-  <td class="type">
-  
-      
-<span class="param-type">Response</span>
-
-
-  
-  </td>
-
-  
-
-  
-
-  <td class="description last"><p>Response object to handle Express request.</p></td>
-</tr>
-
-
-        
-        </tbody>
-    </table>
-</div>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    
-
-    
-
-    
-
-    
-        <p class="tag-source">
-            <a href="controllers_dev_config.js.html" class="button">View Source</a>
-            <span>
-                <a href="controllers_dev_config.js.html">controllers/dev/config.js</a>, <a href="controllers_dev_config.js.html#line29">line 29</a>
-            </span>
-        </p>
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-</div>
-            
-                <div class="member">
-
-
-    
-    <h4 class="name" id="getConfig">
-        <a class="href-link" href="#getConfig">#</a>
-        
-        <span class="code-name">
-            
-                getConfig<span class="signature">(req, res)</span><span class="type-signature"></span>
-            
-        </span>
-    </h4>
-    
-
-    
-    <p class="summary">DEV ONLY: Get environment variables.</p>
-    
-    
-    <div class="description">
-        <p>DEV ONLY: Get environment variables.</p>
-    </div>
-    
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-<div class="table-container">
-    <table class="params table">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
-
-            <th>Type</th>
-
-            
-
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>req</code></td>
-  
-
-  <td class="type">
-  
-      
-<span class="param-type">Request</span>
-
-
-  
-  </td>
-
-  
-
-  
-
-  <td class="description last"><p>Http request object.</p></td>
-</tr>
-
-
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>res</code></td>
-  
-
-  <td class="type">
-  
-      
-<span class="param-type">Response</span>
-
-
-  
-  </td>
-
-  
-
-  
-
-  <td class="description last"><p>Response object to handle Express request.</p></td>
-</tr>
-
-
-        
-        </tbody>
-    </table>
-</div>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    
-
-    
-
-    
-
-    
-        <p class="tag-source">
-            <a href="controllers_dev_config.js.html" class="button">View Source</a>
-            <span>
-                <a href="controllers_dev_config.js.html">controllers/dev/config.js</a>, <a href="controllers_dev_config.js.html#line7">line 7</a>
-            </span>
-        </p>
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-</div>
             
                 <div class="member">
 
@@ -2472,7 +2122,7 @@ Otherwise resolves the obj.</p></div>
         <p class="tag-source">
             <a href="validators_cryptocurrency.js.html" class="button">View Source</a>
             <span>
-                <a href="validators_cryptocurrency.js.html">validators/cryptocurrency.js</a>, <a href="validators_cryptocurrency.js.html#line408">line 408</a>
+                <a href="validators_cryptocurrency.js.html">validators/cryptocurrency.js</a>, <a href="validators_cryptocurrency.js.html#line332">line 332</a>
             </span>
         </p>
     

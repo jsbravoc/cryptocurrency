@@ -1,6 +1,3 @@
 exports.mochaHooks = {
-  /*  beforeAll: function (done) {
-    this.timeout(30000);
-    setTimeout(done, 6000);
-  }, */
+  /*  Mocha hooks to execute before/after the tests.  */
 };
