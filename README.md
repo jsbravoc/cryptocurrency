@@ -17,8 +17,8 @@
 
 <table align="center">
   <tr>
-    <td> <img src="readme_assets/swagger_ui.png"  alt="Swagger UI API" width = 480px height = 244px ></td>
-    <td> <img src="readme_assets/jsdocs.png"  alt="Swagger UI API" width = 480px height = 244px ></td>
+    <td> <img src="readme_assets/swagger_ui.png"  alt="Swagger UI API" max-width = 485px height = auto ></td>
+    <td> <img src="readme_assets/jsdocs.png"  alt="Swagger UI API" max-width = 485px height = auto ></td>
     
    </tr> 
 </table> 
