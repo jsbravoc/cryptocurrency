@@ -23,6 +23,7 @@ const users = {
   NoCoinbase: new User({ address: uuidv4() }),
   CantTransferW1000: new User({ address: uuidv4() }),
   ToDeleteW1000: new User({ address: uuidv4() }),
+  ToDelete: new User({ address: uuidv4() }),
   Inactive: new User({ address: uuidv4() }),
 };
 const createdVariables = {
@@ -33,6 +34,7 @@ const createdVariables = {
       [users.NoCoinbase.address]: {},
       [users.CantTransferW1000.address]: {},
       [users.ToDeleteW1000.address]: {},
+      [users.ToDelete.address]: {},
       [users.Inactive.address]: {},
     },
     transaction: {
@@ -41,6 +43,7 @@ const createdVariables = {
       [users.NoCoinbase.address]: {},
       [users.CantTransferW1000.address]: {},
       [users.ToDeleteW1000.address]: {},
+      [users.ToDelete.address]: {},
       [users.Inactive.address]: {},
     },
   },
@@ -342,6 +345,14 @@ describe(`Cryptocurrency Test Suite`, () => {
                   returnTo: {
                     default: users.W1000.address,
                     inactive: users.Inactive.address,
+                  },
+                  callback: createdUserCallback,
+                });
+                createUser({
+                  alias: "ToDelete",
+                  coinbasePermission: true,
+                  returnTo: {
+                    default: users.W1000.address,
                   },
                   callback: createdUserCallback,
                 });
@@ -2499,7 +2510,7 @@ describe(`Cryptocurrency Test Suite`, () => {
       describe("User success validations", function () {
         this.slow(15000);
         this.timeout(20000);
-        it("User should be deleted successfully", (done) => {
+        it("User should be deactivated & their balance should be transferred successfully (user with balance greater than zero)", (done) => {
           chai
             .request(API_URL)
             .delete(`${USERS_ENDPOINT}/${users.ToDeleteW1000.address}`)
@@ -2508,6 +2519,18 @@ describe(`Cryptocurrency Test Suite`, () => {
             })
             .end(function (err, res) {
               expect(res).to.have.status(201);
+              done();
+            });
+        });
+        it("User should be deactivated successfully (user with balance equal to zero)", (done) => {
+          chai
+            .request(API_URL)
+            .delete(`${USERS_ENDPOINT}/${users.ToDelete.address}`)
+            .send({
+              reason: "default",
+            })
+            .end(function (err, res) {
+              expect(res).to.have.status(200);
               done();
             });
         });
