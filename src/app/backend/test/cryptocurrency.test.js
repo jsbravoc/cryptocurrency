@@ -214,6 +214,8 @@ const createTransaction = ({
         amount,
         pending,
         signature: request.signature,
+        address:
+          res && res.body && res.body.payload ? res.body.payload.address : "",
       });
     });
   return true;
@@ -245,6 +247,7 @@ describe(`Cryptocurrency Test Suite`, () => {
       pending,
       signature,
       res,
+      address,
       callback,
     }) => {
       const recipientAddress = users[recipientAlias].address;
@@ -275,6 +278,8 @@ describe(`Cryptocurrency Test Suite`, () => {
             );
           if (callback) callback(res);
           return true;
+        } else {
+          console.log("ERR RESPONSE", res.body);
         }
         return false;
       });
@@ -512,7 +517,7 @@ describe(`Cryptocurrency Test Suite`, () => {
             .get(
               `${CRYPTO_ENDPOINT}/${
                 createdVariables.transactions.transaction[users.W1000.address]
-                  .coinbase.payload.signature
+                  .coinbase.payload.address
               }`
             )
             .end(function (err, res) {
@@ -527,7 +532,7 @@ describe(`Cryptocurrency Test Suite`, () => {
               `${CRYPTO_ENDPOINT}/${
                 createdVariables.transactions.transaction[
                   users.CantTransferW1000.address
-                ].W0.payload.signature
+                ].W0.payload.address
               }`
             )
             .query({ expanded: true })
@@ -693,7 +698,7 @@ describe(`Cryptocurrency Test Suite`, () => {
                 signature:
                   createdVariables.transactions.transaction[
                     users.CantTransferW1000.address
-                  ].W0.payload.signature + "1",
+                  ].W0.payload.address + "1",
               })
               .end(function (err, res) {
                 expect(res.body.errors).to.be.an("array");
@@ -1035,7 +1040,7 @@ describe(`Cryptocurrency Test Suite`, () => {
                 setTimeout(() => {
                   chai
                     .request(API_URL)
-                    .put(`${CRYPTO_ENDPOINT}/${createdTransaction.signature}`)
+                    .put(`${CRYPTO_ENDPOINT}/${createdTransaction.address}`)
                     .end(function (err, res) {
                       expect(res.body.errors).to.be.an("array");
                       expect(res).to.have.status(400);
@@ -1057,7 +1062,7 @@ describe(`Cryptocurrency Test Suite`, () => {
                 setTimeout(() => {
                   chai
                     .request(API_URL)
-                    .put(`${CRYPTO_ENDPOINT}/${createdTransaction.signature}`)
+                    .put(`${CRYPTO_ENDPOINT}/${createdTransaction.address}`)
                     .query({ approve: true })
                     .end(function (err, res) {
                       expect(res.body.errors).to.be.an("array");
@@ -1080,7 +1085,7 @@ describe(`Cryptocurrency Test Suite`, () => {
                 setTimeout(() => {
                   chai
                     .request(API_URL)
-                    .put(`${CRYPTO_ENDPOINT}/${createdTransaction.signature}`)
+                    .put(`${CRYPTO_ENDPOINT}/${createdTransaction.address}`)
                     .query({ description: "new description" })
                     .end(function (err, res) {
                       expect(res.body.errors).to.be.an("array");
@@ -1108,7 +1113,7 @@ describe(`Cryptocurrency Test Suite`, () => {
                 setTimeout(() => {
                   chai
                     .request(API_URL)
-                    .put(`${CRYPTO_ENDPOINT}/${createdTransaction.signature}`)
+                    .put(`${CRYPTO_ENDPOINT}/${createdTransaction.address}`)
                     .send({ signature })
                     .end(function (err, res) {
                       expect(res.body.errors).to.be.an("array");
@@ -1148,7 +1153,7 @@ describe(`Cryptocurrency Test Suite`, () => {
                   );
                   chai
                     .request(API_URL)
-                    .put(`${CRYPTO_ENDPOINT}/${createdTransaction.signature}`)
+                    .put(`${CRYPTO_ENDPOINT}/${createdTransaction.address}`)
                     .query({ approve: "not-true", signature })
                     .end(function (err, res) {
                       expect(res.body.errors).to.be.an("array");
@@ -1169,7 +1174,7 @@ describe(`Cryptocurrency Test Suite`, () => {
               .put(
                 `${CRYPTO_ENDPOINT}/${
                   createdVariables.transactions.transaction[users.W1000.address]
-                    .coinbase.payload.signature
+                    .coinbase.payload.address
                 }`
               )
               .end(function (err, res) {
@@ -1195,7 +1200,7 @@ describe(`Cryptocurrency Test Suite`, () => {
                   );
                   chai
                     .request(API_URL)
-                    .put(`${CRYPTO_ENDPOINT}/${createdTransaction.signature}`)
+                    .put(`${CRYPTO_ENDPOINT}/${createdTransaction.address}`)
                     .query({ approve: true, signature })
                     .end(function (err, res) {
                       expect(res.body.errors).to.be.an("array");
@@ -1223,7 +1228,7 @@ describe(`Cryptocurrency Test Suite`, () => {
                   );
                   chai
                     .request(API_URL)
-                    .put(`${CRYPTO_ENDPOINT}/${createdTransaction.signature}`)
+                    .put(`${CRYPTO_ENDPOINT}/${createdTransaction.address}`)
                     .query({ approve: false, signature })
                     .end(function (err, res) {
                       expect(res.body.errors).to.be.an("array");
@@ -1249,7 +1254,7 @@ describe(`Cryptocurrency Test Suite`, () => {
 
                   chai
                     .request(API_URL)
-                    .put(`${CRYPTO_ENDPOINT}/${createdTransaction.signature}`)
+                    .put(`${CRYPTO_ENDPOINT}/${createdTransaction.address}`)
                     .query({ approve: true, signature })
                     .end(function (err, res) {
                       expect(res.body.errors).to.be.an("array");
@@ -1278,7 +1283,7 @@ describe(`Cryptocurrency Test Suite`, () => {
 
                   chai
                     .request(API_URL)
-                    .put(`${CRYPTO_ENDPOINT}/${createdTransaction.signature}`)
+                    .put(`${CRYPTO_ENDPOINT}/${createdTransaction.address}`)
                     .query({ approve: true, signature })
                     .end(function (err, res) {
                       expect(res.body.errors).to.be.an("array");
@@ -1309,7 +1314,7 @@ describe(`Cryptocurrency Test Suite`, () => {
 
                   chai
                     .request(API_URL)
-                    .put(`${CRYPTO_ENDPOINT}/${createdTransaction.signature}`)
+                    .put(`${CRYPTO_ENDPOINT}/${createdTransaction.address}`)
                     .send({ description: "Another description", signature })
                     .end(function (err, res) {
                       expect(res.body.errors).to.be.an("array");
@@ -1339,7 +1344,7 @@ describe(`Cryptocurrency Test Suite`, () => {
 
                   chai
                     .request(API_URL)
-                    .put(`${CRYPTO_ENDPOINT}/${createdTransaction.signature}`)
+                    .put(`${CRYPTO_ENDPOINT}/${createdTransaction.address}`)
                     .send({ description: "Different description", signature })
                     .end(function (err, res) {
                       expect(res.body.errors).to.be.an("array");
@@ -1369,7 +1374,7 @@ describe(`Cryptocurrency Test Suite`, () => {
 
                   chai
                     .request(API_URL)
-                    .put(`${CRYPTO_ENDPOINT}/${createdTransaction.signature}`)
+                    .put(`${CRYPTO_ENDPOINT}/${createdTransaction.address}`)
                     .send({ description: "Another description", signature })
                     .end(function (err, res) {
                       expect(res.body.errors).to.be.an("array");
@@ -1403,7 +1408,7 @@ describe(`Cryptocurrency Test Suite`, () => {
 
                 chai
                   .request(API_URL)
-                  .put(`${CRYPTO_ENDPOINT}/${createdTransaction.signature}`)
+                  .put(`${CRYPTO_ENDPOINT}/${createdTransaction.address}`)
                   .query({ approve: true, signature })
                   .end(function (err, res) {
                     expect(res).to.have.status(200);
@@ -1442,7 +1447,7 @@ describe(`Cryptocurrency Test Suite`, () => {
                 );
                 chai
                   .request(API_URL)
-                  .put(`${CRYPTO_ENDPOINT}/${createdTransaction.signature}`)
+                  .put(`${CRYPTO_ENDPOINT}/${createdTransaction.address}`)
                   .query({ approve: false, signature })
                   .end(function (err, res) {
                     expect(res).to.have.status(200);
@@ -1478,7 +1483,7 @@ describe(`Cryptocurrency Test Suite`, () => {
                 );
                 chai
                   .request(API_URL)
-                  .put(`${CRYPTO_ENDPOINT}/${createdTransaction.signature}`)
+                  .put(`${CRYPTO_ENDPOINT}/${createdTransaction.address}`)
                   .query({ approve: false, signature })
                   .end(function (err, res) {
                     expect(res).to.have.status(200);
@@ -1514,16 +1519,14 @@ describe(`Cryptocurrency Test Suite`, () => {
                 );
                 chai
                   .request(API_URL)
-                  .put(`${CRYPTO_ENDPOINT}/${createdTransaction.signature}`)
+                  .put(`${CRYPTO_ENDPOINT}/${createdTransaction.address}`)
                   .send({ description: "New description", signature })
                   .end(function (err, res) {
                     expect(res).to.have.status(200);
                     setTimeout(() => {
                       chai
                         .request(API_URL)
-                        .get(
-                          `${CRYPTO_ENDPOINT}/${createdTransaction.signature}`
-                        )
+                        .get(`${CRYPTO_ENDPOINT}/${createdTransaction.address}`)
                         .end(function (err, res) {
                           expect(res).to.have.status(200);
                           res.body.should.have
@@ -1554,7 +1557,7 @@ describe(`Cryptocurrency Test Suite`, () => {
                 );
                 chai
                   .request(API_URL)
-                  .put(`${CRYPTO_ENDPOINT}/${createdTransaction.signature}`)
+                  .put(`${CRYPTO_ENDPOINT}/${createdTransaction.address}`)
                   .query({ approve: true })
                   .send({ description: "New description", signature })
                   .end(function (err, res) {
@@ -1571,7 +1574,7 @@ describe(`Cryptocurrency Test Suite`, () => {
                           chai
                             .request(API_URL)
                             .get(
-                              `${CRYPTO_ENDPOINT}/${createdTransaction.signature}`
+                              `${CRYPTO_ENDPOINT}/${createdTransaction.address}`
                             )
                             .end(function (err, res) {
                               expect(res).to.have.status(200);
@@ -1604,7 +1607,7 @@ describe(`Cryptocurrency Test Suite`, () => {
                 );
                 chai
                   .request(API_URL)
-                  .put(`${CRYPTO_ENDPOINT}/${createdTransaction.signature}`)
+                  .put(`${CRYPTO_ENDPOINT}/${createdTransaction.address}`)
                   .query({ approve: false })
                   .send({ description: "New description", signature })
                   .end(function (err, res) {
@@ -1619,7 +1622,7 @@ describe(`Cryptocurrency Test Suite`, () => {
                           chai
                             .request(API_URL)
                             .get(
-                              `${CRYPTO_ENDPOINT}/${createdTransaction.signature}`
+                              `${CRYPTO_ENDPOINT}/${createdTransaction.address}`
                             )
                             .end(function (err, res) {
                               expect(res).to.have.status(200);
@@ -1667,7 +1670,7 @@ describe(`Cryptocurrency Test Suite`, () => {
                       transactions: `${
                         createdVariables.transactions.transaction[
                           users.W1000.address
-                        ].expiringTransactionToW0.signature
+                        ].expiringTransactionToW0.address
                       }`,
                     })
                     .end(function (err, res) {
@@ -1683,7 +1686,7 @@ describe(`Cryptocurrency Test Suite`, () => {
                               .that.does.not.include(
                                 createdVariables.transactions.transaction[
                                   users.W1000.address
-                                ].expiringTransactionToW0.signature
+                                ].expiringTransactionToW0.address
                               );
                             res.body.should.have.property("balance").equal(2);
                             done();
@@ -1717,7 +1720,7 @@ describe(`Cryptocurrency Test Suite`, () => {
                       transactions: `${
                         createdVariables.transactions.transaction[
                           users.W1000.address
-                        ].nonExpiringTransactionToW0.signature
+                        ].nonExpiringTransactionToW0.address
                       }`,
                     })
                     .end(function (err, res) {
@@ -1733,7 +1736,7 @@ describe(`Cryptocurrency Test Suite`, () => {
                               .that.does.include(
                                 createdVariables.transactions.transaction[
                                   users.W1000.address
-                                ].nonExpiringTransactionToW0.signature
+                                ].nonExpiringTransactionToW0.address
                               );
                             res.body.should.have.property("balance").equal(3);
                             done();
@@ -1761,7 +1764,7 @@ describe(`Cryptocurrency Test Suite`, () => {
                   .that.does.include(
                     createdVariables.transactions.transaction[
                       users.W1000.address
-                    ].expiringTransaction.signature
+                    ].expiringTransaction.address
                   );
                 chai
                   .request(API_URL)
@@ -1782,7 +1785,7 @@ describe(`Cryptocurrency Test Suite`, () => {
                             .that.does.not.include(
                               createdVariables.transactions.transaction[
                                 users.W1000.address
-                              ].expiringTransaction.signature
+                              ].expiringTransaction.address
                             );
                           done();
                         });
@@ -1806,7 +1809,7 @@ describe(`Cryptocurrency Test Suite`, () => {
                 .that.does.include(
                   createdVariables.transactions.transaction[
                     users.CantTransferW1000.address
-                  ].expiringTransaction.signature
+                  ].expiringTransaction.address
                 );
               chai
                 .request(API_URL)
@@ -1824,7 +1827,7 @@ describe(`Cryptocurrency Test Suite`, () => {
                           .that.does.not.include(
                             createdVariables.transactions.transaction[
                               users.CantTransferW1000.address
-                            ].expiringTransaction.signature
+                            ].expiringTransaction.address
                           );
                         expect(res.body.balance).to.equal(2);
                         done();
@@ -2582,7 +2585,7 @@ describe(`Cryptocurrency Test Suite`, () => {
               .get(
                 `${CRYPTO_ENDPOINT}/${
                   createdVariables.transactions.transaction[users.W1000.address]
-                    .coinbase.payload.signature
+                    .coinbase.payload.address
                 }`
               )
               .end(function (err, res) {
@@ -2613,7 +2616,7 @@ describe(`Cryptocurrency Test Suite`, () => {
               .put(
                 `${CRYPTO_ENDPOINT}/${
                   createdVariables.transactions.transaction[users.W1000.address]
-                    .coinbase.payload.signature
+                    .coinbase.payload.address
                 }`
               )
               .end(function (err, res) {

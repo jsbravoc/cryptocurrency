@@ -32,12 +32,8 @@ const { ERRORS } = require("../utils/errors");
  * @param {Response} [res] - Express.js response object, used to access locals.
  * @return {Promise<User|null>} Promise containing the user object or null if not found.
  */
-const findUser = (
-  address,
-  removeSignature = true,
-  removeType = true,
-  res = null
-) => findByAddress(TYPE.USER, address, removeSignature, removeType, res);
+const findUser = (address, removeType = true, res = null) =>
+  findByAddress(TYPE.USER, address, removeType, res);
 
 /**
  * Updates a user in the blockchain.
@@ -71,14 +67,12 @@ const getUsers = (req, res) => {
     ? 0
     : Number(req.query.limit);
   const hidePublicKey = req.query.hidePublicKey === "true" || false;
-  const assetArray = [
-    findAllAssets(TYPE.USER, "GET /users", limit, true, true, res),
-  ];
+  const assetArray = [findAllAssets(TYPE.USER, "GET /users", limit, true, res)];
   const expanded = req.query.expanded === "true" || false;
 
   if (expanded) {
     assetArray.push(
-      findAllAssets(TYPE.TRANSACTION, "GET /users", limit, false, true, res)
+      findAllAssets(TYPE.TRANSACTION, "GET /users", limit, true, res)
     );
   }
   return Promise.all(assetArray)
@@ -89,14 +83,14 @@ const getUsers = (req, res) => {
       }
       const dictionaryOfTransactions = {};
       (transactionList || []).forEach((asset) => {
-        dictionaryOfTransactions[asset.signature] = asset;
+        dictionaryOfTransactions[asset.address] = asset;
       });
 
       let promises = [];
       (userList || []).forEach((user) => {
         promises.push(
           (user.latest_transactions || []).map((txid) =>
-            findTransaction(txid).then((transaction) =>
+            findTransaction(txid, true, res).then((transaction) =>
               expandSupportingTransactions(
                 transaction,
                 dictionaryOfTransactions
@@ -106,7 +100,7 @@ const getUsers = (req, res) => {
         );
         promises.push(
           (user.pending_transactions || []).map((txid) =>
-            findTransaction(txid).then((transaction) =>
+            findTransaction(txid, true, res).then((transaction) =>
               expandSupportingTransactions(
                 transaction,
                 dictionaryOfTransactions
@@ -124,11 +118,11 @@ const getUsers = (req, res) => {
           (values || []).forEach((tx) => {
             userList.forEach((user) => {
               const indexOfTx = (user.latest_transactions || []).indexOf(
-                tx.signature
+                tx.address
               );
               const indexOfPendingTx = (
                 user.pending_transactions || []
-              ).indexOf(tx.signature);
+              ).indexOf(tx.address);
               if (indexOfTx > -1) {
                 user.latest_transactions[indexOfTx] = tx;
               }
@@ -163,7 +157,7 @@ const getUsers = (req, res) => {
 const getUserByAddress = (req, res) => {
   const expanded = req.query.expanded === "true" || false;
   const hidePublicKey = req.query.hidePublicKey === "true" || false;
-  return findUser(req.params.address, true, true, res).then((user) => {
+  return findUser(req.params.address, true, res).then((user) => {
     hidePublicKey && delete user.public_key;
     if (!expanded) {
       return res.status(200).json(user);
@@ -171,19 +165,18 @@ const getUserByAddress = (req, res) => {
     return findAllAssets(
       TYPE.TRANSACTION,
       "GET /users",
-      0,
-      false,
+      undefined,
       true,
       res
     ).then((transactionList) => {
       let promises = [];
       const dictionaryOfTransactions = {};
       (transactionList || []).forEach((asset) => {
-        dictionaryOfTransactions[asset.signature] = asset;
+        dictionaryOfTransactions[asset.address] = asset;
       });
       promises.push(
         (user.latest_transactions || []).map((txid) =>
-          findTransaction(txid).then((transaction) => {
+          findTransaction(txid, true, res).then((transaction) => {
             return expandSupportingTransactions(
               transaction,
               dictionaryOfTransactions
@@ -194,7 +187,7 @@ const getUserByAddress = (req, res) => {
 
       promises.push(
         (user.pending_transactions || []).map((txid) =>
-          findTransaction(txid).then((transaction) => {
+          findTransaction(txid, true, res).then((transaction) => {
             return expandSupportingTransactions(
               transaction,
               dictionaryOfTransactions
@@ -206,10 +199,10 @@ const getUserByAddress = (req, res) => {
       return Promise.all(promises).then((values) => {
         values.forEach((tx) => {
           const indexOfTx = (user.latest_transactions || []).indexOf(
-            tx.signature
+            tx.address
           );
           const indexOfPendingTx = (user.pending_transactions || []).indexOf(
-            tx.signature
+            tx.address
           );
           if (indexOfTx > -1) {
             user.latest_transactions[indexOfTx] = tx;
@@ -228,7 +221,7 @@ const createUser = (req, res) =>
   putAsset(TYPE.USER, HTTP_METHODS.POST, "POST /users", req, res);
 
 const updateUser = (req, res) => {
-  return findUser(req.params.address, true, true, res).then((existingUser) => {
+  return findUser(req.params.address, false, res).then((existingUser) => {
     const { role, description, permissions, return_to, active } = req.body;
     if (role !== undefined) {
       existingUser.role = role;
@@ -251,31 +244,36 @@ const updateUser = (req, res) => {
 
 const deleteUser = (req, res) => {
   const reason = req.body.reason;
-  return findUser(req.params.address, true, true, res).then((existingUser) => {
+  return findUser(req.params.address, false, res).then((existingUser) => {
     const recipient = existingUser.return_to[reason];
     const promises = [];
     (existingUser.latest_transactions || []).forEach((txid) => {
-      promises.push(findTransaction(txid));
+      promises.push(findTransaction(txid, false, res));
     });
     return Promise.all(promises).then((arrayOfTransactions) => {
       let amountToSend = 0;
       (arrayOfTransactions || []).forEach((tx) => {
         amountToSend += tx.amount;
       });
-      const transaction = new Transaction({
-        amount: amountToSend,
-        recipient,
-        sender: req.params.address,
-        description: `Resulting transaction of user's return_to ${reason}`,
-        signature: hash512(
-          `${
-            existingUser.public_key
-          },${amountToSend},${reason},${recipient},${new Date().toISOString()}`
-        ),
-      });
-      req.body = transaction;
-      existingUser.active = false;
-      return createTransaction(req, res, { disableSender: true });
+      if (amountToSend > 0) {
+        const transaction = new Transaction({
+          amount: amountToSend,
+          recipient,
+          sender: req.params.address,
+          description: `Resulting transaction of user's return_to ${reason}`,
+          signature: hash512(
+            `${
+              existingUser.public_key
+            },${amountToSend},${reason},${recipient},${new Date().toISOString()}`
+          ),
+        });
+        req.body = transaction;
+        existingUser.active = false;
+        return createTransaction(req, res, { disableSender: true });
+      } else {
+        existingUser.active = false;
+        return _updateUser(existingUser, res, "DELETE /users");
+      }
     });
   });
 };

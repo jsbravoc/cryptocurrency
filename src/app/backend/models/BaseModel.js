@@ -3,10 +3,12 @@ const _ = require("lodash");
  * Represents a basic object of an asset, used in {@link User}, {@link Transaction} as an inheritable object.
  * @constructor
  * @param {TYPE} type - The type of the object @see {@link TYPE}.
+ * @param {String} address - The unique address of the object in Sawtooth.
  */
 class BaseModel {
-  constructor(type) {
+  constructor(type, address) {
     this.type = type;
+    this.address = address;
   }
 
   /**
@@ -29,14 +31,12 @@ class BaseModel {
   /**
    * Returns a copy of the object.
    *
-   * @param {Boolean} [removeSignature=false] - If true, the resulting object will not have the signature property.
    * @param {Boolean} [removeType=true] - If true, the resulting object will not have the type property.
    *
    * @return {Object} JSON object containing the properties and values of the object.
    */
-  toObject(removeSignature = false, removeType = true) {
+  toObject(removeType = true) {
     const copy = _.cloneDeep(this);
-    if (removeSignature) delete copy.signature;
     if (removeType) delete copy.type;
     return copy;
   }
@@ -58,15 +58,16 @@ class BaseModel {
   /**
    * Returns the object as a JSON-stringified string.
    *
-   * @param {Boolean} [removeSignature=false] - If true, the JSON-stringified object will not have the signature property.
    * @param {Boolean} [removeType=true] - If true, the JSON-stringified object will not have the type property.
+   * @param {HTTP_METHODS} [httpMethod=null] - Http method (defined in @see {@link HTTP_METHODS} constants) that request the stringified object (used in transaction processor to handle the request).
    *
    * @return {String} JSON-stringified object.
    */
-  toString(removeSignature = false, removeType = true) {
+  toString(removeType = true, httpMethod = null) {
     const dictionary = this.toDictionary();
-    if (removeSignature) delete dictionary.signature;
     if (removeType) delete dictionary.type;
+    if (httpMethod !== null && httpMethod !== undefined)
+      dictionary.httpMethod = httpMethod;
     const response = JSON.stringify(dictionary);
     return response;
   }

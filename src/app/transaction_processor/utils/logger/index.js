@@ -9,6 +9,12 @@ const SEVERITY = {
   ERROR: 6,
   SUCCESS: 7,
 };
+
+// Disable console.log in production
+if (process.env.ENABLE_LOGGING === "true") {
+  console.log = function () {};
+}
+
 const formatMessage = (msg, severity = 0) => {
   let response;
   const options = {
@@ -19,8 +25,8 @@ const formatMessage = (msg, severity = 0) => {
     second: "2-digit",
   };
   const now = new Date();
-  const identifier = chalk.white.bgBlue(
-    `CNK-VALIDATOR | ${now.toLocaleDateString("en-US", options)} `
+  const identifier = chalk.black.bgWhite(
+    `CNK-TP | ${now.toLocaleDateString("en-US", options)} `
   );
   switch (severity) {
     case SEVERITY.SUCCESS:
@@ -39,7 +45,10 @@ const formatMessage = (msg, severity = 0) => {
       response = `${identifier} ${chalk.bold(msg)}`;
       break;
     case SEVERITY.URL:
-      const urlRegex = `(http|https):\/\/(([a-z0-9]|[a-z0-9][a-z0-9\-]*[a-z0-9])\.)*([a-z0-9]|[a-z0-9][a-z0-9\-]*[a-z0-9])(:[0-9]+)?$`;
+      // eslint-disable-next-line no-case-declarations
+      const urlRegex =
+        "(http|https)://(([a-z0-9]|[a-z0-9][a-z0-9-]*[a-z0-9]).)*([a-z0-9]|[a-z0-9][a-z0-9-]*[a-z0-9])(:[0-9]+)?$";
+      // eslint-disable-next-line no-case-declarations
       const url = msg.match(urlRegex);
       msg = msg.replace(url[0], "");
       response = `${identifier} ${msg}${chalk.underline.blue(url[0])}`;

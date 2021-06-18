@@ -26,30 +26,25 @@ const { ERRORS } = require("../utils/errors");
 //#region [AUXILIARY FUNCTIONS]
 
 /**
- * Creates a collision-free signature for a transaction.
+ * Creates a collision-free address for a transaction.
  *
  * @param {String} signature - Signature of the transaction.
  * @param {Date} [creationDate]  - Transaction's creation date.
- * @return {String} New signature that avoids collisions.
+ * @return {String} New address that avoids collisions.
  */
-const createSignature = (signature, creationDate = new Date()) =>
+const createAddress = (signature, creationDate = new Date()) =>
   hash512(`${signature}${creationDate.getTime()}`);
 
 /**
  * Finds a transaction in the blockchain.
  *
  * @param {String} address - Address of the transaction.
- * @param {Boolean} [removeSignature] - Boolean that indicates if the signature should be removed.
  * @param {Boolean} [removeType] - Boolean that indicates if the type should be removed.
  * @param {Response} [res] - Express.js response object, used to access locals.
  * @return {Promise<Transaction|null>} Promise containing the transaction object or null if not found.
  */
-const findTransaction = (
-  address,
-  removeSignature = false,
-  removeType = true,
-  res = null
-) => findByAddress(TYPE.TRANSACTION, address, removeSignature, removeType, res);
+const findTransaction = (address, removeType = true, res = null) =>
+  findByAddress(TYPE.TRANSACTION, address, removeType, res);
 
 /**
  * Updates a transaction in the blockchain.
@@ -77,9 +72,9 @@ const getSupportingTransactions = (transaction, res = null) => {
   const { amount, recipient, sender } = transaction;
   let userPromises = [];
 
-  userPromises.push(findByAddress(TYPE.USER, recipient, false, false, res));
+  userPromises.push(findByAddress(TYPE.USER, recipient, false, res));
   if (sender) {
-    userPromises.push(findByAddress(TYPE.USER, sender, false, false, res));
+    userPromises.push(findByAddress(TYPE.USER, sender, false, res));
   }
 
   return Promise.all(userPromises).then(
@@ -89,9 +84,7 @@ const getSupportingTransactions = (transaction, res = null) => {
         let usedTransactions = [];
         const validTransactionsPromises = [];
         (existingSender.latest_transactions || []).forEach((txid) =>
-          validTransactionsPromises.push(
-            findTransaction(txid, false, true, res)
-          )
+          validTransactionsPromises.push(findTransaction(txid, true, res))
         );
         return Promise.all(validTransactionsPromises).then(
           (supportingTransactions) => {
@@ -143,10 +136,13 @@ const expandSupportingTransactions = async (
     dictionaryOfTransactions = {};
     const assetList = await findAllAssets(
       TYPE.TRANSACTION,
-      "GET /cryptocurrency"
+      "GET /cryptocurrency",
+      100,
+      true,
+      res
     );
     assetList.forEach((asset) => {
-      dictionaryOfTransactions[asset.signature] = asset;
+      dictionaryOfTransactions[asset.address] = asset;
     });
   }
   if (transaction) {
@@ -156,26 +152,26 @@ const expandSupportingTransactions = async (
         index < transaction.supporting_transactions.length;
         index += 1
       ) {
-        const stxid = transaction.supporting_transactions[index];
-        const stx =
-          typeof stxid === "object"
-            ? stxid
-            : dictionaryOfTransactions[stxid] ||
-              (await findTransaction(stxid, false, true, res));
+        const supportingTxAddress = transaction.supporting_transactions[index];
+        const supportingTx =
+          typeof supportingTxAddress === "object"
+            ? supportingTxAddress
+            : dictionaryOfTransactions[supportingTxAddress] ||
+              (await findTransaction(supportingTxAddress, true, res));
         if (
-          stx &&
-          Array.isArray(stx.supporting_transactions) &&
-          typeof stx.supporting_transactions[0] === "string"
+          supportingTx &&
+          Array.isArray(supportingTx.supporting_transactions) &&
+          typeof supportingTx.supporting_transactions[0] === "string"
         ) {
           transaction.supporting_transactions[
             index
           ] = await expandSupportingTransactions(
-            stx,
+            supportingTx,
             dictionaryOfTransactions,
             res
           );
         } else {
-          transaction.supporting_transactions[index] = stx;
+          transaction.supporting_transactions[index] = supportingTx;
         }
       }
     }
@@ -209,7 +205,6 @@ const getTransactions = (req, res) => {
     TYPE.TRANSACTION,
     "GET /cryptocurrency",
     limit,
-    false,
     true,
     res
   )
@@ -229,7 +224,7 @@ const getTransactions = (req, res) => {
 
       const dictionaryOfAssets = {};
       assetList.forEach((asset) => {
-        dictionaryOfAssets[asset.signature] = asset;
+        dictionaryOfAssets[asset.address] = asset;
       });
       const promises = [];
       assetList.forEach((tx) =>
@@ -258,7 +253,7 @@ const getTransactions = (req, res) => {
  * @post Returns the transaction in res object. If an error happens, response object has the error.
  */
 const getTransactionByAddress = (req, res) => {
-  return findTransaction(req.params.address, false, true, res).then((tx) => {
+  return findTransaction(req.params.address, true, res).then((tx) => {
     const expanded = req.query.expanded === "true" || false;
     if (!expanded) {
       return res.status(200).json(tx);
@@ -286,15 +281,15 @@ const createTransaction = (
 ) => {
   const newTx = new Transaction(req.body);
   const { sender, recipient, amount, valid } = newTx;
-  let { signature } = newTx;
+  const { signature, creationDate } = newTx;
   //Avoid transaction collisions
-  signature = createSignature(signature, newTx.creationDate);
-  newTx.signature = signature;
+  let address = createAddress(signature, creationDate);
+  newTx.address = address;
 
   return createTransactionPayload(
     newTx,
     amount,
-    signature,
+    address,
     sender,
     recipient,
     valid,
@@ -321,46 +316,44 @@ const updateTransaction = (req, res) => {
   let approve;
   if (req.query.approve) approve = req.query.approve === "true" || false;
 
-  return findTransaction(req.params.address, false, false, res).then(
-    (existingTx) => {
-      if (req.body.description) {
-        existingTx.description = req.body.description;
-      }
-      if (approve === undefined) {
-        return _updateTransaction(existingTx).then(({ responseCode }) => {
-          delete existingTx.type;
-          return res.status(responseCode).json({
-            msg: req.t("MESSAGES.SUCCESSFUL_REQUEST.TRANSACTION.UPDATE"),
-            payload: existingTx,
-          });
-        });
-      }
-      existingTx.valid = approve;
-      existingTx.pending = false;
-      const { sender, recipient, amount, signature, valid } = existingTx;
-      return createTransactionPayload(
-        existingTx,
-        amount,
-        signature,
-        sender,
-        recipient,
-        valid,
-        HTTP_METHODS.PUT,
-        {
-          disableSender: false,
-          disableRecipient: false,
-        },
-        req,
-        res
-      );
+  return findTransaction(req.params.address, false, res).then((existingTx) => {
+    if (req.body.description) {
+      existingTx.description = req.body.description;
     }
-  );
+    if (approve === undefined) {
+      return _updateTransaction(existingTx).then(({ responseCode }) => {
+        delete existingTx.type;
+        return res.status(responseCode).json({
+          msg: req.t("MESSAGES.SUCCESSFUL_REQUEST.TRANSACTION.UPDATE"),
+          payload: existingTx,
+        });
+      });
+    }
+    existingTx.valid = approve;
+    existingTx.pending = false;
+    const { sender, recipient, amount, address, valid } = existingTx;
+    return createTransactionPayload(
+      existingTx,
+      amount,
+      address,
+      sender,
+      recipient,
+      valid,
+      HTTP_METHODS.PUT,
+      {
+        disableSender: false,
+        disableRecipient: false,
+      },
+      req,
+      res
+    );
+  });
 };
 
 const createTransactionPayload = (
   transaction,
   amount,
-  signature,
+  address,
   sender,
   recipient,
   valid,
@@ -372,6 +365,8 @@ const createTransactionPayload = (
   const { disableRecipient, disableSender } = options;
   let newChangeTransaction;
   let newSender;
+  let recipientAddress;
+  let senderAddress;
   return getSupportingTransactions(transaction, res).then(
     ({
       pendingAmount,
@@ -383,29 +378,26 @@ const createTransactionPayload = (
       let newRecipientUser = new User(existingRecipient);
       if (disableRecipient) newRecipientUser.active = false;
       if (method === HTTP_METHODS.PUT)
-        newRecipientUser.removePendingTransaction(signature);
+        newRecipientUser.removePendingTransaction(address);
 
       // Set supporting transactions (array in Transaction and array of addresses)
       const transactionInput = [];
 
       if (valid) {
         (usedTransactions || []).forEach((utx) => {
-          transaction.addSupportingTransaction(utx.signature);
-          transactionInput.push(getTransactionAddress(utx.signature));
+          transaction.addSupportingTransaction(utx.address);
+          transactionInput.push(getTransactionAddress(utx.address));
         });
       }
       newRecipientUser.addTransaction(
         USER_TYPE.RECIPIENT,
         amount,
-        signature,
+        address,
         valid
       );
-      newRecipientUser = newRecipientUser.toString(false, false);
-      const recipientAddress = getUserAddress(recipient);
-      const recipientPayload = JSON.stringify({
-        func: "post",
-        args: { transaction: newRecipientUser, txid: recipient },
-      });
+      newRecipientUser = newRecipientUser.toString(false, HTTP_METHODS.PUT);
+      recipientAddress = getUserAddress(recipient);
+      const recipientPayload = newRecipientUser;
       const newRecipient = {
         inputs: [recipientAddress],
         outputs: [recipientAddress],
@@ -417,7 +409,7 @@ const createTransactionPayload = (
         let newSenderUser = new User(existingSender);
         if (disableSender) newSenderUser.active = false;
         if (method === HTTP_METHODS.PUT)
-          newSenderUser.removePendingTransaction(signature);
+          newSenderUser.removePendingTransaction(address);
 
         if (valid) {
           if (Array.isArray(usedTransactions)) {
@@ -425,7 +417,7 @@ const createTransactionPayload = (
               newSenderUser.addTransaction(
                 USER_TYPE.SENDER,
                 tx.amount,
-                tx.signature,
+                tx.address,
                 valid
               )
             );
@@ -436,47 +428,50 @@ const createTransactionPayload = (
             const changeDescription = req.t(
               "MESSAGES.CHANGE_TRANSACTION_DESCRIPTION",
               {
-                signature: transaction.signature,
+                signature: transaction.address,
                 input: -pendingAmount + amount,
                 amount,
                 change,
               }
             );
-            const changeTxSignature = hash512(
-              `changeof:${transaction.signature}`
+            const changeCreationDate = new Date();
+            changeCreationDate.setMilliseconds(
+              changeCreationDate.getMilliseconds() + 1
             );
             let changeTransaction = new Transaction({
               amount: change,
               recipient: sender,
               description: changeDescription,
-              signature: changeTxSignature,
+              signature: transaction.signature,
+              address: createAddress(transaction.signature, changeCreationDate),
             });
             if (Array.isArray(usedTransactions)) {
               usedTransactions.forEach((utx) =>
-                changeTransaction.addSupportingTransaction(utx.signature)
+                changeTransaction.addSupportingTransaction(utx.address)
               );
             }
 
             newSenderUser.addTransaction(
               USER_TYPE.RECIPIENT,
               changeTransaction.amount,
-              changeTransaction.signature
+              changeTransaction.address
             );
-
-            changeTransaction = changeTransaction.toString(false, false);
 
             const changeTransactionAddress = getTransactionAddress(
-              changeTxSignature
+              changeTransaction.address
             );
-            const changeTransactionPayload = JSON.stringify({
-              func: "post",
-              args: {
-                transaction: changeTransaction,
-                txid: changeTxSignature,
-              },
-            });
+            changeTransaction = changeTransaction.toString(
+              false,
+              HTTP_METHODS.POST
+            );
+
+            const changeTransactionPayload = changeTransaction;
             newChangeTransaction = {
-              inputs: [changeTransactionAddress, ...transactionInput],
+              inputs: [
+                changeTransactionAddress,
+                ...transactionInput,
+                getUserAddress(sender),
+              ],
               outputs: [changeTransactionAddress],
               payload: changeTransactionPayload,
             };
@@ -485,17 +480,14 @@ const createTransactionPayload = (
           newSenderUser.addTransaction(
             USER_TYPE.SENDER,
             amount,
-            signature,
+            address,
             valid
           );
         }
 
-        newSenderUser = newSenderUser.toString(false, false);
-        const senderAddress = getUserAddress(sender);
-        const senderPayload = JSON.stringify({
-          func: "post",
-          args: { transaction: newSenderUser, txid: sender },
-        });
+        newSenderUser = newSenderUser.toString(false, HTTP_METHODS.PUT);
+        senderAddress = getUserAddress(sender);
+        const senderPayload = newSenderUser;
         newSender = {
           inputs: [senderAddress],
           outputs: [senderAddress],
@@ -504,19 +496,24 @@ const createTransactionPayload = (
       }
 
       // Create new transaction
-      const transactionAddress = getTransactionAddress(transaction.signature);
-      const transactionPayload = JSON.stringify({
-        func: "post",
-        args: {
-          transaction: transaction.toString(false, false),
-          txid: transaction.signature,
-        },
-      });
+      const transactionAddress = getTransactionAddress(transaction.address);
+      const transactionPayload = transaction.toString(false, HTTP_METHODS.POST);
+
       const newTransaction = {
         inputs: [transactionAddress, ...transactionInput],
         outputs: [transactionAddress],
         payload: transactionPayload,
       };
+
+      //Provide reading access to the transaction
+      if (newRecipient) {
+        newTransaction.inputs.push(recipientAddress);
+        //newTransaction.outputs.push(recipientAddress);
+      }
+      if (newSender) {
+        newTransaction.inputs.push(senderAddress);
+        //newTransaction.outputs.push(senderAddress);
+      }
 
       const transactionsToSend = [{ ...newTransaction }];
       if (newRecipient) {
@@ -534,6 +531,7 @@ const createTransactionPayload = (
         transactionsToSend
       ).then(({ responseCode }) => {
         delete transaction.type;
+        delete transaction.httpMethod;
         return res.status(responseCode).json({
           msg:
             method === HTTP_METHODS.POST
@@ -548,7 +546,7 @@ const createTransactionPayload = (
 
 //#endregion
 
-module.exports.createSignature = createSignature;
+module.exports.createAddress = createAddress;
 module.exports.findTransaction = findTransaction;
 module.exports.getSupportingTransactions = getSupportingTransactions;
 module.exports.expandSupportingTransactions = expandSupportingTransactions;

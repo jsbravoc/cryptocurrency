@@ -195,7 +195,7 @@ const validateUserPermissions = (req, res, next) => {
 const validateDeleteReason = (req, res, next) => {
   const reason = req.body.reason;
   if (reason && typeof reason === "string") {
-    return findByAddress(TYPE.USER, req.params.address, false, false, res).then(
+    return findByAddress(TYPE.USER, req.params.address, false, res).then(
       (user) => {
         if (_.isEmpty(user.return_to))
           return createError(req, res, {
@@ -221,7 +221,6 @@ const validateDeleteReason = (req, res, next) => {
             return findByAddress(
               TYPE.USER,
               user.return_to[reason],
-              false,
               false,
               res
             ).then((returnToUser) => {

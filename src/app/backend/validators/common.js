@@ -95,7 +95,7 @@ const validateAssetExistence = (
       break;
   }
   if (txid && txid !== "") {
-    return findByAddress(type, txid, false, false, res)
+    return findByAddress(type, txid, false, res)
       .then((existingAsset) => {
         const expectedToExist = shouldExist && existingAsset === null;
         const notExpectedToExist = !shouldExist && existingAsset !== null;
@@ -104,7 +104,6 @@ const validateAssetExistence = (
             expectedToExist ? "does not" : "already"
           } exist${expectedToExist ? "" : "s"}`;
           logFormatted(errorMsg, SEVERITY.ERROR);
-          //      return Promise.reject(errorMsg);
           let errorObj;
           switch (type) {
             case TYPE.TRANSACTION:

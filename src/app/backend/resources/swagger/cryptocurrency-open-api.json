@@ -189,6 +189,17 @@
               "format": "boolean",
               "example": true
             }
+          },
+          {
+            "name": "expanded",
+            "in": "query",
+            "description": "Expand recursively the user's transactions",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "format": "boolean",
+              "example": true
+            }
           }
         ],
         "responses": {

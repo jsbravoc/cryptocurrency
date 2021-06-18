@@ -1,121 +1,72 @@
 /* eslint-disable no-unused-vars */
 const crypto = require("crypto");
-
-const { InvalidTransaction } = require("sawtooth-sdk/processor/exceptions");
-const { TYPE } = require("./utils/constants");
+const _ = require("lodash");
+const {
+  TYPE,
+  TRANSACTION_FAMILY_VERSION,
+  TRANSACTION_FAMILY,
+} = require("./utils/constants");
 const { logFormatted, SEVERITY } = require("./utils/logger");
 
-const TP_FAMILY = "cnk-cryptocurrency";
-const TP_VERSION = "1.0";
-
-const hash512 = (x) => crypto.createHash("sha512").update(x).digest("hex");
-
-const getAddress = (key, length = 64) => hash512(key).slice(0, length);
-
-const TRANSACTION_FAMILY = "cnk-cryptocurrency";
-
-const TP_NAMESPACE = getAddress(TRANSACTION_FAMILY, 6);
-
-const getTransactionAddress = (name) =>
-  `${TP_NAMESPACE}00${getAddress(name, 62)}`;
-const getUserAddress = (name) => `${TP_NAMESPACE}01${getAddress(name, 62)}`;
-
-const addressIntKey = (key, addressType) => {
-  switch (addressType) {
-    case TYPE.TRANSACTION:
-      return getTransactionAddress(key);
-    case TYPE.USER:
-      return getUserAddress(key);
-  }
-};
-addressIntKey.keysCanCollide = true;
-
-const getContext = ([transactionContext, userContext], transaction) => {
-  let parsedTransaction;
-  try {
-    parsedTransaction = JSON.parse(transaction);
-  } catch (error) {
-    logFormatted(
-      `Error at getContext - ${error}`,
-      SEVERITY.ERROR,
-      parsedTransaction
-    );
-    throw new InvalidTransaction("Transaction was not JSON parsable");
-  }
-  const { type } = parsedTransaction;
-  logFormatted(
-    `Handling transaction with type ${type}`,
-    SEVERITY.WARN,
-    parsedTransaction
-  );
-  switch (type) {
-    case TYPE.TRANSACTION:
-      return transactionContext;
-    case TYPE.USER:
-      return userContext;
-    default:
-      logFormatted(
-        "Error at getContext - Transaction type was not defined",
-        SEVERITY.ERROR,
-        parsedTransaction
-      );
-      throw new InvalidTransaction("Transaction type was not defined");
-  }
-};
+//https://sawtooth.hyperledger.org/faq/transaction-processing/#my-tp-throws-an-exception-of-type-internalerror-but-the-apply-method-gets-stuck-in-an-endless-loop
+//InternalErrors are transient errors, are retried,
+//InvalidTransactions are not retired
+const {
+  InvalidTransaction,
+  InternalError,
+} = require("sawtooth-sdk/processor/exceptions");
+const {
+  inputValidation,
+  postValidationChain,
+} = require("./validators/cryptocurrency");
+const { postTransaction } = require("./controllers/cryptocurrency");
+const { postUser } = require("./controllers/users");
+const { PREFIX } = require("./controllers/common");
 
 const handlers = {
-  async delete([transactionContext, userContext], { transaction, txid }) {
-    logFormatted("Handling delete transaction", SEVERITY.NOTIFY, {
-      transaction,
-      txid,
-    });
-    const contextHandler = getContext(
-      [transactionContext, userContext],
-      transaction
-    );
-    const { output } = JSON.parse(transaction);
-    await contextHandler.putState(txid, output);
+  [TYPE.TRANSACTION]: {
+    async post(context, asset) {
+      logFormatted(
+        `Handling post transaction with address ${asset.address}`,
+        SEVERITY.NOTIFY
+      );
+      try {
+        //await postValidationChain(context, asset);
+        await postTransaction(context, asset);
+      } catch (error) {
+        console.error(error);
+        throw new InvalidTransaction(error);
+      }
+    },
+    async put(context, asset) {
+      logFormatted(
+        `Handling put transaction with address ${asset.address}`,
+        SEVERITY.NOTIFY
+      );
+      await postTransaction(context, asset);
+    },
   },
-  async post([transactionContext, userContext], { transaction, txid }) {
-    logFormatted("Handling post transaction", SEVERITY.NOTIFY, {
-      transaction,
-      txid,
-    });
-
-    const contextHandler = getContext(
-      [transactionContext, userContext],
-      transaction
-    );
-    const { type, ...transactionObject } = JSON.parse(transaction);
-    await contextHandler.putState(txid, transactionObject);
-
-    logFormatted(`Added state ${txid} ->`, SEVERITY.SUCCESS, transactionObject);
-  },
-  async put([transactionContext, userContext], { transaction, txid }) {
-    logFormatted("Handling put transaction", SEVERITY.NOTIFY, {
-      transaction,
-      txid,
-    });
-
-    const contextHandler = getContext(
-      [transactionContext, userContext],
-      transaction
-    );
-    const { type, ...transactionObject } = JSON.parse(transaction);
-    await contextHandler.putState(txid, transactionObject);
-
-    logFormatted(
-      `Updated state ${txid} ->`,
-      SEVERITY.SUCCESS,
-      transactionObject
-    );
+  [TYPE.USER]: {
+    async post(context, asset) {
+      logFormatted(
+        `Handling post user with address ${asset.address}`,
+        SEVERITY.NOTIFY
+      );
+      await postUser(context, asset);
+    },
+    async put(context, asset) {
+      logFormatted(
+        `Handling put user with address ${asset.address}`,
+        SEVERITY.NOTIFY
+      );
+      await postUser(context, asset);
+    },
   },
 };
 
 module.exports = {
-  TP_FAMILY,
-  TP_VERSION,
-  TP_NAMESPACE,
+  TP_FAMILY: TRANSACTION_FAMILY,
+  TP_VERSION: TRANSACTION_FAMILY_VERSION,
+  TP_NAMESPACE: PREFIX,
   handlers,
-  addresses: { getTransactionAddress, getUserAddress },
 };

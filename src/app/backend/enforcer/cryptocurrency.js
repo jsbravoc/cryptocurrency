@@ -21,7 +21,7 @@ const { ERRORS } = require("../utils/errors");
  * @return {Promise<{transactionObj: Transaction, assetObj: Asset}|null>}} Promise containing the asset and the updated transaction object if its validity has changed.
  */
 const updateInvalidTransaction = (address, res) => {
-  return findByAddress(TYPE.TRANSACTION, address, false, false, res).then(
+  return findByAddress(TYPE.TRANSACTION, address, false, res).then(
     (transaction) => {
       if (
         transaction &&
@@ -54,7 +54,7 @@ const updateInvalidTransaction = (address, res) => {
  * @return {Promise<Array<Asset>>} Promise containing a list of assets to post to the blockchain.
  */
 const updateInvalidUserTransactions = (address, transactions, res) => {
-  return findByAddress(TYPE.USER, address, false, false, res).then((user) => {
+  return findByAddress(TYPE.USER, address, false, res).then((user) => {
     const promises = [];
     const arrayOfTransactions = [];
     let requiresUpdate = false;
@@ -127,7 +127,7 @@ const updateInvalidUsersTransactions = (
   const promiseOfUsers = [];
   if (Array.isArray(users) && users.length > 0) {
     users.forEach((user) => {
-      promiseOfUsers.push(findByAddress(TYPE.USER, user, false, false, res));
+      promiseOfUsers.push(findByAddress(TYPE.USER, user, false, res));
     });
   } else {
     logFormatted(
@@ -135,7 +135,7 @@ const updateInvalidUsersTransactions = (
       SEVERITY.WARN
     );
     promiseOfUsers.push(
-      findAllAssets(TYPE.USER, source, undefined, false, false, res)
+      findAllAssets(TYPE.USER, source, undefined, false, res)
     );
   }
   return Promise.all(promiseOfUsers).then((users) => {

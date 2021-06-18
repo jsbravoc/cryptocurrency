@@ -66,18 +66,11 @@ const getUserAddress = (userId) =>
  *
  * @param {TYPE} type - Type of asset, such as TRANSACTION or USER ({@link TYPE}).
  * @param {String} txid - Asset unique identification (before calculated address).
- * @param {Boolean} [removeSignature] - Boolean that indicates if the signature should be removed.
  * @param {Boolean} [removeType] - Boolean that indicates if the type should be removed.
  * @param {Response} [res] - Express.js response object, used to access locals.
  * @return {Promise<Transaction|User|null>} Promise of the asset if found or null if not found.
  */
-const findByAddress = (
-  type,
-  txid,
-  removeSignature = false,
-  removeType = false,
-  res = null
-) => {
+const findByAddress = (type, txid, removeType = false, res = null) => {
   let addressToQuery;
 
   switch (type) {
@@ -89,17 +82,14 @@ const findByAddress = (
         res.locals.transaction[txid]
       )
         return Promise.resolve(
-          new Transaction(res.locals.transaction[txid]).toObject(
-            removeSignature,
-            removeType
-          )
+          new Transaction(res.locals.transaction[txid]).toObject(removeType)
         );
       addressToQuery = getTransactionAddress(txid);
       break;
     case TYPE.USER:
       if (res && res.locals && res.locals.user && res.locals.user[txid])
         return Promise.resolve(
-          new User(res.locals.user[txid]).toObject(removeSignature, removeType)
+          new User(res.locals.user[txid]).toObject(removeType)
         );
       addressToQuery = getUserAddress(txid);
       break;
@@ -110,14 +100,11 @@ const findByAddress = (
         case TYPE.TRANSACTION:
           if (res && res.locals) {
             if (!res.locals.transaction) res.locals.transaction = {};
-            res.locals.transaction[response.signature] = new Transaction(
+            res.locals.transaction[response.address] = new Transaction(
               response
             );
           }
-          response = new Transaction(response).toObject(
-            removeSignature,
-            removeType
-          );
+          response = new Transaction(response).toObject(removeType);
 
           break;
         case TYPE.USER:
@@ -125,7 +112,7 @@ const findByAddress = (
             if (!res.locals.user) res.locals.user = {};
             res.locals.user[response.address] = new User(response);
           }
-          response = new User(response).toObject(removeSignature, removeType);
+          response = new User(response).toObject(removeType);
           break;
       }
       return response;
@@ -149,7 +136,6 @@ const findByAddress = (
  * @param {String} type - Type of asset, such as TRANSACTION or USER (@see {@link TYPE}).
  * @param {String} source - Endpoint source that invoked function (used for logging).
  * @param {Number} [limit] - Maximum number of assets to return.
- * @param {Boolean} [removeSignature] - Boolean that indicates if the signature should be removed.
  * @param {Boolean} [removeType] - Boolean that indicates if the type should be removed.
  * @param {Response} [res] - Express.js response object, used to access locals.
  * @returns {Promise<Array<Transaction|User>|Error>} - Promise of the assets returned.
@@ -158,7 +144,6 @@ const findAllAssets = (
   type,
   source,
   limit = 0,
-  removeSignature = false,
   removeType = false,
   res = null
 ) => {
@@ -197,16 +182,13 @@ const findAllAssets = (
                 if (!res.locals.transaction) res.locals.transaction = {};
                 res.locals.transaction[base.address] = new Transaction(base);
               }
-              return new Transaction(base).toObject(
-                removeSignature,
-                removeType
-              );
+              return new Transaction(base).toObject(removeType);
             case TYPE.USER:
               if (res) {
                 if (!res.locals.user) res.locals.user = {};
                 res.locals.user[base.address] = new User(base);
               }
-              return new User(base).toObject(removeSignature, removeType);
+              return new User(base).toObject(removeType);
           }
         })
         .flatten()
@@ -260,25 +242,22 @@ const _putAsset = (type, httpMethod, source, object) => {
   let assetAddress;
   let assetName;
 
+  txid = object.address;
+  asset = object.toString(false, httpMethod);
+
   switch (type) {
     case TYPE.TRANSACTION:
       assetName = "Transaction";
-      txid = object.signature;
-      asset = object.toString(false, false);
       assetAddress = getTransactionAddress(txid);
       break;
 
     case TYPE.USER:
       assetName = "User";
-      txid = object.address;
-      asset = object.toString(true, false);
       assetAddress = getUserAddress(txid);
       break;
   }
-  const assetPayload = JSON.stringify({
-    func: httpMethod.toLowerCase(),
-    args: { transaction: asset, txid },
-  });
+
+  const assetPayload = asset;
 
   const batch = buildBatch({
     payload: assetPayload,
@@ -299,6 +278,7 @@ const _putAsset = (type, httpMethod, source, object) => {
     }`;
     const objResponse = JSON.parse(asset);
     delete objResponse.type;
+    delete objResponse.httpMethod;
     return { responseCode, msg: responseMessage, payload: objResponse };
   });
 };
@@ -318,21 +298,18 @@ const buildAssetTransaction = (type, httpMethod, object) => {
 
   switch (type) {
     case TYPE.TRANSACTION:
-      txid = object.signature;
-      asset = object.toString(false, false);
+      txid = object.address;
+      asset = object.toString(false, httpMethod);
       assetAddress = getTransactionAddress(txid);
       break;
 
     case TYPE.USER:
       txid = object.address;
-      asset = object.toString(true, false);
+      asset = object.toString(false, httpMethod);
       assetAddress = getUserAddress(txid);
       break;
   }
-  const assetPayload = JSON.stringify({
-    func: httpMethod.toLowerCase(),
-    args: { transaction: asset, txid },
-  });
+  const assetPayload = asset;
 
   return new Asset({
     payload: assetPayload,
@@ -352,7 +329,7 @@ const buildAssetTransaction = (type, httpMethod, object) => {
 const putBatch = (httpMethod, source, arrayOfAssets) => {
   const batch = buildBatch(...arrayOfAssets);
 
-  logFormatted(`${source} | BATCH Request:`, SEVERITY.NOTIFY, ...batch);
+  logFormatted(`${source} | BATCH Request:`, SEVERITY.NOTIFY, batch);
   return sendTransaction(batch).then((sawtoothResponse) => {
     logFormatted(
       `${source} | BATCH Response: ${sawtoothResponse.status} - ${sawtoothResponse.statusText}`,

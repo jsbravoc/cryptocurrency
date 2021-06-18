@@ -7,8 +7,10 @@ const BaseModel = require("./BaseModel");
  * Represents a transaction of the blockchain.
  * @constructor
  * @param {Object} transaction - The transaction object to create.
+ * @param {String} transaction.address - The address of the transaction.
  * @param {Number} transaction.amount - The amount of the transaction.
  * @param {String} transaction.recipient - The address of the recipient of the transaction.
+ * @param {String} transaction.signature - The signature of the transaction.
  * @param {String} [transaction.sender] - The address of the sender of the transaction.
  * @param {String} [transaction.description] - The description of the transaction.
  * @param {Boolean} [transaction.valid] - Boolean representing if the transaction is valid or not.
@@ -22,6 +24,7 @@ class Transaction extends BaseModel {
   constructor({
     amount,
     recipient,
+    address,
     sender,
     description,
     valid = true,
@@ -33,7 +36,7 @@ class Transaction extends BaseModel {
     creator,
     txid,
   }) {
-    super(TYPE.TRANSACTION);
+    super(TYPE.TRANSACTION, address);
     this.amount = amount;
     this.recipient = recipient;
     this.signature = signature || txid;

@@ -14,12 +14,10 @@ const Permissions = require("./Permissions");
  * @param {String} user.public_key - The public key of the user.
  * @param {Object} [user.return_to] - Key-value object containing actions and addresses of users who will receive the user's transactions upon the action execution (ex. user_retire: 'cs_department')
  * @param {Permissions} user.permissions - The permissions of the user.
- * @param {String} user.signature - The signature of the user.
  */
 class User extends BaseModel {
   constructor({
     address,
-    signature,
     role,
     active,
     balance,
@@ -30,8 +28,7 @@ class User extends BaseModel {
     latest_transactions,
     pending_transactions,
   }) {
-    super(TYPE.USER);
-    this.address = address;
+    super(TYPE.USER, address);
     this.role = role;
     this.description = description;
     this.public_key = public_key;
@@ -41,8 +38,6 @@ class User extends BaseModel {
     this.latest_transactions = latest_transactions || [];
     this.pending_transactions = pending_transactions || [];
     this.permissions = new Permissions(permissions);
-    if (signature) this.signature = signature;
-    else this.signature = address;
   }
 
   /**
@@ -53,7 +48,7 @@ class User extends BaseModel {
    */
   removeInvalidTransaction(transaction) {
     const indexOfTransaction = this.latest_transactions.indexOf(
-      transaction.signature
+      transaction.address
     );
     const { amount } = transaction;
     this.balance -= amount;
@@ -80,34 +75,34 @@ class User extends BaseModel {
    *
    * @param {USER_TYPE} userType - The type of user in the transaction (recipient or sender).
    * @param {Number} amount - The amount of the transaction.
-   * @param {String} transactionSignature - The signature of the transaction.
+   * @param {String} transactionAddress - The address of the transaction.
    * @param {Boolean} [validTransaction] - True if the transaction is valid, false otherwise.
-   * @throws {Error} Throws error if the sender user does not have that transaction signature in latest_transactions.
+   * @throws {Error} Throws error if the sender user does not have that transaction address in latest_transactions.
    */
   addTransaction(
     userType,
     amount,
-    transactionSignature,
+    transactionAddress,
     validTransaction = true
   ) {
     switch (userType) {
       case USER_TYPE.SENDER:
         if (validTransaction) {
           const indexOfTransaction = this.latest_transactions.indexOf(
-            transactionSignature
+            transactionAddress
           );
           this.balance -= amount;
           this.latest_transactions.splice(indexOfTransaction, 1);
         } else {
-          this.pending_transactions.push(transactionSignature);
+          this.pending_transactions.push(transactionAddress);
         }
         break;
       case USER_TYPE.RECIPIENT:
         if (validTransaction) {
           this.balance += amount;
-          this.latest_transactions.push(transactionSignature);
+          this.latest_transactions.push(transactionAddress);
         } else {
-          this.pending_transactions.push(transactionSignature);
+          this.pending_transactions.push(transactionAddress);
         }
         break;
     }
