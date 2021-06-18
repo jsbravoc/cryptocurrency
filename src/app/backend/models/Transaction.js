@@ -109,6 +109,28 @@ class Transaction extends BaseModel {
     }
     this.supporting_transactions.push(transactionSignature);
   }
+
+  /**
+   * Returns a simplified representation of the object.
+   *
+   * @returns {String} Simplified representation of the transaction object.
+   */
+  toSimplifiedObject() {
+    const obj = {
+      address: this.address,
+      recipient: this.recipient,
+    };
+    if (this.sender) {
+      obj["sender"] = this.sender;
+    }
+    obj["amount"] = this.amount;
+    obj["signature"] = this.signature;
+    if (this.supporting_transactions) {
+      obj["supporting_transactions"] = this.supporting_transactions.length;
+    }
+
+    return obj;
+  }
 }
 
 module.exports = Transaction;

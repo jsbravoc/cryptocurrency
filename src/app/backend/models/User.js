@@ -107,6 +107,19 @@ class User extends BaseModel {
         break;
     }
   }
+  /**
+   * Returns a simplified representation of the object.
+   *
+   * @returns {String} Simplified representation of the user object.
+   */
+  toSimplifiedObject() {
+    return {
+      address: this.address,
+      balance: this.balance,
+      latest_transactions: this.latest_transactions.length,
+      pending_transactions: this.pending_transactions.length,
+    };
+  }
 }
 
 module.exports = User;

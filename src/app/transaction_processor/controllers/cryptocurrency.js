@@ -5,7 +5,6 @@ const {
 } = require("sawtooth-sdk/processor/exceptions");
 const { logFormatted, SEVERITY } = require("../utils/logger");
 async function postTransaction(context, transaction, timeout) {
-  //Note that transaction.address => getTransactionAddress(transaction.address) (L492 in controllers/cryptocurrency)
   let addresses = await context.setState(
     {
       [getTransactionAddress(transaction.address)]: Buffer.from(

@@ -440,12 +440,31 @@ describe(`Cryptocurrency Test Suite`, () => {
               });
           });
         });
+        describe("Get all simplified transactions (non expanded & simplified)", () => {
+          it("Non expanded transactions should be returned and should be simplified", (done) => {
+            chai
+              .request(API_URL)
+              .get(`${CRYPTO_ENDPOINT}`)
+              .query({ limit: 5, simplifyTransaction: true })
+              .end(function (err, res) {
+                expect(res.body).to.be.an("array");
+                expect(res).to.have.status(200);
+                res.body.forEach((transaction) => {
+                  if (transaction.supporting_transactions !== undefined)
+                    expect(transaction.supporting_transactions).to.satisfy(
+                      Number.isInteger
+                    );
+                });
+                done();
+              });
+          });
+        });
         describe("Get all transactions (expanded)", () => {
           it("All transactions returned should be expanded", (done) => {
             chai
               .request(API_URL)
               .get(`${CRYPTO_ENDPOINT}`)
-              .query({ expanded: true, limit: 5 })
+              .query({ expand: true, limit: 5 })
               .end(function (err, res) {
                 expect(res.body).to.be.an("array");
                 expect(res).to.have.status(200);
@@ -455,6 +474,25 @@ describe(`Cryptocurrency Test Suite`, () => {
                       expect(supporting_transaction).to.be.an("object");
                     }
                   );
+                });
+                done();
+              });
+          });
+        });
+        describe("Get all transactions (expanded & simplified -> simplifyTransaction should prevail)", () => {
+          it("Non expanded transactions should be returned and should be simplified", (done) => {
+            chai
+              .request(API_URL)
+              .get(`${CRYPTO_ENDPOINT}`)
+              .query({ limit: 5, simplifyTransaction: true, expand: true })
+              .end(function (err, res) {
+                expect(res.body).to.be.an("array");
+                expect(res).to.have.status(200);
+                res.body.forEach((transaction) => {
+                  if (transaction.supporting_transactions !== undefined)
+                    expect(transaction.supporting_transactions).to.satisfy(
+                      Number.isInteger
+                    );
                 });
                 done();
               });
@@ -546,7 +584,7 @@ describe(`Cryptocurrency Test Suite`, () => {
                 ].W0.payload.address
               }`
             )
-            .query({ expanded: true })
+            .query({ expand: true })
             .end(function (err, res) {
               expect(res).to.have.status(200);
               (res.body.supporting_transactions || []).forEach(
@@ -554,6 +592,50 @@ describe(`Cryptocurrency Test Suite`, () => {
                   expect(supporting_transaction).to.be.an("object");
                 }
               );
+              done();
+            });
+        });
+        it("Transaction should be retrieved and expanded successfully, with supporting transactions simplfied", (done) => {
+          chai
+            .request(API_URL)
+            .get(
+              `${CRYPTO_ENDPOINT}/${
+                createdVariables.transactions.transaction[
+                  users.CantTransferW1000.address
+                ].W0.payload.address
+              }`
+            )
+            .query({ expand: true, simplifySupportingTransactions: true })
+            .end(function (err, res) {
+              expect(res).to.have.status(200);
+              (res.body.supporting_transactions || []).forEach(
+                (supporting_transaction) => {
+                  expect(supporting_transaction).to.be.an("object");
+                  if (
+                    supporting_transaction.supporting_transactions !== undefined
+                  )
+                    expect(
+                      supporting_transaction.supporting_transactions
+                    ).to.satisfy(Number.isInteger);
+                }
+              );
+              done();
+            });
+        });
+        it("Transaction should be retrieved and simplified successfully", (done) => {
+          chai
+            .request(API_URL)
+            .get(
+              `${CRYPTO_ENDPOINT}/${
+                createdVariables.transactions.transaction[
+                  users.CantTransferW1000.address
+                ].W0.payload.address
+              }`
+            )
+            .query({ simplifyTransaction: true })
+            .end(function (err, res) {
+              expect(res).to.have.status(200);
+              expect(res.body.supporting_transactions).to.be.a("number");
               done();
             });
         });
@@ -1866,6 +1948,19 @@ describe(`Cryptocurrency Test Suite`, () => {
               });
           });
         });
+        describe("Get all simplified users (non expanded & simplified)", () => {
+          it("Non expanded users should be returned", (done) => {
+            chai
+              .request(API_URL)
+              .get(`${USERS_ENDPOINT}`)
+              .query({ limit: 5, simplifyUser: true })
+              .end(function (err, res) {
+                expect(res.body).to.be.an("array");
+                expect(res).to.have.status(200);
+                done();
+              });
+          });
+        });
         describe("Get all users and hide their public keys (non expanded)", () => {
           it("Non expanded users should be returned without exposing their public keys", (done) => {
             chai
@@ -1889,7 +1984,7 @@ describe(`Cryptocurrency Test Suite`, () => {
             chai
               .request(API_URL)
               .get(`${USERS_ENDPOINT}`)
-              .query({ expanded: true, limit: 5 })
+              .query({ expand: true, limit: 5 })
               .end(function (err, res) {
                 expect(res).to.have.status(200);
                 expect(res.body).to.be.an("array");
@@ -1906,6 +2001,66 @@ describe(`Cryptocurrency Test Suite`, () => {
               });
           });
         });
+        describe("Get all users (expanded & simplified -> expanded should prevail)", function () {
+          this.slow(1500);
+          this.timeout(5000);
+          it("All users returned should be expanded", (done) => {
+            chai
+              .request(API_URL)
+              .get(`${USERS_ENDPOINT}`)
+              .query({ expand: true, limit: 5 })
+              .end(function (err, res) {
+                expect(res).to.have.status(200);
+                expect(res.body).to.be.an("array");
+                res.body.forEach((user) => {
+                  Array.from(user.latest_transactions).forEach((transaction) =>
+                    expect(transaction).not.to.be.a("string")
+                  );
+                  Array.from(user.pending_transactions).forEach((transaction) =>
+                    expect(transaction).not.to.be.a("string")
+                  );
+                });
+
+                done();
+              });
+          });
+        });
+        describe("Get all users (expanded /w simplifiedTransaction)", function () {
+          this.slow(1500);
+          this.timeout(5000);
+          it("All users returned should be expanded and their transactions simplified", (done) => {
+            chai
+              .request(API_URL)
+              .get(`${USERS_ENDPOINT}`)
+              .query({ expand: true, limit: 5, simplifyTransaction: true })
+              .end(function (err, res) {
+                expect(res).to.have.status(200);
+                expect(res.body).to.be.an("array");
+                res.body.forEach((user) => {
+                  Array.from(user.latest_transactions).forEach(
+                    (transaction) => {
+                      expect(transaction).not.to.be.a("string");
+                      if (transaction.supporting_transactions)
+                        expect(transaction.supporting_transactions).to.be.a(
+                          "number"
+                        );
+                    }
+                  );
+                  Array.from(user.pending_transactions).forEach(
+                    (transaction) => {
+                      expect(transaction).not.to.be.a("string");
+                      if (transaction.supporting_transactions)
+                        expect(transaction.supporting_transactions).to.be.a(
+                          "number"
+                        );
+                    }
+                  );
+                });
+
+                done();
+              });
+          });
+        });
         describe("Get all users and hide their public keys (expanded)", function () {
           this.slow(1500);
           this.timeout(5000);
@@ -1913,7 +2068,7 @@ describe(`Cryptocurrency Test Suite`, () => {
             chai
               .request(API_URL)
               .get(`${USERS_ENDPOINT}`)
-              .query({ expanded: true, limit: 5, hidePublicKey: true })
+              .query({ expand: true, limit: 5, hidePublicKey: true })
               .end(function (err, res) {
                 expect(res).to.have.status(200);
                 expect(res.body).to.be.an("array");
@@ -1984,7 +2139,25 @@ describe(`Cryptocurrency Test Suite`, () => {
           chai
             .request(API_URL)
             .get(`${USERS_ENDPOINT}/${users.W1000.address}`)
-            .query({ expanded: true })
+            .query({ expand: true })
+            .end(function (err, res) {
+              expect(res).to.have.status(200);
+              const user = res.body;
+              expect(res.body).to.be.an("object");
+              Array.from(user.latest_transactions).forEach((transaction) =>
+                expect(transaction).not.to.be.a("string")
+              );
+              Array.from(user.pending_transactions).forEach((transaction) =>
+                expect(transaction).not.to.be.a("string")
+              );
+              done();
+            });
+        });
+        it("User should be retrieved and expanded successfully /w simplified transactions", (done) => {
+          chai
+            .request(API_URL)
+            .get(`${USERS_ENDPOINT}/${users.W1000.address}`)
+            .query({ expand: true, simplifyTransaction: true })
             .end(function (err, res) {
               expect(res).to.have.status(200);
               const user = res.body;
@@ -2002,7 +2175,7 @@ describe(`Cryptocurrency Test Suite`, () => {
           chai
             .request(API_URL)
             .get(`${USERS_ENDPOINT}/${users.W1000.address}`)
-            .query({ expanded: true, hidePublicKey: true })
+            .query({ expand: true, hidePublicKey: true })
             .end(function (err, res) {
               expect(res).to.have.status(200);
               const user = res.body;

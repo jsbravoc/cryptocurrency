@@ -188,16 +188,18 @@ const expandSupportingTransactions = async (
  *
  * @param {Request} req - Express request object.
  * @param {Response} res - Response object to handle Express request.
- * @param {Boolean} [req.query.expanded] - If true supporting transactions which be expanded.
+ * @param {Boolean} [req.query.expand] - If true, supporting transactions will be expanded.
  * @param {Boolean} [req.query.hidePending] - If true, pending transactions will not be returned.
  * @param {Boolean} [req.query.hideInvalid] - If true, invalid transactions will not be returned.
  * @param {Number} [req.query.limit] - Maximum number of transactions to return.
+ * @param {Boolean} [req.query.simplifyTransaction] - If true, a simplified version of the transactions will be returned. (Note that is mutually exclusive with req.query.expand)
  * @post Returns array of transactions in res object. If an error happens, response object has the error.
  */
 const getTransactions = (req, res) => {
-  const expanded = req.query.expanded === "true" || false;
+  const expand = req.query.expand === "true" || false;
   const hidePending = req.query.hidePending === "true" || false;
   const hideInvalid = req.query.hideInvalid === "true" || false;
+  const simplifyTransaction = req.query.simplifyTransaction === "true" || false;
   const limit = Number.isNaN(Number(req.query.limit))
     ? 0
     : Number(req.query.limit);
@@ -218,7 +220,12 @@ const getTransactions = (req, res) => {
       if (hideInvalid) {
         assetList = assetList.filter((x) => x.valid);
       }
-      if (!expanded) {
+      if (simplifyTransaction) {
+        return res.json(
+          assetList.map((transaction) => transaction.toSimplifiedObject())
+        );
+      }
+      if (!expand) {
         return res.json(assetList.map((transaction) => transaction.toObject()));
       }
 
@@ -250,17 +257,30 @@ const getTransactions = (req, res) => {
  * @param {Request} req - Express request object.
  * @param {Response} res - Response object to handle Express request.
  * @param {String} req.params.address - Transaction address to query.
+ * @param {Boolean} [req.query.expand] - If true, supporting transactions will be expanded.
+ * @param {Boolean} [req.query.simplifyTransaction] - If true, the transaction will be simplified.
+ * @param {Boolean} [req.query.simplifySupportingTransactions] - If true, the supporting transactions will be simplified.
  * @post Returns the transaction in res object. If an error happens, response object has the error.
  */
 const getTransactionByAddress = (req, res) => {
   return findTransaction(req.params.address, true, res).then((tx) => {
-    const expanded = req.query.expanded === "true" || false;
-    if (!expanded) {
+    const expand = req.query.expand === "true" || false;
+    const simplifyTransaction =
+      req.query.simplifyTransaction === "true" || false;
+    const simplifySupportingTransactions =
+      req.query.simplifySupportingTransactions === "true" || false;
+    if (simplifyTransaction) {
+      return res.status(200).json(tx.toSimplifiedObject());
+    }
+    if (!expand) {
       return res.status(200).json(tx);
     }
-    return expandSupportingTransactions(tx, undefined, res).then(() =>
-      res.status(200).json(tx)
-    );
+    return expandSupportingTransactions(tx, undefined, res).then(() => {
+      if (simplifySupportingTransactions) {
+        tx.supporting_transactions.forEach((t) => t.toSimplifiedObject());
+      }
+      return res.status(200).json(tx);
+    });
   });
 };
 
@@ -357,7 +377,7 @@ const createTransactionPayload = (
   sender,
   recipient,
   valid,
-  method = "POST",
+  method = HTTP_METHODS.POST,
   options = { disableRecipient: false, disableSender: false },
   req,
   res
@@ -497,7 +517,7 @@ const createTransactionPayload = (
 
       // Create new transaction
       const transactionAddress = getTransactionAddress(transaction.address);
-      const transactionPayload = transaction.toString(false, HTTP_METHODS.POST);
+      const transactionPayload = transaction.toString(false, method);
 
       const newTransaction = {
         inputs: [transactionAddress, ...transactionInput],

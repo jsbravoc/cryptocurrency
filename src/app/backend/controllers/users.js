@@ -60,6 +60,10 @@ const _updateUser = (user, res, source = "[LOCAL USER UPDATE]") =>
  *
  * @param {Request} req - Express request object.
  * @param {Response} res - Response object to handle Express request.
+ * @param {Boolean} [req.query.expand] - If true, latest & pending transactions which be expanded.
+ * @param {Number} [req.query.limit] - Maximum number of users to return.
+ * @param {Boolean} [req.query.simplifyUser] - If true, a simplified version of the users will be returned.
+ * @param {Boolean} [req.query.simplifyTransactions] - If true, a simplified version of the users' transactions will be returned (only if the transaction are expanded).
  * @post Returns array of users in res object. If an error happens, response object has the error.
  */
 const getUsers = (req, res) => {
@@ -68,17 +72,20 @@ const getUsers = (req, res) => {
     : Number(req.query.limit);
   const hidePublicKey = req.query.hidePublicKey === "true" || false;
   const assetArray = [findAllAssets(TYPE.USER, "GET /users", limit, true, res)];
-  const expanded = req.query.expanded === "true" || false;
+  const expand = req.query.expand === "true" || false;
+  const simplifyUser = req.query.simplifyUser === "true" || false;
+  const simplifyTransaction = req.query.simplifyTransaction === "true" || false;
 
-  if (expanded) {
+  if (expand && !simplifyUser) {
     assetArray.push(
       findAllAssets(TYPE.TRANSACTION, "GET /users", limit, true, res)
     );
   }
   return Promise.all(assetArray)
     .then(([userList, transactionList]) => {
-      if (!expanded) {
+      if (!expand) {
         hidePublicKey && userList.forEach((user) => delete user.public_key);
+        simplifyUser && userList.forEach((user) => user.toSimplifiedObject());
         return res.status(200).json(userList);
       }
       const dictionaryOfTransactions = {};
@@ -124,10 +131,16 @@ const getUsers = (req, res) => {
                 user.pending_transactions || []
               ).indexOf(tx.address);
               if (indexOfTx > -1) {
-                user.latest_transactions[indexOfTx] = tx;
+                if (simplifyTransaction) {
+                  user.latest_transactions[indexOfTx] = tx.toSimplifiedObject();
+                } else user.latest_transactions[indexOfTx] = tx;
               }
               if (indexOfPendingTx > -1) {
-                user.pending_transactions[indexOfPendingTx] = tx;
+                if (simplifyTransaction) {
+                  user.pending_transactions[
+                    indexOfPendingTx
+                  ] = tx.toSimplifiedObject();
+                } else user.pending_transactions[indexOfPendingTx] = tx;
               }
             });
           });
@@ -152,14 +165,20 @@ const getUsers = (req, res) => {
  *
  * @param {Request} req - Express request object.
  * @param {Response} res - Response object to handle Express request.
+ * @param {Boolean} [req.query.expand] - If true, latest & pending transactions which be expanded.
+ * @param {Boolean} [req.query.simplifyUser] - If true, a simplified version of the user will be returned.
+ * @param {Boolean} [req.query.simplifyTransaction] - If true, a simplified version of the users' transactions will be returned (only if the transaction are expanded).
  * @post Returns the user in res object. If an error happens, response object has the error.
  */
 const getUserByAddress = (req, res) => {
-  const expanded = req.query.expanded === "true" || false;
+  const expand = req.query.expand === "true" || false;
   const hidePublicKey = req.query.hidePublicKey === "true" || false;
+  const simplifyUser = req.query.simplifyUser === "true" || false;
+  const simplifyTransaction = req.query.simplifyTransaction === "true" || false;
   return findUser(req.params.address, true, res).then((user) => {
     hidePublicKey && delete user.public_key;
-    if (!expanded) {
+    if (!expand) {
+      if (simplifyUser) user = user.toSimplifiedObject();
       return res.status(200).json(user);
     }
     return findAllAssets(
@@ -205,10 +224,16 @@ const getUserByAddress = (req, res) => {
             tx.address
           );
           if (indexOfTx > -1) {
-            user.latest_transactions[indexOfTx] = tx;
+            if (simplifyTransaction)
+              user.latest_transactions[indexOfTx] = tx.toSimplifiedObject();
+            else user.latest_transactions[indexOfTx] = tx;
           }
           if (indexOfPendingTx > -1) {
-            user.pending_transactions[indexOfPendingTx] = tx;
+            if (simplifyTransaction)
+              user.pending_transactions[
+                indexOfPendingTx
+              ] = tx.toSimplifiedObject();
+            else user.pending_transactions[indexOfPendingTx] = tx;
           }
         });
         return res.status(200).json(user);

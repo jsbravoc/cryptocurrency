@@ -46,7 +46,7 @@
         "operationId": "getUsers",
         "parameters": [
           {
-            "name": "expanded",
+            "name": "expand",
             "in": "query",
             "description": "Expand recursively the transactions",
             "required": false,
@@ -76,6 +76,28 @@
               "type": "boolean",
               "format": "boolean",
               "example": true
+            }
+          },
+          {
+            "name": "simplifyUser",
+            "in": "query",
+            "description": "Return a simplified object with the user information (mutually exclusive with `expand` query parameter --- `expand` query parameter prevails over `simplifyUser` query parameter).",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "format": "boolean",
+              "example": false
+            }
+          },
+          {
+            "name": "simplifyTransaction",
+            "in": "query",
+            "description": "Upon requesting transactions' expansion (expand=true), return a simplified object with the transaction information.",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "format": "boolean",
+              "example": false
             }
           }
         ],
@@ -191,7 +213,7 @@
             }
           },
           {
-            "name": "expanded",
+            "name": "expand",
             "in": "query",
             "description": "Expand recursively the user's transactions",
             "required": false,
@@ -199,6 +221,28 @@
               "type": "boolean",
               "format": "boolean",
               "example": true
+            }
+          },
+          {
+            "name": "simplifyUser",
+            "in": "query",
+            "description": "Return a simplified object with the user information (mutually exclusive with `expand` query parameter --- `expand` query parameter prevails over `simplifyUser` query parameter).",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "format": "boolean",
+              "example": false
+            }
+          },
+          {
+            "name": "simplifyTransaction",
+            "in": "query",
+            "description": "Upon requesting transactions' expansion (expand=true), return a simplified object with the transaction information.",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "format": "boolean",
+              "example": false
             }
           }
         ],
@@ -363,10 +407,10 @@
         "tags": ["cryptocurrency"],
         "summary": "Retrieves all transactions registered in the blockchain.",
         "description": "Retrieves all transactions registered in the blockchain. Note that, by default, Hyperledger Sawtooth REST API will return up to 100 transactions.",
-        "operationId": "getCryptocurrency",
+        "operationId": "getTransactions",
         "parameters": [
           {
-            "name": "expanded",
+            "name": "expand",
             "in": "query",
             "description": "Expand recursively the transactions",
             "required": false,
@@ -407,6 +451,17 @@
               "type": "integer",
               "format": "int32",
               "example": 100
+            }
+          },
+          {
+            "name": "simplifyTransaction",
+            "in": "query",
+            "description": "Return a simplified transaction object (mutually exclusive with `expand` query parameter --- `simplifyTransaction` query parameter prevails over `expand` query parameter)",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "format": "boolean",
+              "example": "false"
             }
           }
         ],
@@ -517,6 +572,28 @@
             "schema": {
               "type": "string",
               "format": "string"
+            }
+          },
+          {
+            "name": "simplifyTransaction",
+            "in": "query",
+            "description": "Return a simplified transaction object (mutually exclusive with `expand` query parameter --- `simplifyTransaction` query parameter prevails over `expand` query parameter)",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "format": "boolean",
+              "example": "false"
+            }
+          },
+          {
+            "name": "simplifySupportingTransactions",
+            "in": "query",
+            "description": "Upon requesting transaction's expansion (expand=true), simplify supporting transactions.",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "format": "boolean",
+              "example": "false"
             }
           }
         ],

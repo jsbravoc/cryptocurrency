@@ -31,7 +31,7 @@ const handlers = {
         SEVERITY.NOTIFY
       );
       try {
-        //await postValidationChain(context, asset);
+        await postValidationChain(context, asset);
         await postTransaction(context, asset);
       } catch (error) {
         console.error(error);
