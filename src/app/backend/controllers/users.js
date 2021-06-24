@@ -6,10 +6,10 @@ const { SEVERITY, logFormatted } = require("../utils/logger");
 
 const { HTTP_METHODS, TYPE } = require("../utils/constants");
 const {
-  findAllAssets,
+  findAllObjects,
   findByAddress,
-  putAsset,
-  _putAsset,
+  putObject,
+  _putObject,
   hash512,
 } = require("./common");
 
@@ -45,7 +45,7 @@ const findUser = (address, removeType = true, res = null) =>
  */
 // eslint-disable-next-line no-unused-vars
 const _updateUser = (user, res, source = "[LOCAL USER UPDATE]") =>
-  _putAsset(TYPE.USER, HTTP_METHODS.PUT, source, user).then(
+  _putObject(TYPE.USER, HTTP_METHODS.PUT, source, user).then(
     ({ responseCode, msg, payload }) => {
       return res.status(responseCode).json({ msg, payload });
     }
@@ -71,17 +71,17 @@ const getUsers = (req, res) => {
     ? 0
     : Number(req.query.limit);
   const hidePublicKey = req.query.hidePublicKey === "true" || false;
-  const assetArray = [findAllAssets(TYPE.USER, "GET /users", limit, true, res)];
+  const objArray = [findAllObjects(TYPE.USER, "GET /users", limit, true, res)];
   const expand = req.query.expand === "true" || false;
   const simplifyUser = req.query.simplifyUser === "true" || false;
   const simplifyTransaction = req.query.simplifyTransaction === "true" || false;
 
   if (expand && !simplifyUser) {
-    assetArray.push(
-      findAllAssets(TYPE.TRANSACTION, "GET /users", limit, true, res)
+    objArray.push(
+      findAllObjects(TYPE.TRANSACTION, "GET /users", limit, true, res)
     );
   }
-  return Promise.all(assetArray)
+  return Promise.all(objArray)
     .then(([userList, transactionList]) => {
       if (!expand) {
         hidePublicKey && userList.forEach((user) => delete user.public_key);
@@ -89,8 +89,8 @@ const getUsers = (req, res) => {
         return res.status(200).json(userList);
       }
       const dictionaryOfTransactions = {};
-      (transactionList || []).forEach((asset) => {
-        dictionaryOfTransactions[asset.address] = asset;
+      (transactionList || []).forEach((obj) => {
+        dictionaryOfTransactions[obj.address] = obj;
       });
 
       let promises = [];
@@ -181,7 +181,7 @@ const getUserByAddress = (req, res) => {
       if (simplifyUser) user = user.toSimplifiedObject();
       return res.status(200).json(user);
     }
-    return findAllAssets(
+    return findAllObjects(
       TYPE.TRANSACTION,
       "GET /users",
       undefined,
@@ -190,8 +190,8 @@ const getUserByAddress = (req, res) => {
     ).then((transactionList) => {
       let promises = [];
       const dictionaryOfTransactions = {};
-      (transactionList || []).forEach((asset) => {
-        dictionaryOfTransactions[asset.address] = asset;
+      (transactionList || []).forEach((obj) => {
+        dictionaryOfTransactions[obj.address] = obj;
       });
       promises.push(
         (user.latest_transactions || []).map((txid) =>
@@ -243,7 +243,7 @@ const getUserByAddress = (req, res) => {
 };
 
 const createUser = (req, res) =>
-  putAsset(TYPE.USER, HTTP_METHODS.POST, "POST /users", req, res);
+  putObject(TYPE.USER, HTTP_METHODS.POST, "POST /users", req, res);
 
 const updateUser = (req, res) => {
   return findUser(req.params.address, false, res).then((existingUser) => {

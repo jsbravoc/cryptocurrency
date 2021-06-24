@@ -25,41 +25,41 @@ const { PREFIX } = require("./controllers/common");
 
 const handlers = {
   [TYPE.TRANSACTION]: {
-    async post(context, asset) {
+    async post(context, txObject) {
       logFormatted(
-        `Handling post transaction with address ${asset.address}`,
+        `Handling post transaction with address ${txObject.address}`,
         SEVERITY.NOTIFY
       );
       try {
-        await postValidationChain(context, asset);
-        await postTransaction(context, asset);
+        await postValidationChain(context, txObject);
+        await postTransaction(context, txObject);
       } catch (error) {
         console.error(error);
         throw new InvalidTransaction(error);
       }
     },
-    async put(context, asset) {
+    async put(context, txObject) {
       logFormatted(
-        `Handling put transaction with address ${asset.address}`,
+        `Handling put transaction with address ${txObject.address}`,
         SEVERITY.NOTIFY
       );
-      await postTransaction(context, asset);
+      await postTransaction(context, txObject);
     },
   },
   [TYPE.USER]: {
-    async post(context, asset) {
+    async post(context, txObject) {
       logFormatted(
-        `Handling post user with address ${asset.address}`,
+        `Handling post user with address ${txObject.address}`,
         SEVERITY.NOTIFY
       );
-      await postUser(context, asset);
+      await postUser(context, txObject);
     },
-    async put(context, asset) {
+    async put(context, txObject) {
       logFormatted(
-        `Handling put user with address ${asset.address}`,
+        `Handling put user with address ${txObject.address}`,
         SEVERITY.NOTIFY
       );
-      await postUser(context, asset);
+      await postUser(context, txObject);
     },
   },
 };

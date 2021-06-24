@@ -16,7 +16,7 @@ const { SEVERITY, logFormatted } = require("../utils/logger");
 const { queryState, sendTransaction } = require("../sawtooth/sawtooth-helpers");
 const Transaction = require("../models/Transaction");
 const User = require("../models/User");
-const Asset = require("../models/Asset");
+const SawtoothTransaction = require("../models/SawtoothTransaction");
 
 //#region [AUXILIARY FUNCTIONS]
 
@@ -62,13 +62,13 @@ const getUserAddress = (userId) =>
 //#region [SAWTOOTH REST API FUNCTIONS]
 
 /**
- * Finds and returns an asset in the blockchain.
+ * Finds and returns a transaction in the blockchain.
  *
- * @param {TYPE} type - Type of asset, such as TRANSACTION or USER ({@link TYPE}).
- * @param {String} txid - Asset unique identification (before calculated address).
+ * @param {TYPE} type - Type of transaction stored in the blockchain, such as TRANSACTION or USER ({@link TYPE}).
+ * @param {String} txid - Transaction unique identification (before calculated address).
  * @param {Boolean} [removeType] - Boolean that indicates if the type should be removed.
  * @param {Response} [res] - Express.js response object, used to access locals.
- * @return {Promise<Transaction|User|null>} Promise of the asset if found or null if not found.
+ * @return {Promise<Transaction|User|null>} Promise of the object if found or null if not found.
  */
 const findByAddress = (type, txid, removeType = false, res = null) => {
   let addressToQuery;
@@ -131,31 +131,31 @@ const findByAddress = (type, txid, removeType = false, res = null) => {
 };
 
 /**
- * Finds and returns all assets of a type.
- * @pre A request to an endpoint of an asset is made. The endpoint must be GET /{asset}
- * @param {String} type - Type of asset, such as TRANSACTION or USER (@see {@link TYPE}).
+ * Finds and returns all transactions of a type.
+ * @pre A request to an endpoint of a transaction is made. The endpoint must be GET /{transactionType}
+ * @param {String} type - Type of transaction, such as TRANSACTION or USER (@see {@link TYPE}).
  * @param {String} source - Endpoint source that invoked function (used for logging).
- * @param {Number} [limit] - Maximum number of assets to return.
+ * @param {Number} [limit] - Maximum number of transactions to return.
  * @param {Boolean} [removeType] - Boolean that indicates if the type should be removed.
  * @param {Response} [res] - Express.js response object, used to access locals.
- * @returns {Promise<Array<Transaction|User>|Error>} - Promise of the assets returned.
+ * @returns {Promise<Array<Transaction|User>|Error>} - Promise of the object array returned by the Sawtooth API.
  */
-const findAllAssets = (
+const findAllObjects = (
   type,
   source,
   limit = 0,
   removeType = false,
   res = null
 ) => {
-  let assetName;
+  let transactionName;
   let addressPrefix;
   switch (type) {
     case TYPE.TRANSACTION:
-      assetName = "transaction";
+      transactionName = "transaction";
       addressPrefix = ADDRESS_PREFIX.TRANSACTION;
       break;
     case TYPE.USER:
-      assetName = "user";
+      transactionName = "user";
       addressPrefix = ADDRESS_PREFIX.USER;
       break;
   }
@@ -170,7 +170,7 @@ const findAllAssets = (
       params
     )
     .then((query) => {
-      const assetList = _.chain(query.data.data)
+      const objectList = _.chain(query.data.data)
         .filter(
           (item) => !_.isEmpty(JSON.parse(Buffer.from(item.data, "base64")))
         )
@@ -194,26 +194,26 @@ const findAllAssets = (
         .flatten()
         .value();
       logFormatted(
-        `${source} | Querying all ${assetName}s - ${
-          assetList.length
-        } ${assetName}${assetList.length !== 1 ? "s" : ""} found`,
-        assetList.length === 0 ? SEVERITY.ERROR : SEVERITY.SUCCESS
+        `${source} | Querying all ${transactionName}s - ${
+          objectList.length
+        } ${transactionName}${objectList.length !== 1 ? "s" : ""} found`,
+        objectList.length === 0 ? SEVERITY.ERROR : SEVERITY.SUCCESS
       );
-      return assetList;
+      return objectList;
     });
 };
 
 /**
- * Creates an array of assets (namely transactions) for the Sawtooth REST API.
+ * Creates an array of transactions (namely batches) for the Sawtooth REST API.
  *
  * @param {Array} inputs - Array of addresses that are the inputs (read access) of the transaction.
  * @param {Array} outputs - Array of addresses that are the outputs (write access) of the transaction.
  * @param {String} payload - JSON stringified object to insert into the blockchain. (Must include {func, args: {transaction, txid}})
- * @returns {Array} Array of assets (namely transactions) for the Sawtooth REST API.
+ * @returns {Array} Array of transactions (namely Batches) for the Sawtooth REST API.
  */
 const buildBatch = ({ inputs, outputs, payload }, ...args) => {
   let transactions = [
-    new Asset({
+    new SawtoothTransaction({
       inputs,
       outputs,
       payload,
@@ -228,41 +228,41 @@ const buildBatch = ({ inputs, outputs, payload }, ...args) => {
 };
 
 /**
- * Puts an asset in the blockchain.
+ * Puts an transaction in the blockchain.
  *
- * @param {TYPE} type - Type of asset, such as TRANSACTION or USER (@see {@link TYPE}).
+ * @param {TYPE} type - Type of transaction, such as TRANSACTION or USER (@see {@link TYPE}).
  * @param {HTTP_METHODS} httpMethod - PUT or POST (defined in @see {@link HTTP_METHODS} constants).
  * @param {String} source - Endpoint source that invoked function (used for logging).
- * @param {User|Transaction} object - Asset object.
+ * @param {User|Transaction} object - Transaction object.
  * @returns {Promise<{ responseCode, msg, payload }| Error >}  Promise of the batch post request. If successfully resolved, contains responseCode, msg, payload
  */
-const _putAsset = (type, httpMethod, source, object) => {
-  let asset;
+const _putObject = (type, httpMethod, source, object) => {
+  let txObject;
   let txid;
-  let assetAddress;
-  let assetName;
+  let txAddress;
+  let txName;
 
   txid = object.address;
-  asset = object.toString(false, httpMethod);
+  txObject = object.toString(false, httpMethod);
 
   switch (type) {
     case TYPE.TRANSACTION:
-      assetName = "Transaction";
-      assetAddress = getTransactionAddress(txid);
+      txName = "Transaction";
+      txAddress = getTransactionAddress(txid);
       break;
 
     case TYPE.USER:
-      assetName = "User";
-      assetAddress = getUserAddress(txid);
+      txName = "User";
+      txAddress = getUserAddress(txid);
       break;
   }
 
-  const assetPayload = asset;
+  const txPayload = txObject;
 
   const batch = buildBatch({
-    payload: assetPayload,
-    inputs: [assetAddress],
-    outputs: [assetAddress],
+    payload: txPayload,
+    inputs: [txAddress],
+    outputs: [txAddress],
   });
 
   logFormatted(`${source} | BATCH Request:`, SEVERITY.NOTIFY, ...batch);
@@ -273,10 +273,10 @@ const _putAsset = (type, httpMethod, source, object) => {
       SEVERITY.SUCCESS
     );
     const responseCode = httpMethod === HTTP_METHODS.POST ? 201 : 200;
-    const responseMessage = `${assetName} ${
+    const responseMessage = `${txName} ${
       httpMethod === HTTP_METHODS.POST ? "created" : "updated"
     }`;
-    const objResponse = JSON.parse(asset);
+    const objResponse = JSON.parse(txObject);
     delete objResponse.type;
     delete objResponse.httpMethod;
     return { responseCode, msg: responseMessage, payload: objResponse };
@@ -284,50 +284,50 @@ const _putAsset = (type, httpMethod, source, object) => {
 };
 
 /**
- * Builds a transaction of an asset (User, Transaction, etc).
+ * Builds a transaction of an object (User, Transaction, etc).
  *
- * @param {String} type - Type of asset, such as TRANSACTION or USER (@see {@link TYPE}).
+ * @param {String} type - Type of object, such as TRANSACTION or USER (@see {@link TYPE}).
  * @param {HTTP_METHODS} httpMethod - PUT or POST (@see {@link HTTP_METHODS}).
- * @param {User|Transaction} object - Asset object, such as {@link User}, {@link Transaction}.
- * @returns {Asset} Asset (namely a transaction) of the Sawtooth REST API.
+ * @param {User|Transaction} object - Transaction object, such as {@link User}, {@link Transaction}.
+ * @returns {SawtoothTransaction} Transaction of the Sawtooth REST API.
  */
-const buildAssetTransaction = (type, httpMethod, object) => {
-  let asset;
+const buildObjectTransaction = (type, httpMethod, object) => {
+  let txObject;
   let txid;
-  let assetAddress;
+  let txAddress;
 
   switch (type) {
     case TYPE.TRANSACTION:
       txid = object.address;
-      asset = object.toString(false, httpMethod);
-      assetAddress = getTransactionAddress(txid);
+      txObject = object.toString(false, httpMethod);
+      txAddress = getTransactionAddress(txid);
       break;
 
     case TYPE.USER:
       txid = object.address;
-      asset = object.toString(false, httpMethod);
-      assetAddress = getUserAddress(txid);
+      txObject = object.toString(false, httpMethod);
+      txAddress = getUserAddress(txid);
       break;
   }
-  const assetPayload = asset;
+  const txPayload = txObject;
 
-  return new Asset({
-    payload: assetPayload,
-    inputs: [assetAddress],
-    outputs: [assetAddress],
+  return new SawtoothTransaction({
+    payload: txPayload,
+    inputs: [txAddress],
+    outputs: [txAddress],
   });
 };
 
 /**
- * Puts a batch of assets into the blockchain.
+ * Puts a batch of transactions into the blockchain.
  *
  * @param {HTTP_METHODS} httpMethod - PUT or POST (@see {@link HTTP_METHODS}).
  * @param {String} source - Endpoint source that invoked function (used for logging).
- * @param {Object} arrayOfAssets - Array of assets to be inserted into the blockchain.
+ * @param {Object} arrayOfObjects - Array of objects to be inserted into the blockchain.
  * @returns {Promise<{ responseCode, msg, payload }| Error >} Promise of the batch post request. If successfully resolved, contains responseCode, msg, payload
  */
-const putBatch = (httpMethod, source, arrayOfAssets) => {
-  const batch = buildBatch(...arrayOfAssets);
+const putBatch = (httpMethod, source, arrayOfObjects) => {
+  const batch = buildBatch(...arrayOfObjects);
 
   logFormatted(`${source} | BATCH Request:`, SEVERITY.NOTIFY, batch);
   return sendTransaction(batch).then((sawtoothResponse) => {
@@ -336,8 +336,8 @@ const putBatch = (httpMethod, source, arrayOfAssets) => {
       SEVERITY.SUCCESS
     );
     const responseCode = httpMethod === HTTP_METHODS.POST ? 201 : 200;
-    const responseMessage = `Batch of ${arrayOfAssets.length} transaction${
-      arrayOfAssets.length > 1 ? "s" : ""
+    const responseMessage = `Batch of ${arrayOfObjects.length} transaction${
+      arrayOfObjects.length > 1 ? "s" : ""
     } ${httpMethod === HTTP_METHODS.POST ? "created" : "updated"}`;
     const arrayOfPayloads = [];
     batch.forEach((transaction) => {
@@ -355,23 +355,23 @@ const putBatch = (httpMethod, source, arrayOfAssets) => {
 //#region [Express.js REQUEST HANDLERS]
 
 /**
- * Puts an asset in the blockchain.
+ * Puts an object in the blockchain.
  *
- * @param {String} type - Type of asset, such as TRANSACTION or USER (@see {@link TYPE}).
+ * @param {String} type - Type of object, such as TRANSACTION or USER (@see {@link TYPE}).
  * @param {HTTP_METHODS} httpMethod - PUT or POST (@see {@link HTTP_METHODS}).
  * @param {String} source - Endpoint source that invoked function (used for logging).
  * @param {Request} req - Http request object.
  * @param {Response} res - Response object to handle Express request.
  * @return {Promise<{ responseCode, msg, payload }| Error >} Promise of the Sawtooth REST API request response.
  */
-const putAsset = (type, httpMethod, source, req, res) => {
-  let asset;
+const putObject = (type, httpMethod, source, req, res) => {
+  let txObject;
   switch (type) {
     case TYPE.USER:
-      asset = new User(req.body);
+      txObject = new User(req.body);
       break;
   }
-  return _putAsset(type, httpMethod, source, asset).then(
+  return _putObject(type, httpMethod, source, txObject).then(
     ({ responseCode, msg, payload }) => {
       return res.status(responseCode).json({ msg, payload });
     }
@@ -384,8 +384,8 @@ module.exports.hash512 = hash512;
 module.exports.getTransactionAddress = getTransactionAddress;
 module.exports.getUserAddress = getUserAddress;
 module.exports.findByAddress = findByAddress;
-module.exports.findAllAssets = findAllAssets;
-module.exports._putAsset = _putAsset;
-module.exports.buildAssetTransaction = buildAssetTransaction;
+module.exports.findAllObjects = findAllObjects;
+module.exports._putObject = _putObject;
+module.exports.buildObjectTransaction = buildObjectTransaction;
 module.exports.putBatch = putBatch;
-module.exports.putAsset = putAsset;
+module.exports.putObject = putObject;

@@ -3,7 +3,7 @@ const _ = require("lodash");
 const { findByAddress } = require("../controllers/common");
 const {
   validate,
-  validateAssetExistence,
+  validateObjExistence,
   createError,
   createErrorObj,
 } = require("./common");
@@ -18,7 +18,7 @@ const validateExistingUser = (
   shouldExist,
   { location = "body" } = null
 ) => {
-  return validateAssetExistence(TYPE.USER, address, shouldExist, req, res, {
+  return validateObjExistence(TYPE.USER, address, shouldExist, req, res, {
     location,
   })
     .then(() => {
@@ -100,7 +100,7 @@ const validateUserReturnTo = (req, res, next) => {
           const value = req.body.return_to[key];
           if (typeof value === "string") {
             promises.push(
-              validateAssetExistence(TYPE.USER, value, true, req, res, {
+              validateObjExistence(TYPE.USER, value, true, req, res, {
                 location: "body",
                 param: "return_to",
               })

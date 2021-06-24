@@ -4,7 +4,7 @@ const { hash512 } = require("../controllers/common");
 const { TYPE } = require("../utils/constants");
 const { ERRORS } = require("../utils/errors");
 const { MAXIMUM_FLOAT_PRECISION } = require("../utils/constants");
-const { validateAssetExistence } = require("./common");
+const { validateObjExistence } = require("./common");
 /**
  * Creates a collision-free signature for a transaction.
  *
@@ -26,101 +26,95 @@ const createSignature = (signature, creationDate = new Date()) =>
  *
  * @post Sanitizes and allows the request to continue if the request body is valid, denies the request otherwise.
  */
-const inputValidation = (asset) => {
-  let sanitizedAsset = asset;
-  console.log("SANITIZING asset: ", asset);
-  if (asset.recipient === undefined || validator.isEmpty(`${asset.recipient}`))
+const inputValidation = (obj) => {
+  let sanitizedObj = obj;
+  if (obj.recipient === undefined || validator.isEmpty(`${obj.recipient}`))
     throw Error("Transaction format error: missing a recipient");
-  else sanitizedAsset.recipient = asset.recipient.trim();
+  else sanitizedObj.recipient = obj.recipient.trim();
 
   if (
-    asset.amount === undefined ||
-    validator.isEmpty(`${asset.amount}`) ||
-    !validator.isFloat(`${asset.amount}`, { gt: 0 })
+    obj.amount === undefined ||
+    validator.isEmpty(`${obj.amount}`) ||
+    !validator.isFloat(`${obj.amount}`, { gt: 0 })
   )
     throw Error("Transaction format error: missing a valid amount");
   else
-    sanitizedAsset.amount = Number(
-      validator.toFloat(`${asset.amount}`).toFixed(MAXIMUM_FLOAT_PRECISION)
+    sanitizedObj.amount = Number(
+      validator.toFloat(`${obj.amount}`).toFixed(MAXIMUM_FLOAT_PRECISION)
     );
 
-  if (asset.signature === undefined || validator.isEmpty(`${asset.signature}`))
+  if (obj.signature === undefined || validator.isEmpty(`${obj.signature}`))
     throw Error("Transaction format error: missing a signature");
-  else sanitizedAsset.signature = asset.signature.trim();
-  if (asset.address === undefined || validator.isEmpty(`${asset.address}`))
+  else sanitizedObj.signature = obj.signature.trim();
+  if (obj.address === undefined || validator.isEmpty(`${obj.address}`))
     throw Error("Transaction format error: missing an address");
-  else sanitizedAsset.address = asset.address.trim();
+  else sanitizedObj.address = obj.address.trim();
 
-  if (asset.sender !== undefined && !validator.isEmpty(`${asset.sender}`))
-    sanitizedAsset.sender = asset.sender.trim();
+  if (obj.sender !== undefined && !validator.isEmpty(`${obj.sender}`))
+    sanitizedObj.sender = obj.sender.trim();
 
   if (
-    asset.valid_thru !== undefined &&
-    !validator.isEmpty(`${asset.valid_thru}`) &&
-    !validator.isISO8601(`${asset.valid_thru}`)
+    obj.valid_thru !== undefined &&
+    !validator.isEmpty(`${obj.valid_thru}`) &&
+    !validator.isISO8601(`${obj.valid_thru}`)
   )
     throw Error(
       "Transaction format error: valid_thru date format is not ISO 8601"
     );
-  else if (asset.valid_thru !== undefined) {
-    sanitizedAsset.valid_thru = validator.toDate(`${asset.valid_thru}`);
+  else if (obj.valid_thru !== undefined) {
+    sanitizedObj.valid_thru = validator.toDate(`${obj.valid_thru}`);
   }
   if (
-    asset.creationDate !== undefined &&
-    !validator.isEmpty(`${asset.creationDate}`) &&
-    !validator.isISO8601(`${asset.creationDate}`)
+    obj.creationDate !== undefined &&
+    !validator.isEmpty(`${obj.creationDate}`) &&
+    !validator.isISO8601(`${obj.creationDate}`)
   )
     throw Error(
       "Transaction format error: creationDate date format is not ISO 8601"
     );
-  else if (asset.creationDate !== undefined) {
-    sanitizedAsset.creationDate = validator.toDate(`${asset.creationDate}`);
+  else if (obj.creationDate !== undefined) {
+    sanitizedObj.creationDate = validator.toDate(`${obj.creationDate}`);
   }
   if (
-    asset.pending !== undefined &&
-    !validator.isEmpty(`${asset.pending}`) &&
-    !validator.isBoolean(`${asset.pending}`)
+    obj.pending !== undefined &&
+    !validator.isEmpty(`${obj.pending}`) &&
+    !validator.isBoolean(`${obj.pending}`)
   )
     throw Error("Transaction format error: pending is not boolean");
   else {
-    sanitizedAsset.valid =
-      asset.pending === undefined || validator.isEmpty(`${asset.pending}`)
+    sanitizedObj.valid =
+      obj.pending === undefined || validator.isEmpty(`${obj.pending}`)
         ? true
-        : !validator.toBoolean(`${asset.pending}`);
+        : !validator.toBoolean(`${obj.pending}`);
   }
-  return sanitizedAsset;
+  return sanitizedObj;
 };
 
-const postValidationChain = (context, asset) => {
+const postValidationChain = (context, obj) => {
   return new Promise((resolve, reject) => {
-    let sanitizedAsset;
+    let sanitizedObj;
     try {
-      sanitizedAsset = inputValidation(asset);
-      resolve(sanitizedAsset);
+      sanitizedObj = inputValidation(obj);
+      resolve(sanitizedObj);
     } catch (error) {
       reject(error);
     }
-  }).then((sanitizedAsset) => {
-    let validateAssets = [
-      validateAssetExistence(
+  }).then((sanitizedObj) => {
+    let validatedObjs = [
+      validateObjExistence(
         context,
         TYPE.TRANSACTION,
-        sanitizedAsset.address,
+        sanitizedObj.address,
         false
       ),
-      validateAssetExistence(
-        context,
-        TYPE.USER,
-        sanitizedAsset.recipient,
-        true
-      ),
+      validateObjExistence(context, TYPE.USER, sanitizedObj.recipient, true),
     ];
-    if (sanitizedAsset.sender)
-      validateAssets.push(
-        validateAssetExistence(context, TYPE.USER, sanitizedAsset.sender, true)
+    if (sanitizedObj.sender)
+      validatedObjs.push(
+        validateObjExistence(context, TYPE.USER, sanitizedObj.sender, true)
       );
     //Note that this are the same validations as in backend/validators/cryptocurrency.js
-    return Promise.all(validateAssets)
+    return Promise.all(validatedObjs)
       .then(([, recipientUser, senderUser]) => {
         if (recipientUser.active === false) {
           return Promise.reject("ERRORS.USER.LOGIC.USER_IS_NOT_ACTIVE");
@@ -130,14 +124,13 @@ const postValidationChain = (context, asset) => {
           } else if (
             senderUser.permissions &&
             senderUser.permissions.transfer_to &&
-            senderUser.permissions.transfer_to[sanitizedAsset.recipient] ===
-              false
+            senderUser.permissions.transfer_to[sanitizedObj.recipient] === false
           ) {
             return Promise.reject(
               "ERRORS.USER.LOGIC.USER_DOES_NOT_HAVE_TRANSFER_PERMISSIONS"
             );
           }
-          if (senderUser.balance < sanitizedAsset.amount)
+          if (senderUser.balance < sanitizedObj.amount)
             return Promise.reject("ERRORS.USER.INPUT.INSUFFICIENT_FUNDS");
           if (
             !Array.isArray(senderUser.latest_transactions) ||
@@ -151,39 +144,36 @@ const postValidationChain = (context, asset) => {
            * be validated by the TP.
            */
           if (
-            sanitizedAsset.valid === true &&
-            (!sanitizedAsset.supporting_transactions ||
-              !Array.isArray(sanitizedAsset.supporting_transactions) ||
-              sanitizedAsset.supporting_transactions.length === 0)
+            sanitizedObj.valid === true &&
+            (!sanitizedObj.supporting_transactions ||
+              !Array.isArray(sanitizedObj.supporting_transactions) ||
+              sanitizedObj.supporting_transactions.length === 0)
           )
             return Promise.reject(
               "ERRORS.TRANSACTION.INPUT.NO_SUPPORTING_TRANSACTIONS"
             );
           if (
-            Array.isArray(sanitizedAsset.supporting_transactions) &&
-            sanitizedAsset.supporting_transactions.length > 0
+            Array.isArray(sanitizedObj.supporting_transactions) &&
+            sanitizedObj.supporting_transactions.length > 0
           ) {
             const validatedTxOrigin = [];
-            sanitizedAsset.supporting_transactions.forEach((tx) => {
+            sanitizedObj.supporting_transactions.forEach((tx) => {
               validatedTxOrigin.push(
-                validateAssetExistence(
-                  context,
-                  TYPE.TRANSACTION,
-                  tx,
-                  true
-                ).then((transaction) => {
-                  if (transaction.recipient !== senderUser.address) {
-                    return Promise.reject(
-                      "ERRORS.TRANSACTION.LOGIC.TRANSACTION_OWNERSHIP_MISMATCH"
-                    );
+                validateObjExistence(context, TYPE.TRANSACTION, tx, true).then(
+                  (transaction) => {
+                    if (transaction.recipient !== senderUser.address) {
+                      return Promise.reject(
+                        "ERRORS.TRANSACTION.LOGIC.TRANSACTION_OWNERSHIP_MISMATCH"
+                      );
+                    }
+                    return transaction;
                   }
-                  return transaction;
-                })
+                )
               );
             });
             return Promise.all(validatedTxOrigin)
               .then((supportingTransactions) => {
-                let amountToFulfill = sanitizedAsset.amount;
+                let amountToFulfill = sanitizedObj.amount;
                 supportingTransactions.forEach((tx) => {
                   amountToFulfill -= tx.amount;
                 });

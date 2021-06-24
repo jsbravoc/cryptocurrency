@@ -3,8 +3,8 @@
  * @property {number} MAXIMUM_FLOAT_PRECISION=5  The maximum float precision to avoid incorrect math operations.
  * @property {String} TRANSACTION_FAMILY="cnk-cryptocurrency"  The transaction family identifier for the transaction processor.
  * @property {String} TRANSACTION_FAMILY_VERSION="1.0"  The transaction family version for the transaction processor.
- * @property {Object} TYPE  The available types of the assets in the blockchain.
- * @property {Object} ADDRESS_PREFIX  The corresponding address prefixes for the assets in the blockchain.
+ * @property {Object} TYPE  The available types of the objects in the blockchain.
+ * @property {Object} ADDRESS_PREFIX  The corresponding address prefixes for the object in the blockchain.
  * @property {Object} USER_TYPE  The types (or roles) of a user in a transaction.
  * @property {Object} HTTP_METHODS  The https methods available.
  * @property {String} LOCAL_ADDRESS  The current local IP address of the application.
@@ -27,14 +27,14 @@ const HTTP_METHODS = {
   DELETE: "DELETE",
 };
 /**
- * Enum for available assets type in the blockchain.
+ * Enum for available objects type in the blockchain.
  * @readonly
  * @enum {String}
  */
 const TYPE = {
-  /** Represents a {@link User} asset */
+  /** Represents a {@link User} object */
   USER: "USER",
-  /** Represents a {@link Transaction} asset */
+  /** Represents a {@link Transaction} object */
   TRANSACTION: "TRANSACTION",
 };
 

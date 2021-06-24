@@ -13,12 +13,12 @@ const {
   HTTP_METHODS,
 } = require("../utils/constants");
 const {
-  findAllAssets,
+  findAllObjects,
   findByAddress,
   getTransactionAddress,
   getUserAddress,
   hash512,
-  _putAsset,
+  _putObject,
   putBatch,
 } = require("./common");
 const { ERRORS } = require("../utils/errors");
@@ -54,7 +54,7 @@ const findTransaction = (address, removeType = true, res = null) =>
  */
 // eslint-disable-next-line no-unused-vars
 const _updateTransaction = (transaction) =>
-  _putAsset(
+  _putObject(
     TYPE.TRANSACTION,
     HTTP_METHODS.PUT,
     "PUT [LOCAL] /cryptocurrency",
@@ -134,15 +134,15 @@ const expandSupportingTransactions = async (
 ) => {
   if (!dictionaryOfTransactions) {
     dictionaryOfTransactions = {};
-    const assetList = await findAllAssets(
+    const objectList = await findAllObjects(
       TYPE.TRANSACTION,
       "GET /cryptocurrency",
       100,
       true,
       res
     );
-    assetList.forEach((asset) => {
-      dictionaryOfTransactions[asset.address] = asset;
+    objectList.forEach((obj) => {
+      dictionaryOfTransactions[obj.address] = obj;
     });
   }
   if (transaction) {
@@ -203,44 +203,44 @@ const getTransactions = (req, res) => {
   const limit = Number.isNaN(Number(req.query.limit))
     ? 0
     : Number(req.query.limit);
-  return findAllAssets(
+  return findAllObjects(
     TYPE.TRANSACTION,
     "GET /cryptocurrency",
     limit,
     true,
     res
   )
-    .then((assetList) => {
-      assetList = assetList.sort(
+    .then((objList) => {
+      objList = objList.sort(
         (a, b) => new Date(a.creationDate) - new Date(b.creationDate)
       );
       if (hidePending) {
-        assetList = assetList.filter((x) => !x.pending);
+        objList = objList.filter((x) => !x.pending);
       }
       if (hideInvalid) {
-        assetList = assetList.filter((x) => x.valid);
+        objList = objList.filter((x) => x.valid);
       }
       if (simplifyTransaction) {
         return res.json(
-          assetList.map((transaction) => transaction.toSimplifiedObject())
+          objList.map((transaction) => transaction.toSimplifiedObject())
         );
       }
       if (!expand) {
-        return res.json(assetList.map((transaction) => transaction.toObject()));
+        return res.json(objList.map((transaction) => transaction.toObject()));
       }
 
-      const dictionaryOfAssets = {};
-      assetList.forEach((asset) => {
-        dictionaryOfAssets[asset.address] = asset;
+      const dictionaryOfObjs = {};
+      objList.forEach((obj) => {
+        dictionaryOfObjs[obj.address] = obj;
       });
       const promises = [];
-      assetList.forEach((tx) =>
-        promises.push(expandSupportingTransactions(tx, dictionaryOfAssets, res))
+      objList.forEach((tx) =>
+        promises.push(expandSupportingTransactions(tx, dictionaryOfObjs, res))
       );
       Promise.all(promises).then(() => {
         return res
           .status(200)
-          .json(assetList.map((transaction) => transaction.toObject()));
+          .json(objList.map((transaction) => transaction.toObject()));
       });
     })
     .catch(() =>

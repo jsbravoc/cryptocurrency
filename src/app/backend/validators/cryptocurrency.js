@@ -4,7 +4,7 @@ const { ERRORS } = require("../utils/errors");
 const {
   validate,
   createError,
-  validateAssetExistence,
+  validateObjExistence,
   createErrorObj,
 } = require("./common");
 const { findByAddress } = require("../controllers/common");
@@ -147,7 +147,7 @@ const validateExistingTransaction = (
   shouldExist,
   { location = "body" } = null
 ) => {
-  return validateAssetExistence(
+  return validateObjExistence(
     TYPE.TRANSACTION,
     address,
     shouldExist,

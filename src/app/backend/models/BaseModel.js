@@ -1,6 +1,6 @@
 const _ = require("lodash");
 /**
- * Represents a basic object of an asset, used in {@link User}, {@link Transaction} as an inheritable object.
+ * Represents a basic object of a blockchain transaction, used in {@link User}, {@link Transaction} as an inheritable object.
  * @constructor
  * @param {TYPE} type - The type of the object @see {@link TYPE}.
  * @param {String} address - The unique address of the object in Sawtooth.

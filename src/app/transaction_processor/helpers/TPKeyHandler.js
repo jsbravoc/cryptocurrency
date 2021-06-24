@@ -13,16 +13,16 @@ module.exports = function ({ TP_FAMILY, TP_VERSION, TP_NAMESPACE, handlers }) {
 
     async apply(transactionProcessRequest, context) {
       let httpMethod;
-      let asset;
+      let txObject;
       let type;
       try {
-        asset = JSON.parse(
+        txObject = JSON.parse(
           Buffer.from(transactionProcessRequest.payload, "utf8").toString()
         );
-        httpMethod = asset.httpMethod.toLowerCase();
-        type = asset.type;
-        delete asset.httpMethod;
-        delete asset.type;
+        httpMethod = txObject.httpMethod.toLowerCase();
+        type = txObject.type;
+        delete txObject.httpMethod;
+        delete txObject.type;
       } catch (err) {
         console.error(`Transaction payload format error`, err);
         throw new InvalidTransaction(
@@ -31,7 +31,7 @@ module.exports = function ({ TP_FAMILY, TP_VERSION, TP_NAMESPACE, handlers }) {
         );
       }
       if (!handlers[type]) {
-        console.log("Transaction error type asset", asset);
+        console.log("Transaction object type error", txObject);
         console.error(
           `Transaction type error, missing ${type}, expected type between ${Object.keys(
             handlers
@@ -45,7 +45,7 @@ module.exports = function ({ TP_FAMILY, TP_VERSION, TP_NAMESPACE, handlers }) {
       }
       if (true) {
         try {
-          await handlers[type][httpMethod](context, asset);
+          await handlers[type][httpMethod](context, txObject);
         } catch (e) {
           console.log("ERROR during:", e);
           if (e instanceof InternalError) {
@@ -56,7 +56,7 @@ module.exports = function ({ TP_FAMILY, TP_VERSION, TP_NAMESPACE, handlers }) {
           }
         }
       } else {
-        await handlers[type][httpMethod](context, asset);
+        await handlers[type][httpMethod](context, txObject);
       }
     }
   }

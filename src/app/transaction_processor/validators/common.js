@@ -7,20 +7,20 @@ const { TYPE } = require("../utils/constants");
 const { ERRORS } = require("../utils/errors");
 const { logFormatted, SEVERITY } = require("../utils/logger");
 /**
- * Validates if a asset exists in the blockchain.
+ * Validates if a object exists in the blockchain.
  *
- * @param {String} type - Type of asset, @see TYPE
- * @param {String} txid - Asset unique identification (before calculated address)
- * @param {Boolean} shouldExist - Represents if the asset should or should not exist, used to manage error.
+ * @param {String} type - Type of object, @see TYPE
+ * @param {String} txid - Transaction unique identification (before calculated address)
+ * @param {Boolean} shouldExist - Represents if the object should or should not exist, used to manage error.
  * @param {Request} req - Express.js request object.
  * @param {Response} res - Express.js response object.
  * @return {Promise} Promise rejection if:
  *   The type was missing
- *   The asset exists and it should not exist
- *   The asset does not exist and should exist
+ *   The object exists and it should not exist
+ *   The object does not exist and should exist
  *  Otherwise resolves the obj.
  */
-const validateAssetExistence = (context, type, txid, shouldExist) => {
+const validateObjExistence = (context, type, txid, shouldExist) => {
   let getAddress;
   txid = (txid + "").trim();
   switch (type) {
@@ -32,13 +32,13 @@ const validateAssetExistence = (context, type, txid, shouldExist) => {
       break;
   }
   return getRawState(context, getAddress(txid), 5000)
-    .then((existingAsset) => {
-      existingAsset =
-        existingAsset !== null
-          ? JSON.parse(Buffer.from(existingAsset, "utf8").toString())
-          : existingAsset;
-      const expectedToExist = shouldExist && existingAsset === null;
-      const notExpectedToExist = !shouldExist && existingAsset !== null;
+    .then((existingObj) => {
+      existingObj =
+        existingObj !== null
+          ? JSON.parse(Buffer.from(existingObj, "utf8").toString())
+          : existingObj;
+      const expectedToExist = shouldExist && existingObj === null;
+      const notExpectedToExist = !shouldExist && existingObj !== null;
       if (expectedToExist || notExpectedToExist) {
         const errorMsg = `${type.toProperCase()} with address {${txid}} ${
           expectedToExist ? "does not" : "already"
@@ -62,7 +62,7 @@ const validateAssetExistence = (context, type, txid, shouldExist) => {
         return Promise.reject(errorObj);
       }
 
-      return Promise.resolve(existingAsset);
+      return Promise.resolve(existingObj);
     })
     .catch((err) => {
       console.log("Catched rejection from getRawState", err);
@@ -70,4 +70,4 @@ const validateAssetExistence = (context, type, txid, shouldExist) => {
     });
 };
 
-module.exports.validateAssetExistence = validateAssetExistence;
+module.exports.validateObjExistence = validateObjExistence;

@@ -3,8 +3,8 @@
  */
 const {
   findByAddress,
-  findAllAssets,
-  buildAssetTransaction,
+  findAllObjects,
+  buildObjectTransaction,
   putBatch,
 } = require("../controllers/common");
 const { TYPE, HTTP_METHODS } = require("../utils/constants");
@@ -13,12 +13,12 @@ const { createError } = require("../validators/common");
 const { ERRORS } = require("../utils/errors");
 
 /**
- * Returns the updated transaction object & asset in case its validity has changed.
+ * Returns the updated transaction object & transaction object in case its validity has changed.
  * This mainly handles expiring transactions (with valid_thru property).
  *
  * @param {String} address - Address of the transaction.
  * @param {Response} res- Express.js response object, used to access locals.
- * @return {Promise<{transactionObj: Transaction, assetObj: Asset}|null>}} Promise containing the asset and the updated transaction object if its validity has changed.
+ * @return {Promise<{transactionObj: Transaction, txObj: SawtoothTransaction}|null>}} Promise containing the transaction object and the updated transaction object if its validity has changed.
  */
 const updateInvalidTransaction = (address, res) => {
   return findByAddress(TYPE.TRANSACTION, address, false, res).then(
@@ -32,7 +32,7 @@ const updateInvalidTransaction = (address, res) => {
         transaction.valid = transaction.checkValidity();
         return {
           transactionObj: transaction,
-          assetObj: buildAssetTransaction(
+          txObj: buildObjectTransaction(
             TYPE.TRANSACTION,
             HTTP_METHODS.PUT,
             transaction
@@ -51,7 +51,7 @@ const updateInvalidTransaction = (address, res) => {
  * @param {String} address - Address of the user.
  * @param {Array<String>} transactions - Array of known transactions that must be updated (used to limit blockchain queries to the minimum).
  * @param {Response} res- Express.js response object, used to access locals.
- * @return {Promise<Array<Asset>>} Promise containing a list of assets to post to the blockchain.
+ * @return {Promise<Array<SawtoothTransaction>>} Promise containing a list of transactions to post to the blockchain.
  */
 const updateInvalidUserTransactions = (address, transactions, res) => {
   return findByAddress(TYPE.USER, address, false, res).then((user) => {
@@ -68,10 +68,10 @@ const updateInvalidUserTransactions = (address, transactions, res) => {
         promises.push(
           updateInvalidTransaction(transaction, res).then((response) => {
             if (response) {
-              const { transactionObj, assetObj } = response;
+              const { transactionObj, txObj } = response;
               requiresUpdate = true;
               user.removeInvalidTransaction(transactionObj);
-              arrayOfTransactions.push(assetObj);
+              arrayOfTransactions.push(txObj);
             }
           })
         );
@@ -85,10 +85,10 @@ const updateInvalidUserTransactions = (address, transactions, res) => {
         promises.push(
           updateInvalidTransaction(transaction, res).then((response) => {
             if (response) {
-              const { assetObj } = response;
+              const { txObj } = response;
               requiresUpdate = true;
               user.removePendingTransaction(transaction);
-              arrayOfTransactions.push(assetObj);
+              arrayOfTransactions.push(txObj);
             }
           })
         );
@@ -97,7 +97,7 @@ const updateInvalidUserTransactions = (address, transactions, res) => {
     return Promise.all(promises).then(() => {
       if (requiresUpdate) {
         arrayOfTransactions.push(
-          buildAssetTransaction(TYPE.USER, HTTP_METHODS.PUT, user)
+          buildObjectTransaction(TYPE.USER, HTTP_METHODS.PUT, user)
         );
       }
       return arrayOfTransactions;
@@ -135,7 +135,7 @@ const updateInvalidUsersTransactions = (
       SEVERITY.WARN
     );
     promiseOfUsers.push(
-      findAllAssets(TYPE.USER, source, undefined, false, res)
+      findAllObjects(TYPE.USER, source, undefined, false, res)
     );
   }
   return Promise.all(promiseOfUsers).then((users) => {
