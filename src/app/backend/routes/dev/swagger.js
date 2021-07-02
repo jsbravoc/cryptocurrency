@@ -19,6 +19,9 @@ require("public-ip")
     );
     const publicAddress = `http://${publicIp}:${process.env.PORT || "3000"}`;
 
+    process.env.ALLOW_DEV_ENV_CHANGES !== "true" &&
+      delete swaggerDocument.paths["/config"];
+
     swaggerDocument.servers = [
       {
         url: localAddress,

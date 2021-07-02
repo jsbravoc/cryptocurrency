@@ -22,6 +22,7 @@ const {
   putBatch,
 } = require("./common");
 const { ERRORS } = require("../utils/errors");
+const SawtoothTransaction = require("../models/SawtoothTransaction");
 
 //#region [AUXILIARY FUNCTIONS]
 
@@ -30,7 +31,7 @@ const { ERRORS } = require("../utils/errors");
  *
  * @param {String} signature - Signature of the transaction.
  * @param {Date} [creationDate]  - Transaction's creation date.
- * @return {String} New address that avoids collisions.
+ * @returns {String} New address that avoids collisions.
  */
 const createAddress = (signature, creationDate = new Date()) =>
   hash512(`${signature}${creationDate.getTime()}`);
@@ -41,7 +42,7 @@ const createAddress = (signature, creationDate = new Date()) =>
  * @param {String} address - Address of the transaction.
  * @param {Boolean} [removeType] - Boolean that indicates if the type should be removed.
  * @param {Response} [res] - Express.js response object, used to access locals.
- * @return {Promise<Transaction|null>} Promise containing the transaction object or null if not found.
+ * @returns {Promise<Transaction|null>} Promise containing the transaction object or null if not found.
  */
 const findTransaction = (address, removeType = true, res = null) =>
   findByAddress(TYPE.TRANSACTION, address, removeType, res);
@@ -50,7 +51,7 @@ const findTransaction = (address, removeType = true, res = null) =>
  * Updates a transaction in the blockchain.
  *
  * @param {Transaction} transaction - The transaction to update.
- * @return {Promise<{ responseCode, msg, payload }| Error >} Promise of the sawtooth REST API request response.
+ * @returns {Promise<{ responseCode, msg, payload }| Error >} Promise of the sawtooth REST API request response.
  */
 // eslint-disable-next-line no-unused-vars
 const _updateTransaction = (transaction) =>
@@ -66,7 +67,7 @@ const _updateTransaction = (transaction) =>
  *
  * @param {Transaction} transaction - The transaction which requires supporting transactions.
  * @param {Response} [res] - Express.js response object, used to access locals.
- * @return {Promise<{existingSender, existingRecipient, pendingAmount, usedTransactions}>} Promise of object containing {existingSender, existingRecipient, pendingAmount, usedTransactions}
+ * @returns {Promise<{existingSender, existingRecipient, pendingAmount, usedTransactions}>} Promise of object containing {existingSender, existingRecipient, pendingAmount, usedTransactions}
  */
 const getSupportingTransactions = (transaction, res = null) => {
   const { amount, recipient, sender } = transaction;
@@ -214,20 +215,14 @@ const getTransactions = (req, res) => {
       objList = objList.sort(
         (a, b) => new Date(a.creationDate) - new Date(b.creationDate)
       );
-      if (hidePending) {
-        objList = objList.filter((x) => !x.pending);
-      }
-      if (hideInvalid) {
-        objList = objList.filter((x) => x.valid);
-      }
-      if (simplifyTransaction) {
+      if (hidePending) objList = objList.filter((x) => !x.pending);
+      if (hideInvalid) objList = objList.filter((x) => x.valid);
+      if (simplifyTransaction)
         return res.json(
           objList.map((transaction) => transaction.toSimplifiedObject())
         );
-      }
-      if (!expand) {
+      if (!expand)
         return res.json(objList.map((transaction) => transaction.toObject()));
-      }
 
       const dictionaryOfObjs = {};
       objList.forEach((obj) => {
@@ -269,12 +264,11 @@ const getTransactionByAddress = (req, res) => {
       req.query.simplifyTransaction === "true" || false;
     const simplifySupportingTransactions =
       req.query.simplifySupportingTransactions === "true" || false;
-    if (simplifyTransaction) {
+    if (simplifyTransaction)
       return res.status(200).json(tx.toSimplifiedObject());
-    }
-    if (!expand) {
-      return res.status(200).json(tx);
-    }
+
+    if (!expand) return res.status(200).json(tx);
+
     return expandSupportingTransactions(tx, undefined, res).then(() => {
       if (simplifySupportingTransactions) {
         tx.supporting_transactions.forEach((t) => t.toSimplifiedObject());
@@ -300,19 +294,13 @@ const createTransaction = (
   { disableSender = false, disableRecipient = false } = null
 ) => {
   const newTx = new Transaction(req.body);
-  const { sender, recipient, amount, valid } = newTx;
   const { signature, creationDate } = newTx;
   //Avoid transaction collisions
   let address = createAddress(signature, creationDate);
   newTx.address = address;
 
-  return createTransactionPayload(
+  return putTransaction(
     newTx,
-    amount,
-    address,
-    sender,
-    recipient,
-    valid,
     HTTP_METHODS.POST,
     {
       disableSender: disableSender || false,
@@ -337,9 +325,7 @@ const updateTransaction = (req, res) => {
   if (req.query.approve) approve = req.query.approve === "true" || false;
 
   return findTransaction(req.params.address, false, res).then((existingTx) => {
-    if (req.body.description) {
-      existingTx.description = req.body.description;
-    }
+    if (req.body.description) existingTx.description = req.body.description;
     if (approve === undefined) {
       return _updateTransaction(existingTx).then(({ responseCode }) => {
         delete existingTx.type;
@@ -351,14 +337,8 @@ const updateTransaction = (req, res) => {
     }
     existingTx.valid = approve;
     existingTx.pending = false;
-    const { sender, recipient, amount, address, valid } = existingTx;
-    return createTransactionPayload(
+    return putTransaction(
       existingTx,
-      amount,
-      address,
-      sender,
-      recipient,
-      valid,
       HTTP_METHODS.PUT,
       {
         disableSender: false,
@@ -370,18 +350,23 @@ const updateTransaction = (req, res) => {
   });
 };
 
-const createTransactionPayload = (
+/**
+ * Puts a transaction in the blockchain, updating the users involved in it.
+ *
+ * @param {Transaction} req - Express request object.
+ * @param {Response} res - Response object to handle Express request.
+ * @param {String} req.params.address - Transaction address to update.
+ * @param {Boolean} [req.query.approve] - If true, the transaction will be approved, otherwise it will be rejected.
+ * @post Returns the transaction in res object. If an error happens, response object has the error.
+ */
+const putTransaction = (
   transaction,
-  amount,
-  address,
-  sender,
-  recipient,
-  valid,
   method = HTTP_METHODS.POST,
   options = { disableRecipient: false, disableSender: false },
   req,
   res
 ) => {
+  const { amount, address, sender, recipient, valid } = transaction;
   const { disableRecipient, disableSender } = options;
   let newChangeTransaction;
   let newSender;
@@ -418,11 +403,11 @@ const createTransactionPayload = (
       newRecipientUser = newRecipientUser.toString(false, HTTP_METHODS.PUT);
       recipientAddress = getUserAddress(recipient);
       const recipientPayload = newRecipientUser;
-      const newRecipient = {
+      const newRecipient = new SawtoothTransaction({
         inputs: [recipientAddress],
         outputs: [recipientAddress],
         payload: recipientPayload,
-      };
+      });
 
       // Update sender user
       if (existingSender) {
@@ -508,43 +493,32 @@ const createTransactionPayload = (
         newSenderUser = newSenderUser.toString(false, HTTP_METHODS.PUT);
         senderAddress = getUserAddress(sender);
         const senderPayload = newSenderUser;
-        newSender = {
+        newSender = new SawtoothTransaction({
           inputs: [senderAddress],
           outputs: [senderAddress],
           payload: senderPayload,
-        };
+        });
       }
 
       // Create new transaction
       const transactionAddress = getTransactionAddress(transaction.address);
       const transactionPayload = transaction.toString(false, method);
 
-      const newTransaction = {
+      const newTransaction = new SawtoothTransaction({
         inputs: [transactionAddress, ...transactionInput],
         outputs: [transactionAddress],
         payload: transactionPayload,
-      };
+      });
 
-      //Provide reading access to the transaction
-      if (newRecipient) {
-        newTransaction.inputs.push(recipientAddress);
-        //newTransaction.outputs.push(recipientAddress);
-      }
-      if (newSender) {
-        newTransaction.inputs.push(senderAddress);
-        //newTransaction.outputs.push(senderAddress);
-      }
+      if (newRecipient) newTransaction.inputs.push(recipientAddress);
+      if (newSender) newTransaction.inputs.push(senderAddress);
 
       const transactionsToSend = [{ ...newTransaction }];
-      if (newRecipient) {
-        transactionsToSend.push({ ...newRecipient });
-      }
-      if (newSender) {
-        transactionsToSend.push({ ...newSender });
-      }
-      if (newChangeTransaction) {
+      if (newRecipient) transactionsToSend.push({ ...newRecipient });
+      if (newSender) transactionsToSend.push({ ...newSender });
+      if (newChangeTransaction)
         transactionsToSend.push({ ...newChangeTransaction });
-      }
+
       return putBatch(
         method,
         `${method} /cryptocurrency`,

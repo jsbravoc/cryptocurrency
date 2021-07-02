@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "start": "NODE_ENV=production node ./bin/www.js",
-    "test": "NODE_ENV=test ENABLE_LOGGING=false HIDE_ENV_VARIABLES=false DEBUG=true CLEAR_STARTING_LOGS=true ./node_modules/.bin/mocha -s 350 --require ./test/hooks.js --exit",
-    "test-junit": "NODE_ENV=test ENABLE_LOGGING=false HIDE_ENV_VARIABLES=false DEBUG=true CLEAR_STARTING_LOGS=true ./node_modules/.bin/nyc ./node_modules/.bin/mocha -s 350 --require ./test/hooks.js --exit --reporter mocha-junit-reporter --reporter-options mochaFile=reports/mocha/test-results.xml",
+    "test": "ALLOW_DEV_ENV_CHANGES=false NODE_ENV=test ENABLE_LOGGING=false HIDE_ENV_VARIABLES=false DEBUG=true CLEAR_STARTING_LOGS=true ./node_modules/.bin/mocha -s 350 --require ./test/hooks.js --exit",
+    "test-junit": "ALLOW_DEV_ENV_CHANGES=true NODE_ENV=test ENABLE_LOGGING=false HIDE_ENV_VARIABLES=false DEBUG=true CLEAR_STARTING_LOGS=true ./node_modules/.bin/nyc ./node_modules/.bin/mocha -s 350 --require ./test/hooks.js --exit --reporter mocha-junit-reporter --reporter-options mochaFile=reports/mocha/test-results.xml",
     "test-codecov": "./node_modules/.bin/nyc report --reporter=lcov",
     "coverage": "./node_modules/.bin/codecov",
     "docs": "./node_modules/jsdoc/jsdoc.js -c ./.jsdoc.conf.json --readme ../../../README.md"
@@ -16,6 +16,8 @@
   },
   "dependencies": {
     "axios": "^0.21.1",
+    "cache-manager": "^3.4.4",
+    "cache-manager-redis": "^0.6.0",
     "chai": "^4.3.4",
     "chalk": "^4.1.1",
     "cookie-parser": "~1.4.4",

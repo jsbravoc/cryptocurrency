@@ -68,7 +68,7 @@
             
             <nav>
                 
-                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Modules</h3><ul><li><a href="module-config.html">config</a></li><li><a href="module-controllers_common.html">controllers/common</a></li><li><a href="module-controllers_cryptocurrency.html">controllers/cryptocurrency</a></li><li><a href="module-controllers_users.html">controllers/users</a></li><li><a href="module-enforcer_cryptocurrency.html">enforcer/cryptocurrency</a></li><li><a href="module-routers_cryptocurrency.html">routers/cryptocurrency</a></li><li><a href="module-routers_dev_config.html">routers/dev/config</a></li><li><a href="module-routers_enforcer.html">routers/enforcer</a></li><li><a href="module-routers_users.html">routers/users</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-routers_cryptocurrency-cryptoRouter.html">cryptoRouter</a></li><li><a href="module-routers_dev_config-devConfig.html">devConfig</a></li><li><a href="module-routers_enforcer-enforcerRouter.html">enforcerRouter</a></li><li><a href="module-routers_users-usersRouter.html">usersRouter</a></li></ul><h3>Classes</h3><ul><li><a href="Asset.html">Asset</a></li><li><a href="BaseModel.html">BaseModel</a></li><li><a href="Permissions.html">Permissions</a></li><li><a href="Transaction.html">Transaction</a></li><li><a href="User.html">User</a></li></ul><h3>Global</h3><ul><li><a href="global.html#http">http</a></li><li><a href="global.html#HTTP_METHODS">HTTP_METHODS</a></li><li><a href="global.html#inputValidation">inputValidation</a></li><li><a href="global.html#normalizePort">normalizePort</a></li><li><a href="global.html#onError">onError</a></li><li><a href="global.html#port">port</a></li><li><a href="global.html#server">server</a></li><li><a href="global.html#TYPE">TYPE</a></li><li><a href="global.html#USER_TYPE">USER_TYPE</a></li><li><a href="global.html#validate">validate</a></li><li><a href="global.html#validateAssetExistence">validateAssetExistence</a></li><li><a href="global.html#validateExistingTransaction">validateExistingTransaction</a></li><li><a href="global.html#validatePendingTransaction">validatePendingTransaction</a></li><li><a href="global.html#validateTransactionAddress">validateTransactionAddress</a></li><li><a href="global.html#validateTransactionUpdateRequest">validateTransactionUpdateRequest</a></li><li><a href="global.html#validateUserCreation">validateUserCreation</a></li></ul></div>
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Modules</h3><ul><li><a href="module-config.html">config</a></li><li><a href="module-controllers_common.html">controllers/common</a></li><li><a href="module-controllers_cryptocurrency.html">controllers/cryptocurrency</a></li><li><a href="module-controllers_sawtooth.html">controllers/sawtooth</a></li><li><a href="module-controllers_users.html">controllers/users</a></li><li><a href="module-enforcer_cryptocurrency.html">enforcer/cryptocurrency</a></li><li><a href="module-routers_cryptocurrency.html">routers/cryptocurrency</a></li><li><a href="module-routers_dev_config.html">routers/dev/config</a></li><li><a href="module-routers_enforcer.html">routers/enforcer</a></li><li><a href="module-routers_users.html">routers/users</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-routers_cryptocurrency-cryptoRouter.html">cryptoRouter</a></li><li><a href="module-routers_dev_config-devConfig.html">devConfig</a></li><li><a href="module-routers_enforcer-enforcerRouter.html">enforcerRouter</a></li><li><a href="module-routers_users-usersRouter.html">usersRouter</a></li></ul><h3>Classes</h3><ul><li><a href="BaseModel.html">BaseModel</a></li><li><a href="Permissions.html">Permissions</a></li><li><a href="SawtoothBatch.html">SawtoothBatch</a></li><li><a href="SawtoothTransaction.html">SawtoothTransaction</a></li><li><a href="Transaction.html">Transaction</a></li><li><a href="User.html">User</a></li></ul><h3>Global</h3><ul><li><a href="global.html#http">http</a></li><li><a href="global.html#HTTP_METHODS">HTTP_METHODS</a></li><li><a href="global.html#inputValidation">inputValidation</a></li><li><a href="global.html#normalizePort">normalizePort</a></li><li><a href="global.html#onError">onError</a></li><li><a href="global.html#port">port</a></li><li><a href="global.html#server">server</a></li><li><a href="global.html#TYPE">TYPE</a></li><li><a href="global.html#USER_TYPE">USER_TYPE</a></li><li><a href="global.html#validate">validate</a></li><li><a href="global.html#validateExistingTransaction">validateExistingTransaction</a></li><li><a href="global.html#validateObjExistence">validateObjExistence</a></li><li><a href="global.html#validatePendingTransaction">validatePendingTransaction</a></li><li><a href="global.html#validateTransactionAddress">validateTransactionAddress</a></li><li><a href="global.html#validateTransactionUpdateRequest">validateTransactionUpdateRequest</a></li><li><a href="global.html#validateUserCreation">validateUserCreation</a></li></ul></div>
                 
             </nav>
         </div>
@@ -96,19 +96,21 @@ const Permissions = require("./Permissions");
  * @constructor
  * @param {Object} user - The user object to create.
  * @param {String} user.address - The unique address of the user.
+ * @param {String} [user.active] - Represents if the user is active (can make transactions) or not.
+ * @param {String} user.balance - Represents the balance of the user.
  * @param {String} [user.role] - The role of the user.
  * @param {String} [user.description] - The description of the user.
  * @param {String} user.public_key - The public key of the user.
  * @param {Object} [user.return_to] - Key-value object containing actions and addresses of users who will receive the user's transactions upon the action execution (ex. user_retire: 'cs_department')
- * @param {Permissions} user.permissions - The permissions of the user.
- * @param {String} user.signature - The signature of the user.
+ * @param {Permissions} [user.permissions] - User permissions in the system.
+ * @param {Array&lt;String>} [user.latest_transactions] - The latest transactions of the user.
+ * @param {Array&lt;String>} [user.pending_transactions] - The pending transactions of the user.
  */
 class User extends BaseModel {
   constructor({
     address,
-    signature,
     role,
-    active,
+    active = true,
     balance,
     description,
     public_key,
@@ -117,8 +119,7 @@ class User extends BaseModel {
     latest_transactions,
     pending_transactions,
   }) {
-    super(TYPE.USER);
-    this.address = address;
+    super(TYPE.USER, address);
     this.role = role;
     this.description = description;
     this.public_key = public_key;
@@ -128,8 +129,6 @@ class User extends BaseModel {
     this.latest_transactions = latest_transactions || [];
     this.pending_transactions = pending_transactions || [];
     this.permissions = new Permissions(permissions);
-    if (signature) this.signature = signature;
-    else this.signature = address;
   }
 
   /**
@@ -140,7 +139,7 @@ class User extends BaseModel {
    */
   removeInvalidTransaction(transaction) {
     const indexOfTransaction = this.latest_transactions.indexOf(
-      transaction.signature
+      transaction.address
     );
     const { amount } = transaction;
     this.balance -= amount;
@@ -167,37 +166,50 @@ class User extends BaseModel {
    *
    * @param {USER_TYPE} userType - The type of user in the transaction (recipient or sender).
    * @param {Number} amount - The amount of the transaction.
-   * @param {String} transactionSignature - The signature of the transaction.
+   * @param {String} transactionAddress - The address of the transaction.
    * @param {Boolean} [validTransaction] - True if the transaction is valid, false otherwise.
-   * @throws {Error} Throws error if the sender user does not have that transaction signature in latest_transactions.
+   * @throws {Error} Throws error if the sender user does not have that transaction address in latest_transactions.
    */
   addTransaction(
     userType,
     amount,
-    transactionSignature,
+    transactionAddress,
     validTransaction = true
   ) {
     switch (userType) {
       case USER_TYPE.SENDER:
         if (validTransaction) {
           const indexOfTransaction = this.latest_transactions.indexOf(
-            transactionSignature
+            transactionAddress
           );
           this.balance -= amount;
           this.latest_transactions.splice(indexOfTransaction, 1);
         } else {
-          this.pending_transactions.push(transactionSignature);
+          this.pending_transactions.push(transactionAddress);
         }
         break;
       case USER_TYPE.RECIPIENT:
         if (validTransaction) {
           this.balance += amount;
-          this.latest_transactions.push(transactionSignature);
+          this.latest_transactions.push(transactionAddress);
         } else {
-          this.pending_transactions.push(transactionSignature);
+          this.pending_transactions.push(transactionAddress);
         }
         break;
     }
+  }
+  /**
+   * Returns a simplified representation of the object.
+   *
+   * @returns {String} Simplified representation of the user object.
+   */
+  toSimplifiedObject() {
+    return {
+      address: this.address,
+      balance: this.balance,
+      latest_transactions: this.latest_transactions.length,
+      pending_transactions: this.pending_transactions.length,
+    };
   }
 }
 

@@ -66,7 +66,7 @@
             
             <nav>
                 
-                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Modules</h3><ul><li><a href="module-config.html">config</a></li><li><a href="module-controllers_common.html">controllers/common</a></li><li><a href="module-controllers_cryptocurrency.html">controllers/cryptocurrency</a></li><li><a href="module-controllers_users.html">controllers/users</a></li><li><a href="module-enforcer_cryptocurrency.html">enforcer/cryptocurrency</a></li><li><a href="module-routers_cryptocurrency.html">routers/cryptocurrency</a></li><li><a href="module-routers_dev_config.html">routers/dev/config</a></li><li><a href="module-routers_enforcer.html">routers/enforcer</a></li><li><a href="module-routers_users.html">routers/users</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-routers_cryptocurrency-cryptoRouter.html">cryptoRouter</a></li><li><a href="module-routers_dev_config-devConfig.html">devConfig</a></li><li><a href="module-routers_enforcer-enforcerRouter.html">enforcerRouter</a></li><li><a href="module-routers_users-usersRouter.html">usersRouter</a></li></ul><h3>Classes</h3><ul><li><a href="Asset.html">Asset</a></li><li><a href="BaseModel.html">BaseModel</a></li><li><a href="Permissions.html">Permissions</a></li><li><a href="Transaction.html">Transaction</a></li><li><a href="User.html">User</a></li></ul><h3>Global</h3><ul><li><a href="global.html#http">http</a></li><li><a href="global.html#HTTP_METHODS">HTTP_METHODS</a></li><li><a href="global.html#inputValidation">inputValidation</a></li><li><a href="global.html#normalizePort">normalizePort</a></li><li><a href="global.html#onError">onError</a></li><li><a href="global.html#port">port</a></li><li><a href="global.html#server">server</a></li><li><a href="global.html#TYPE">TYPE</a></li><li><a href="global.html#USER_TYPE">USER_TYPE</a></li><li><a href="global.html#validate">validate</a></li><li><a href="global.html#validateAssetExistence">validateAssetExistence</a></li><li><a href="global.html#validateExistingTransaction">validateExistingTransaction</a></li><li><a href="global.html#validatePendingTransaction">validatePendingTransaction</a></li><li><a href="global.html#validateTransactionAddress">validateTransactionAddress</a></li><li><a href="global.html#validateTransactionUpdateRequest">validateTransactionUpdateRequest</a></li><li><a href="global.html#validateUserCreation">validateUserCreation</a></li></ul></div>
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Modules</h3><ul><li><a href="module-config.html">config</a></li><li><a href="module-controllers_common.html">controllers/common</a></li><li><a href="module-controllers_cryptocurrency.html">controllers/cryptocurrency</a></li><li><a href="module-controllers_sawtooth.html">controllers/sawtooth</a></li><li><a href="module-controllers_users.html">controllers/users</a></li><li><a href="module-enforcer_cryptocurrency.html">enforcer/cryptocurrency</a></li><li><a href="module-routers_cryptocurrency.html">routers/cryptocurrency</a></li><li><a href="module-routers_dev_config.html">routers/dev/config</a></li><li><a href="module-routers_enforcer.html">routers/enforcer</a></li><li><a href="module-routers_users.html">routers/users</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-routers_cryptocurrency-cryptoRouter.html">cryptoRouter</a></li><li><a href="module-routers_dev_config-devConfig.html">devConfig</a></li><li><a href="module-routers_enforcer-enforcerRouter.html">enforcerRouter</a></li><li><a href="module-routers_users-usersRouter.html">usersRouter</a></li></ul><h3>Classes</h3><ul><li><a href="BaseModel.html">BaseModel</a></li><li><a href="Permissions.html">Permissions</a></li><li><a href="SawtoothBatch.html">SawtoothBatch</a></li><li><a href="SawtoothTransaction.html">SawtoothTransaction</a></li><li><a href="Transaction.html">Transaction</a></li><li><a href="User.html">User</a></li></ul><h3>Global</h3><ul><li><a href="global.html#http">http</a></li><li><a href="global.html#HTTP_METHODS">HTTP_METHODS</a></li><li><a href="global.html#inputValidation">inputValidation</a></li><li><a href="global.html#normalizePort">normalizePort</a></li><li><a href="global.html#onError">onError</a></li><li><a href="global.html#port">port</a></li><li><a href="global.html#server">server</a></li><li><a href="global.html#TYPE">TYPE</a></li><li><a href="global.html#USER_TYPE">USER_TYPE</a></li><li><a href="global.html#validate">validate</a></li><li><a href="global.html#validateExistingTransaction">validateExistingTransaction</a></li><li><a href="global.html#validateObjExistence">validateObjExistence</a></li><li><a href="global.html#validatePendingTransaction">validatePendingTransaction</a></li><li><a href="global.html#validateTransactionAddress">validateTransactionAddress</a></li><li><a href="global.html#validateTransactionUpdateRequest">validateTransactionUpdateRequest</a></li><li><a href="global.html#validateUserCreation">validateUserCreation</a></li></ul></div>
                 
             </nav>
         </div>
@@ -419,7 +419,7 @@
         <p class="tag-source">
             <a href="controllers_users.js.html" class="button">View Source</a>
             <span>
-                <a href="controllers_users.js.html">controllers/users.js</a>, <a href="controllers_users.js.html#line51">line 51</a>
+                <a href="controllers_users.js.html">controllers/users.js</a>, <a href="controllers_users.js.html#line46">line 46</a>
             </span>
         </p>
     
@@ -457,6 +457,776 @@
         <label>Type: </label>
         
 <span class="param-type">Promise</span>
+
+
+    </div>
+    
+</div>
+
+                
+        </div>
+    </div>
+
+
+
+
+</div>
+            
+                <div class="member">
+
+
+    
+    <h4 class="name" id="~createUser">
+        <a class="href-link" href="#~createUser">#</a>
+        
+            
+                <span class='tag'>inner</span>
+            
+        
+        <span class="code-name">
+            
+                createUser<span class="signature">(req, res)</span><span class="type-signature"> &rarr; {Promise.&lt;({responseCode, msg, payload}|Error)>}</span>
+            
+        </span>
+    </h4>
+    
+
+    
+    <p class="summary">Creates a user in the blockchain.</p>
+    
+    
+    <div class="description">
+        <p>Creates a user in the blockchain.</p>
+    </div>
+    
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+<div class="table-container">
+    <table class="params table">
+        <thead>
+        <tr>
+            
+            <th>Name</th>
+            
+
+            <th>Type</th>
+
+            
+            <th>Attributes</th>
+            
+
+            
+
+            <th class="last">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>req</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">Request</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"><p>Http request object.</p></td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>res</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">Response</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"><p>Response object to handle Express request.</p></td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>req.body</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">Object</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"><p>The user object to create.</p></td>
+</tr>
+
+  
+  
+    
+<tr class="deep-level-1">
+  
+      <td class="name"><code>address</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">String</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"><p>The unique address of the user.</p></td>
+</tr>
+
+  
+    
+<tr class="deep-level-1">
+  
+      <td class="name"><code>active</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">String</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+          &lt;optional><br>
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"><p>Represents if the user is active (can make transactions) or not.</p></td>
+</tr>
+
+  
+    
+<tr class="deep-level-1">
+  
+      <td class="name"><code>balance</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">String</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"><p>Represents the balance of the user.</p></td>
+</tr>
+
+  
+    
+<tr class="deep-level-1">
+  
+      <td class="name"><code>role</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">String</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+          &lt;optional><br>
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"><p>The role of the user.</p></td>
+</tr>
+
+  
+    
+<tr class="deep-level-1">
+  
+      <td class="name"><code>description</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">String</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+          &lt;optional><br>
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"><p>The description of the user.</p></td>
+</tr>
+
+  
+    
+<tr class="deep-level-1">
+  
+      <td class="name"><code>public_key</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">String</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"><p>The public key of the user.</p></td>
+</tr>
+
+  
+    
+<tr class="deep-level-1">
+  
+      <td class="name"><code>return_to</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">Object</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+          &lt;optional><br>
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"><p>Key-value object containing actions and addresses of user who will receive the user's transactions upon the action execution (ex. user_retire: 'cs_department')</p></td>
+</tr>
+
+  
+    
+<tr class="deep-level-1">
+  
+      <td class="name"><code>permissions</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type"><a href="Permissions.html">Permissions</a></span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+          &lt;optional><br>
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"><p>User permissions in the system.</p></td>
+</tr>
+
+  
+
+
+        
+        </tbody>
+    </table>
+</div>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+
+    
+
+    
+
+    
+        <p class="tag-source">
+            <a href="controllers_users.js.html" class="button">View Source</a>
+            <span>
+                <a href="controllers_users.js.html">controllers/users.js</a>, <a href="controllers_users.js.html#line260">line 260</a>
+            </span>
+        </p>
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div class='columns method-parameter'>
+        <div class="column is-2"><label>Returns:</label></div>
+        <div class="column is-10">
+            
+                    
+
+<div class="columns">
+    
+    <div class='param-desc column is-7'><p>Promise of the Sawtooth REST API request response.</p></div>
+    
+    
+    <div class='column is-5 has-text-left'>
+        <label>Type: </label>
+        
+<span class="param-type">Promise.&lt;({responseCode, msg, payload}|Error)></span>
+
+
+    </div>
+    
+</div>
+
+                
+        </div>
+    </div>
+
+
+
+
+</div>
+            
+                <div class="member">
+
+
+    
+    <h4 class="name" id="~deleteUser">
+        <a class="href-link" href="#~deleteUser">#</a>
+        
+            
+                <span class='tag'>inner</span>
+            
+        
+        <span class="code-name">
+            
+                deleteUser<span class="signature">(req, res)</span><span class="type-signature"> &rarr; {Promise.&lt;({responseCode, msg, payload}|Error)>}</span>
+            
+        </span>
+    </h4>
+    
+
+    
+    <p class="summary">Transfers one user's balance to another user in the blockchain.</p>
+    
+    
+    <div class="description">
+        <p>Transfers one user's balance to another user in the blockchain.</p>
+    </div>
+    
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+<div class="table-container">
+    <table class="params table">
+        <thead>
+        <tr>
+            
+            <th>Name</th>
+            
+
+            <th>Type</th>
+
+            
+
+            
+
+            <th class="last">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>req</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">Request</span>
+
+
+  
+  </td>
+
+  
+
+  
+
+  <td class="description last"><p>Http request object.</p></td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>res</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">Response</span>
+
+
+  
+  </td>
+
+  
+
+  
+
+  <td class="description last"><p>Response object to handle Express request.</p></td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>req.params.address</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">String</span>
+
+
+  
+  </td>
+
+  
+
+  
+
+  <td class="description last"><p>The unique address of the user to disable.</p></td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>req.body.reason</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">String</span>
+
+
+  
+  </td>
+
+  
+
+  
+
+  <td class="description last"><p>The reason to disable the user.</p></td>
+</tr>
+
+
+        
+        </tbody>
+    </table>
+</div>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+
+    
+
+    
+
+    
+        <p class="tag-source">
+            <a href="controllers_users.js.html" class="button">View Source</a>
+            <span>
+                <a href="controllers_users.js.html">controllers/users.js</a>, <a href="controllers_users.js.html#line298">line 298</a>
+            </span>
+        </p>
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div class='columns method-parameter'>
+        <div class="column is-2"><label>Returns:</label></div>
+        <div class="column is-10">
+            
+                    
+
+<div class="columns">
+    
+    <div class='param-desc column is-7'><p>Promise of the Sawtooth REST API request response.</p></div>
+    
+    
+    <div class='column is-5 has-text-left'>
+        <label>Type: </label>
+        
+<span class="param-type">Promise.&lt;({responseCode, msg, payload}|Error)></span>
 
 
     </div>
@@ -525,8 +1295,6 @@
             
 
             
-            <th>Default</th>
-            
 
             <th class="last">Description</th>
         </tr>
@@ -560,10 +1328,6 @@
       </td>
   
 
-  
-      <td class="default">
-      
-      </td>
   
 
   <td class="description last"><p>Address of the user.</p></td>
@@ -600,12 +1364,6 @@
   
 
   
-      <td class="default">
-      
-          true
-      
-      </td>
-  
 
   <td class="description last"><p>Boolean that indicates if the signature should be removed.</p></td>
 </tr>
@@ -641,12 +1399,6 @@
   
 
   
-      <td class="default">
-      
-          true
-      
-      </td>
-  
 
   <td class="description last"><p>Boolean that indicates if the type should be removed.</p></td>
 </tr>
@@ -681,12 +1433,6 @@
       </td>
   
 
-  
-      <td class="default">
-      
-          null
-      
-      </td>
   
 
   <td class="description last"><p>Express.js response object, used to access locals.</p></td>
@@ -839,6 +1585,8 @@
             <th>Type</th>
 
             
+            <th>Attributes</th>
+            
 
             
 
@@ -865,6 +1613,14 @@
   </td>
 
   
+      <td class="attributes">
+      
+
+      
+
+      
+      </td>
+  
 
   
 
@@ -890,10 +1646,123 @@
   </td>
 
   
+      <td class="attributes">
+      
+
+      
+
+      
+      </td>
+  
 
   
 
   <td class="description last"><p>Response object to handle Express request.</p></td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>req.query.expand</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">Boolean</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+          &lt;optional><br>
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"><p>If true, latest &amp; pending transactions which be expanded.</p></td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>req.query.simplifyUser</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">Boolean</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+          &lt;optional><br>
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"><p>If true, a simplified version of the user will be returned.</p></td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>req.query.simplifyTransaction</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">Boolean</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+          &lt;optional><br>
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"><p>If true, a simplified version of the users' transactions will be returned (only if the transaction are expanded).</p></td>
 </tr>
 
 
@@ -941,7 +1810,7 @@
         <p class="tag-source">
             <a href="controllers_users.js.html" class="button">View Source</a>
             <span>
-                <a href="controllers_users.js.html">controllers/users.js</a>, <a href="controllers_users.js.html#line163">line 163</a>
+                <a href="controllers_users.js.html">controllers/users.js</a>, <a href="controllers_users.js.html#line172">line 172</a>
             </span>
         </p>
     
@@ -1018,6 +1887,8 @@
             <th>Type</th>
 
             
+            <th>Attributes</th>
+            
 
             
 
@@ -1044,6 +1915,14 @@
   </td>
 
   
+      <td class="attributes">
+      
+
+      
+
+      
+      </td>
+  
 
   
 
@@ -1069,10 +1948,158 @@
   </td>
 
   
+      <td class="attributes">
+      
+
+      
+
+      
+      </td>
+  
 
   
 
   <td class="description last"><p>Response object to handle Express request.</p></td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>req.query.expand</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">Boolean</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+          &lt;optional><br>
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"><p>If true, latest &amp; pending transactions which be expanded.</p></td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>req.query.limit</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">Number</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+          &lt;optional><br>
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"><p>Maximum number of users to return.</p></td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>req.query.simplifyUser</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">Boolean</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+          &lt;optional><br>
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"><p>If true, a simplified version of the users will be returned.</p></td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>req.query.simplifyTransactions</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">Boolean</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+          &lt;optional><br>
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"><p>If true, a simplified version of the users' transactions will be returned (only if the transaction are expanded).</p></td>
 </tr>
 
 
@@ -1120,7 +2147,7 @@
         <p class="tag-source">
             <a href="controllers_users.js.html" class="button">View Source</a>
             <span>
-                <a href="controllers_users.js.html">controllers/users.js</a>, <a href="controllers_users.js.html#line69">line 69</a>
+                <a href="controllers_users.js.html">controllers/users.js</a>, <a href="controllers_users.js.html#line68">line 68</a>
             </span>
         </p>
     
@@ -1142,6 +2169,462 @@
 
 
 
+
+
+
+
+</div>
+            
+                <div class="member">
+
+
+    
+    <h4 class="name" id="~updateUser">
+        <a class="href-link" href="#~updateUser">#</a>
+        
+            
+                <span class='tag'>inner</span>
+            
+        
+        <span class="code-name">
+            
+                updateUser<span class="signature">(req, res)</span><span class="type-signature"> &rarr; {Promise.&lt;({responseCode, msg, payload}|Error)>}</span>
+            
+        </span>
+    </h4>
+    
+
+    
+    <p class="summary">Updates a user in the blockchain.</p>
+    
+    
+    <div class="description">
+        <p>Updates a user in the blockchain.</p>
+    </div>
+    
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+<div class="table-container">
+    <table class="params table">
+        <thead>
+        <tr>
+            
+            <th>Name</th>
+            
+
+            <th>Type</th>
+
+            
+            <th>Attributes</th>
+            
+
+            
+
+            <th class="last">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>req</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">Request</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"><p>Http request object.</p></td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>res</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">Response</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"><p>Response object to handle Express request.</p></td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>req.params.address</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">String</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"><p>The unique address of the user.</p></td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>req.body</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">Object</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"><p>The user properties to update.</p></td>
+</tr>
+
+  
+  
+    
+<tr class="deep-level-1">
+  
+      <td class="name"><code>active</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">String</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+          &lt;optional><br>
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"><p>Represents if the user is active (can make transactions) or not.</p></td>
+</tr>
+
+  
+    
+<tr class="deep-level-1">
+  
+      <td class="name"><code>role</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">String</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+          &lt;optional><br>
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"><p>The role of the user.</p></td>
+</tr>
+
+  
+    
+<tr class="deep-level-1">
+  
+      <td class="name"><code>description</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">String</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+          &lt;optional><br>
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"><p>The description of the user.</p></td>
+</tr>
+
+  
+    
+<tr class="deep-level-1">
+  
+      <td class="name"><code>return_to</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">Object</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+          &lt;optional><br>
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"><p>Key-value object containing actions and addresses of user who will receive the user's transactions upon the action execution (ex. user_retire: 'cs_department')</p></td>
+</tr>
+
+  
+    
+<tr class="deep-level-1">
+  
+      <td class="name"><code>permissions</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type"><a href="Permissions.html">Permissions</a></span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+          &lt;optional><br>
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"><p>User permissions in the system.</p></td>
+</tr>
+
+  
+
+
+        
+        </tbody>
+    </table>
+</div>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+
+    
+
+    
+
+    
+        <p class="tag-source">
+            <a href="controllers_users.js.html" class="button">View Source</a>
+            <span>
+                <a href="controllers_users.js.html">controllers/users.js</a>, <a href="controllers_users.js.html#line277">line 277</a>
+            </span>
+        </p>
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div class='columns method-parameter'>
+        <div class="column is-2"><label>Returns:</label></div>
+        <div class="column is-10">
+            
+                    
+
+<div class="columns">
+    
+    <div class='param-desc column is-7'><p>Promise of the Sawtooth REST API request response.</p></div>
+    
+    
+    <div class='column is-5 has-text-left'>
+        <label>Type: </label>
+        
+<span class="param-type">Promise.&lt;({responseCode, msg, payload}|Error)></span>
+
+
+    </div>
+    
+</div>
+
+                
+        </div>
+    </div>
 
 
 

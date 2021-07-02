@@ -68,7 +68,7 @@
             
             <nav>
                 
-                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Modules</h3><ul><li><a href="module-config.html">config</a></li><li><a href="module-controllers_common.html">controllers/common</a></li><li><a href="module-controllers_cryptocurrency.html">controllers/cryptocurrency</a></li><li><a href="module-controllers_users.html">controllers/users</a></li><li><a href="module-enforcer_cryptocurrency.html">enforcer/cryptocurrency</a></li><li><a href="module-routers_cryptocurrency.html">routers/cryptocurrency</a></li><li><a href="module-routers_dev_config.html">routers/dev/config</a></li><li><a href="module-routers_enforcer.html">routers/enforcer</a></li><li><a href="module-routers_users.html">routers/users</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-routers_cryptocurrency-cryptoRouter.html">cryptoRouter</a></li><li><a href="module-routers_dev_config-devConfig.html">devConfig</a></li><li><a href="module-routers_enforcer-enforcerRouter.html">enforcerRouter</a></li><li><a href="module-routers_users-usersRouter.html">usersRouter</a></li></ul><h3>Classes</h3><ul><li><a href="Asset.html">Asset</a></li><li><a href="BaseModel.html">BaseModel</a></li><li><a href="Permissions.html">Permissions</a></li><li><a href="Transaction.html">Transaction</a></li><li><a href="User.html">User</a></li></ul><h3>Global</h3><ul><li><a href="global.html#http">http</a></li><li><a href="global.html#HTTP_METHODS">HTTP_METHODS</a></li><li><a href="global.html#inputValidation">inputValidation</a></li><li><a href="global.html#normalizePort">normalizePort</a></li><li><a href="global.html#onError">onError</a></li><li><a href="global.html#port">port</a></li><li><a href="global.html#server">server</a></li><li><a href="global.html#TYPE">TYPE</a></li><li><a href="global.html#USER_TYPE">USER_TYPE</a></li><li><a href="global.html#validate">validate</a></li><li><a href="global.html#validateAssetExistence">validateAssetExistence</a></li><li><a href="global.html#validateExistingTransaction">validateExistingTransaction</a></li><li><a href="global.html#validatePendingTransaction">validatePendingTransaction</a></li><li><a href="global.html#validateTransactionAddress">validateTransactionAddress</a></li><li><a href="global.html#validateTransactionUpdateRequest">validateTransactionUpdateRequest</a></li><li><a href="global.html#validateUserCreation">validateUserCreation</a></li></ul></div>
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Modules</h3><ul><li><a href="module-config.html">config</a></li><li><a href="module-controllers_common.html">controllers/common</a></li><li><a href="module-controllers_cryptocurrency.html">controllers/cryptocurrency</a></li><li><a href="module-controllers_sawtooth.html">controllers/sawtooth</a></li><li><a href="module-controllers_users.html">controllers/users</a></li><li><a href="module-enforcer_cryptocurrency.html">enforcer/cryptocurrency</a></li><li><a href="module-routers_cryptocurrency.html">routers/cryptocurrency</a></li><li><a href="module-routers_dev_config.html">routers/dev/config</a></li><li><a href="module-routers_enforcer.html">routers/enforcer</a></li><li><a href="module-routers_users.html">routers/users</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-routers_cryptocurrency-cryptoRouter.html">cryptoRouter</a></li><li><a href="module-routers_dev_config-devConfig.html">devConfig</a></li><li><a href="module-routers_enforcer-enforcerRouter.html">enforcerRouter</a></li><li><a href="module-routers_users-usersRouter.html">usersRouter</a></li></ul><h3>Classes</h3><ul><li><a href="BaseModel.html">BaseModel</a></li><li><a href="Permissions.html">Permissions</a></li><li><a href="SawtoothBatch.html">SawtoothBatch</a></li><li><a href="SawtoothTransaction.html">SawtoothTransaction</a></li><li><a href="Transaction.html">Transaction</a></li><li><a href="User.html">User</a></li></ul><h3>Global</h3><ul><li><a href="global.html#http">http</a></li><li><a href="global.html#HTTP_METHODS">HTTP_METHODS</a></li><li><a href="global.html#inputValidation">inputValidation</a></li><li><a href="global.html#normalizePort">normalizePort</a></li><li><a href="global.html#onError">onError</a></li><li><a href="global.html#port">port</a></li><li><a href="global.html#server">server</a></li><li><a href="global.html#TYPE">TYPE</a></li><li><a href="global.html#USER_TYPE">USER_TYPE</a></li><li><a href="global.html#validate">validate</a></li><li><a href="global.html#validateExistingTransaction">validateExistingTransaction</a></li><li><a href="global.html#validateObjExistence">validateObjExistence</a></li><li><a href="global.html#validatePendingTransaction">validatePendingTransaction</a></li><li><a href="global.html#validateTransactionAddress">validateTransactionAddress</a></li><li><a href="global.html#validateTransactionUpdateRequest">validateTransactionUpdateRequest</a></li><li><a href="global.html#validateUserCreation">validateUserCreation</a></li></ul></div>
                 
             </nav>
         </div>
@@ -94,8 +94,10 @@ const BaseModel = require("./BaseModel");
  * Represents a transaction of the blockchain.
  * @constructor
  * @param {Object} transaction - The transaction object to create.
+ * @param {String} transaction.address - The address of the transaction.
  * @param {Number} transaction.amount - The amount of the transaction.
  * @param {String} transaction.recipient - The address of the recipient of the transaction.
+ * @param {String} transaction.signature - The signature of the transaction.
  * @param {String} [transaction.sender] - The address of the sender of the transaction.
  * @param {String} [transaction.description] - The description of the transaction.
  * @param {Boolean} [transaction.valid] - Boolean representing if the transaction is valid or not.
@@ -109,6 +111,7 @@ class Transaction extends BaseModel {
   constructor({
     amount,
     recipient,
+    address,
     sender,
     description,
     valid = true,
@@ -118,12 +121,11 @@ class Transaction extends BaseModel {
     pending,
     creationDate = new Date(),
     creator,
-    txid,
   }) {
-    super(TYPE.TRANSACTION);
+    super(TYPE.TRANSACTION, address);
     this.amount = amount;
     this.recipient = recipient;
-    this.signature = signature || txid;
+    this.signature = signature;
     this.creationDate = creationDate;
     this.valid = valid === null || valid === undefined ? true : valid;
     this.creator = creator || sender || recipient;
@@ -192,6 +194,28 @@ class Transaction extends BaseModel {
       this.supporting_transactions = [];
     }
     this.supporting_transactions.push(transactionSignature);
+  }
+
+  /**
+   * Returns a simplified representation of the object.
+   *
+   * @returns {String} Simplified representation of the transaction object.
+   */
+  toSimplifiedObject() {
+    const obj = {
+      address: this.address,
+      recipient: this.recipient,
+    };
+    if (this.sender) {
+      obj["sender"] = this.sender;
+    }
+    obj["amount"] = this.amount;
+    obj["signature"] = this.signature;
+    if (this.supporting_transactions) {
+      obj["supporting_transactions"] = this.supporting_transactions.length;
+    }
+
+    return obj;
   }
 }
 

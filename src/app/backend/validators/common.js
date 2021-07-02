@@ -8,7 +8,7 @@ const { SEVERITY, logFormatted } = require("../utils/logger");
  * Validates an array of validations using express-validator.
  *
  * @param {Array} validations - Array of validation Promises.
- * @return {Function} Next callback if there was not any validation errors, void otherwise (response object will contain the validation errors).
+ * @returns {Function} Next callback if there was not any validation errors, void otherwise (response object will contain the validation errors).
  */
 const validate = (validations) => (req, res, next) => {
   return Promise.all(validations.map((validation) => validation.run(req))).then(
@@ -67,7 +67,7 @@ const createError = (
  * @param {Boolean} shouldExist - Represents if the object should or should not exist, used to manage error.
  * @param {Request} req - Express.js request object.
  * @param {Response} res - Express.js response object.
- * @return {Promise} Promise rejection if:
+ * @returns {Promise} Promise rejection if:
  *   The type was missing
  *   The object exists and it should not exist
  *   The object does not exist and should exist

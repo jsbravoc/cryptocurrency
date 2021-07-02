@@ -10,7 +10,7 @@ const { validateObjExistence } = require("./common");
  *
  * @param {String} signature - Signature of the transaction.
  * @param {Date} [creationDate]  - Transaction's creation date.
- * @return {String} New signature that avoids collisions.
+ * @returns {String} New signature that avoids collisions.
  */
 const createSignature = (signature, creationDate = new Date()) =>
   hash512(`${signature}${creationDate.getTime()}`);
@@ -74,6 +74,14 @@ const inputValidation = (obj) => {
     );
   else if (obj.creationDate !== undefined) {
     sanitizedObj.creationDate = validator.toDate(`${obj.creationDate}`);
+  }
+  if (
+    sanitizedObj.valid_thru &&
+    sanitizedObj.creationDate > sanitizedObj.valid_thru
+  ) {
+    throw Error(
+      `Transaction format error: valid_thru date is before creationDate`
+    );
   }
   if (
     obj.pending !== undefined &&

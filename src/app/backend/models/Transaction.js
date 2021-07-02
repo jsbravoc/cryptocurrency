@@ -34,12 +34,11 @@ class Transaction extends BaseModel {
     pending,
     creationDate = new Date(),
     creator,
-    txid,
   }) {
     super(TYPE.TRANSACTION, address);
     this.amount = amount;
     this.recipient = recipient;
-    this.signature = signature || txid;
+    this.signature = signature;
     this.creationDate = creationDate;
     this.valid = valid === null || valid === undefined ? true : valid;
     this.creator = creator || sender || recipient;

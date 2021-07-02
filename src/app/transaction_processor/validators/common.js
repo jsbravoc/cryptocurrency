@@ -14,7 +14,7 @@ const { logFormatted, SEVERITY } = require("../utils/logger");
  * @param {Boolean} shouldExist - Represents if the object should or should not exist, used to manage error.
  * @param {Request} req - Express.js request object.
  * @param {Response} res - Express.js response object.
- * @return {Promise} Promise rejection if:
+ * @returns {Promise} Promise rejection if:
  *   The type was missing
  *   The object exists and it should not exist
  *   The object does not exist and should exist

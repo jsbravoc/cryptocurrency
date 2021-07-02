@@ -30,7 +30,7 @@ const { ERRORS } = require("../utils/errors");
  * @param {Boolean} [removeSignature] - Boolean that indicates if the signature should be removed.
  * @param {Boolean} [removeType] - Boolean that indicates if the type should be removed.
  * @param {Response} [res] - Express.js response object, used to access locals.
- * @return {Promise<User|null>} Promise containing the user object or null if not found.
+ * @returns {Promise<User|null>} Promise containing the user object or null if not found.
  */
 const findUser = (address, removeType = true, res = null) =>
   findByAddress(TYPE.USER, address, removeType, res);
@@ -41,9 +41,8 @@ const findUser = (address, removeType = true, res = null) =>
  * @param {User} user - The user to update.
  * @param {Response} res - Express.js response object, used to access locals.
  * @param {String} [source] - Source function that invoked the request.
- * @return {Promise} Promise of the sawtooth REST API request response.
+ * @returns {Promise} Promise of the sawtooth REST API request response.
  */
-// eslint-disable-next-line no-unused-vars
 const _updateUser = (user, res, source = "[LOCAL USER UPDATE]") =>
   _putObject(TYPE.USER, HTTP_METHODS.PUT, source, user).then(
     ({ responseCode, msg, payload }) => {
@@ -242,31 +241,60 @@ const getUserByAddress = (req, res) => {
   });
 };
 
+/**
+ * Creates a user in the blockchain.
+ *
+ * @param {Request} req - Http request object.
+ * @param {Response} res - Response object to handle Express request.
+ * @param {Object} req.body - The user object to create.
+ * @param {String} req.body.address - The unique address of the user.
+ * @param {String} [req.body.active] - Represents if the user is active (can make transactions) or not.
+ * @param {String} req.body.balance - Represents the balance of the user.
+ * @param {String} [req.body.role] - The role of the user.
+ * @param {String} [req.body.description] - The description of the user.
+ * @param {String} req.body.public_key - The public key of the user.
+ * @param {Object} [req.body.return_to] - Key-value object containing actions and addresses of user who will receive the user's transactions upon the action execution (ex. user_retire: 'cs_department')
+ * @param {Permissions} [req.body.permissions] - User permissions in the system.
+ * @returns {Promise<{ responseCode, msg, payload }| Error >} Promise of the Sawtooth REST API request response.
+ */
 const createUser = (req, res) =>
   putObject(TYPE.USER, HTTP_METHODS.POST, "POST /users", req, res);
 
+/**
+ * Updates a user in the blockchain.
+ *
+ * @param {Request} req - Http request object.
+ * @param {Response} res - Response object to handle Express request.
+ * @param {String} req.params.address - The unique address of the user.
+ * @param {Object} req.body - The user properties to update.
+ * @param {String} [req.body.active] - Represents if the user is active (can make transactions) or not.
+ * @param {String} [req.body.role] - The role of the user.
+ * @param {String} [req.body.description] - The description of the user.
+ * @param {Object} [req.body.return_to] - Key-value object containing actions and addresses of user who will receive the user's transactions upon the action execution (ex. user_retire: 'cs_department')
+ * @param {Permissions} [req.body.permissions] - User permissions in the system.
+ * @returns {Promise<{ responseCode, msg, payload }| Error >} Promise of the Sawtooth REST API request response.
+ */
 const updateUser = (req, res) => {
   return findUser(req.params.address, false, res).then((existingUser) => {
     const { role, description, permissions, return_to, active } = req.body;
-    if (role !== undefined) {
-      existingUser.role = role;
-    }
-    if (description !== undefined) {
-      existingUser.description = description;
-    }
-    if (permissions !== undefined) {
-      existingUser.permissions = permissions;
-    }
-    if (return_to !== undefined) {
-      existingUser.return_to = return_to;
-    }
-    if (active !== undefined) {
-      existingUser.active = active;
-    }
+    if (role !== undefined) existingUser.role = role;
+    if (description !== undefined) existingUser.description = description;
+    if (permissions !== undefined) existingUser.permissions = permissions;
+    if (return_to !== undefined) existingUser.return_to = return_to;
+    if (active !== undefined) existingUser.active = active;
     return _updateUser(existingUser, res, "PUT /users");
   });
 };
 
+/**
+ * Transfers one user's balance to another user in the blockchain.
+ *
+ * @param {Request} req - Http request object.
+ * @param {Response} res - Response object to handle Express request.
+ * @param {String} req.params.address - The unique address of the user to disable.
+ * @param {String} req.body.reason - The reason to disable the user.
+ * @returns {Promise<{ responseCode, msg, payload }| Error >} Promise of the Sawtooth REST API request response.
+ */
 const deleteUser = (req, res) => {
   const reason = req.body.reason;
   return findUser(req.params.address, false, res).then((existingUser) => {

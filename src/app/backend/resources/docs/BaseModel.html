@@ -66,7 +66,7 @@
             
             <nav>
                 
-                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Modules</h3><ul><li><a href="module-config.html">config</a></li><li><a href="module-controllers_common.html">controllers/common</a></li><li><a href="module-controllers_cryptocurrency.html">controllers/cryptocurrency</a></li><li><a href="module-controllers_users.html">controllers/users</a></li><li><a href="module-enforcer_cryptocurrency.html">enforcer/cryptocurrency</a></li><li><a href="module-routers_cryptocurrency.html">routers/cryptocurrency</a></li><li><a href="module-routers_dev_config.html">routers/dev/config</a></li><li><a href="module-routers_enforcer.html">routers/enforcer</a></li><li><a href="module-routers_users.html">routers/users</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-routers_cryptocurrency-cryptoRouter.html">cryptoRouter</a></li><li><a href="module-routers_dev_config-devConfig.html">devConfig</a></li><li><a href="module-routers_enforcer-enforcerRouter.html">enforcerRouter</a></li><li><a href="module-routers_users-usersRouter.html">usersRouter</a></li></ul><h3>Classes</h3><ul><li><a href="Asset.html">Asset</a></li><li><a href="BaseModel.html">BaseModel</a></li><li><a href="Permissions.html">Permissions</a></li><li><a href="Transaction.html">Transaction</a></li><li><a href="User.html">User</a></li></ul><h3>Global</h3><ul><li><a href="global.html#http">http</a></li><li><a href="global.html#HTTP_METHODS">HTTP_METHODS</a></li><li><a href="global.html#inputValidation">inputValidation</a></li><li><a href="global.html#normalizePort">normalizePort</a></li><li><a href="global.html#onError">onError</a></li><li><a href="global.html#port">port</a></li><li><a href="global.html#server">server</a></li><li><a href="global.html#TYPE">TYPE</a></li><li><a href="global.html#USER_TYPE">USER_TYPE</a></li><li><a href="global.html#validate">validate</a></li><li><a href="global.html#validateAssetExistence">validateAssetExistence</a></li><li><a href="global.html#validateExistingTransaction">validateExistingTransaction</a></li><li><a href="global.html#validatePendingTransaction">validatePendingTransaction</a></li><li><a href="global.html#validateTransactionAddress">validateTransactionAddress</a></li><li><a href="global.html#validateTransactionUpdateRequest">validateTransactionUpdateRequest</a></li><li><a href="global.html#validateUserCreation">validateUserCreation</a></li></ul></div>
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Modules</h3><ul><li><a href="module-config.html">config</a></li><li><a href="module-controllers_common.html">controllers/common</a></li><li><a href="module-controllers_cryptocurrency.html">controllers/cryptocurrency</a></li><li><a href="module-controllers_sawtooth.html">controllers/sawtooth</a></li><li><a href="module-controllers_users.html">controllers/users</a></li><li><a href="module-enforcer_cryptocurrency.html">enforcer/cryptocurrency</a></li><li><a href="module-routers_cryptocurrency.html">routers/cryptocurrency</a></li><li><a href="module-routers_dev_config.html">routers/dev/config</a></li><li><a href="module-routers_enforcer.html">routers/enforcer</a></li><li><a href="module-routers_users.html">routers/users</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-routers_cryptocurrency-cryptoRouter.html">cryptoRouter</a></li><li><a href="module-routers_dev_config-devConfig.html">devConfig</a></li><li><a href="module-routers_enforcer-enforcerRouter.html">enforcerRouter</a></li><li><a href="module-routers_users-usersRouter.html">usersRouter</a></li></ul><h3>Classes</h3><ul><li><a href="BaseModel.html">BaseModel</a></li><li><a href="Permissions.html">Permissions</a></li><li><a href="SawtoothBatch.html">SawtoothBatch</a></li><li><a href="SawtoothTransaction.html">SawtoothTransaction</a></li><li><a href="Transaction.html">Transaction</a></li><li><a href="User.html">User</a></li></ul><h3>Global</h3><ul><li><a href="global.html#http">http</a></li><li><a href="global.html#HTTP_METHODS">HTTP_METHODS</a></li><li><a href="global.html#inputValidation">inputValidation</a></li><li><a href="global.html#normalizePort">normalizePort</a></li><li><a href="global.html#onError">onError</a></li><li><a href="global.html#port">port</a></li><li><a href="global.html#server">server</a></li><li><a href="global.html#TYPE">TYPE</a></li><li><a href="global.html#USER_TYPE">USER_TYPE</a></li><li><a href="global.html#validate">validate</a></li><li><a href="global.html#validateExistingTransaction">validateExistingTransaction</a></li><li><a href="global.html#validateObjExistence">validateObjExistence</a></li><li><a href="global.html#validatePendingTransaction">validatePendingTransaction</a></li><li><a href="global.html#validateTransactionAddress">validateTransactionAddress</a></li><li><a href="global.html#validateTransactionUpdateRequest">validateTransactionUpdateRequest</a></li><li><a href="global.html#validateUserCreation">validateUserCreation</a></li></ul></div>
                 
             </nav>
         </div>
@@ -85,9 +85,9 @@
 
 <header>
     
-        <h2><span class="attribs"><span class="type-signature"></span></span>BaseModel<span class="signature">(type)</span><span class="type-signature"></span></h2>
+        <h2><span class="attribs"><span class="type-signature"></span></span>BaseModel<span class="signature">(type, address)</span><span class="type-signature"></span></h2>
         
-            <div class="class-description"><p>Represents a basic object of an asset, used in <a href="User.html">User</a>, <a href="Transaction.html">Transaction</a> as an inheritable object.</p></div>
+            <div class="class-description"><p>Represents a basic object of a blockchain transaction, used in <a href="User.html">User</a>, <a href="Transaction.html">Transaction</a> as an inheritable object.</p></div>
         
     
 </header>
@@ -111,7 +111,7 @@
         
         <span class="code-name">
             
-                new BaseModel<span class="signature">(type)</span><span class="type-signature"></span>
+                new BaseModel<span class="signature">(type, address)</span><span class="type-signature"></span>
             
         </span>
     </h4>
@@ -175,6 +175,31 @@
 
 
         
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>address</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">String</span>
+
+
+  
+  </td>
+
+  
+
+  
+
+  <td class="description last"><p>The unique address of the object in Sawtooth.</p></td>
+</tr>
+
+
+        
         </tbody>
     </table>
 </div>
@@ -218,7 +243,7 @@
         <p class="tag-source">
             <a href="models_BaseModel.js.html" class="button">View Source</a>
             <span>
-                <a href="models_BaseModel.js.html">models/BaseModel.js</a>, <a href="models_BaseModel.js.html#line7">line 7</a>
+                <a href="models_BaseModel.js.html">models/BaseModel.js</a>, <a href="models_BaseModel.js.html#line8">line 8</a>
             </span>
         </p>
     
@@ -521,7 +546,7 @@
         <p class="tag-source">
             <a href="models_BaseModel.js.html" class="button">View Source</a>
             <span>
-                <a href="models_BaseModel.js.html">models/BaseModel.js</a>, <a href="models_BaseModel.js.html#line17">line 17</a>
+                <a href="models_BaseModel.js.html">models/BaseModel.js</a>, <a href="models_BaseModel.js.html#line19">line 19</a>
             </span>
         </p>
     
@@ -583,7 +608,7 @@
         
         <span class="code-name">
             
-                toObject<span class="signature">(removeSignature<span class="signature-attributes">opt</span>, removeType<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Object}</span>
+                toObject<span class="signature">(removeType<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Object}</span>
             
         </span>
     </h4>
@@ -631,47 +656,6 @@
         </thead>
 
         <tbody>
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>removeSignature</code></td>
-  
-
-  <td class="type">
-  
-      
-<span class="param-type">Boolean</span>
-
-
-  
-  </td>
-
-  
-      <td class="attributes">
-      
-          &lt;optional><br>
-      
-
-      
-
-      
-      </td>
-  
-
-  
-      <td class="default">
-      
-          false
-      
-      </td>
-  
-
-  <td class="description last"><p>If true, the resulting object will not have the signature property.</p></td>
-</tr>
-
-
         
 
             
@@ -757,7 +741,7 @@
         <p class="tag-source">
             <a href="models_BaseModel.js.html" class="button">View Source</a>
             <span>
-                <a href="models_BaseModel.js.html">models/BaseModel.js</a>, <a href="models_BaseModel.js.html#line37">line 37</a>
+                <a href="models_BaseModel.js.html">models/BaseModel.js</a>, <a href="models_BaseModel.js.html#line38">line 38</a>
             </span>
         </p>
     
@@ -819,7 +803,7 @@
         
         <span class="code-name">
             
-                toString<span class="signature">(removeSignature<span class="signature-attributes">opt</span>, removeType<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {String}</span>
+                toString<span class="signature">(removeType<span class="signature-attributes">opt</span>, httpMethod<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {String}</span>
             
         </span>
     </h4>
@@ -872,47 +856,6 @@
             
 <tr class="deep-level-0">
   
-      <td class="name"><code>removeSignature</code></td>
-  
-
-  <td class="type">
-  
-      
-<span class="param-type">Boolean</span>
-
-
-  
-  </td>
-
-  
-      <td class="attributes">
-      
-          &lt;optional><br>
-      
-
-      
-
-      
-      </td>
-  
-
-  
-      <td class="default">
-      
-          false
-      
-      </td>
-  
-
-  <td class="description last"><p>If true, the JSON-stringified object will not have the signature property.</p></td>
-</tr>
-
-
-        
-
-            
-<tr class="deep-level-0">
-  
       <td class="name"><code>removeType</code></td>
   
 
@@ -946,6 +889,47 @@
   
 
   <td class="description last"><p>If true, the JSON-stringified object will not have the type property.</p></td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>httpMethod</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type"><a href="global.html#HTTP_METHODS">HTTP_METHODS</a></span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+          &lt;optional><br>
+      
+
+      
+
+      
+      </td>
+  
+
+  
+      <td class="default">
+      
+          null
+      
+      </td>
+  
+
+  <td class="description last"><p>Http method (defined in @see <a href="global.html#HTTP_METHODS">HTTP_METHODS</a> constants) that request the stringified object (used in transaction processor to handle the request).</p></td>
 </tr>
 
 

@@ -14,7 +14,7 @@ class BaseModel {
   /**
    * Returns the object as a JSON dictionary (without BaseModel.prototype).
    *
-   * @return {Object} JSON object containing the properties and values of the object.
+   * @returns {Object} JSON object containing the properties and values of the object.
    */
   toDictionary() {
     const dictionary = {};
@@ -33,7 +33,7 @@ class BaseModel {
    *
    * @param {Boolean} [removeType=true] - If true, the resulting object will not have the type property.
    *
-   * @return {Object} JSON object containing the properties and values of the object.
+   * @returns {Object} JSON object containing the properties and values of the object.
    */
   toObject(removeType = true) {
     const copy = _.cloneDeep(this);
@@ -47,7 +47,7 @@ class BaseModel {
    * @static
    * @param {Object} obj - Object whose properties will be sorted and returned.
    *
-   * @return {Object} JSON object containing the properties and values of the object.
+   * @returns {Object} JSON object containing the properties and values of the object.
    */
   static toSortedObject(obj) {
     return Object.keys(obj)
@@ -61,7 +61,7 @@ class BaseModel {
    * @param {Boolean} [removeType=true] - If true, the JSON-stringified object will not have the type property.
    * @param {HTTP_METHODS} [httpMethod=null] - Http method (defined in @see {@link HTTP_METHODS} constants) that request the stringified object (used in transaction processor to handle the request).
    *
-   * @return {String} JSON-stringified object.
+   * @returns {String} JSON-stringified object.
    */
   toString(removeType = true, httpMethod = null) {
     const dictionary = this.toDictionary();

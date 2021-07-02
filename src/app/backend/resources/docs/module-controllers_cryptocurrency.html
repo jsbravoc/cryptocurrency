@@ -66,7 +66,7 @@
             
             <nav>
                 
-                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Modules</h3><ul><li><a href="module-config.html">config</a></li><li><a href="module-controllers_common.html">controllers/common</a></li><li><a href="module-controllers_cryptocurrency.html">controllers/cryptocurrency</a></li><li><a href="module-controllers_users.html">controllers/users</a></li><li><a href="module-enforcer_cryptocurrency.html">enforcer/cryptocurrency</a></li><li><a href="module-routers_cryptocurrency.html">routers/cryptocurrency</a></li><li><a href="module-routers_dev_config.html">routers/dev/config</a></li><li><a href="module-routers_enforcer.html">routers/enforcer</a></li><li><a href="module-routers_users.html">routers/users</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-routers_cryptocurrency-cryptoRouter.html">cryptoRouter</a></li><li><a href="module-routers_dev_config-devConfig.html">devConfig</a></li><li><a href="module-routers_enforcer-enforcerRouter.html">enforcerRouter</a></li><li><a href="module-routers_users-usersRouter.html">usersRouter</a></li></ul><h3>Classes</h3><ul><li><a href="Asset.html">Asset</a></li><li><a href="BaseModel.html">BaseModel</a></li><li><a href="Permissions.html">Permissions</a></li><li><a href="Transaction.html">Transaction</a></li><li><a href="User.html">User</a></li></ul><h3>Global</h3><ul><li><a href="global.html#http">http</a></li><li><a href="global.html#HTTP_METHODS">HTTP_METHODS</a></li><li><a href="global.html#inputValidation">inputValidation</a></li><li><a href="global.html#normalizePort">normalizePort</a></li><li><a href="global.html#onError">onError</a></li><li><a href="global.html#port">port</a></li><li><a href="global.html#server">server</a></li><li><a href="global.html#TYPE">TYPE</a></li><li><a href="global.html#USER_TYPE">USER_TYPE</a></li><li><a href="global.html#validate">validate</a></li><li><a href="global.html#validateAssetExistence">validateAssetExistence</a></li><li><a href="global.html#validateExistingTransaction">validateExistingTransaction</a></li><li><a href="global.html#validatePendingTransaction">validatePendingTransaction</a></li><li><a href="global.html#validateTransactionAddress">validateTransactionAddress</a></li><li><a href="global.html#validateTransactionUpdateRequest">validateTransactionUpdateRequest</a></li><li><a href="global.html#validateUserCreation">validateUserCreation</a></li></ul></div>
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Modules</h3><ul><li><a href="module-config.html">config</a></li><li><a href="module-controllers_common.html">controllers/common</a></li><li><a href="module-controllers_cryptocurrency.html">controllers/cryptocurrency</a></li><li><a href="module-controllers_sawtooth.html">controllers/sawtooth</a></li><li><a href="module-controllers_users.html">controllers/users</a></li><li><a href="module-enforcer_cryptocurrency.html">enforcer/cryptocurrency</a></li><li><a href="module-routers_cryptocurrency.html">routers/cryptocurrency</a></li><li><a href="module-routers_dev_config.html">routers/dev/config</a></li><li><a href="module-routers_enforcer.html">routers/enforcer</a></li><li><a href="module-routers_users.html">routers/users</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-routers_cryptocurrency-cryptoRouter.html">cryptoRouter</a></li><li><a href="module-routers_dev_config-devConfig.html">devConfig</a></li><li><a href="module-routers_enforcer-enforcerRouter.html">enforcerRouter</a></li><li><a href="module-routers_users-usersRouter.html">usersRouter</a></li></ul><h3>Classes</h3><ul><li><a href="BaseModel.html">BaseModel</a></li><li><a href="Permissions.html">Permissions</a></li><li><a href="SawtoothBatch.html">SawtoothBatch</a></li><li><a href="SawtoothTransaction.html">SawtoothTransaction</a></li><li><a href="Transaction.html">Transaction</a></li><li><a href="User.html">User</a></li></ul><h3>Global</h3><ul><li><a href="global.html#http">http</a></li><li><a href="global.html#HTTP_METHODS">HTTP_METHODS</a></li><li><a href="global.html#inputValidation">inputValidation</a></li><li><a href="global.html#normalizePort">normalizePort</a></li><li><a href="global.html#onError">onError</a></li><li><a href="global.html#port">port</a></li><li><a href="global.html#server">server</a></li><li><a href="global.html#TYPE">TYPE</a></li><li><a href="global.html#USER_TYPE">USER_TYPE</a></li><li><a href="global.html#validate">validate</a></li><li><a href="global.html#validateExistingTransaction">validateExistingTransaction</a></li><li><a href="global.html#validateObjExistence">validateObjExistence</a></li><li><a href="global.html#validatePendingTransaction">validatePendingTransaction</a></li><li><a href="global.html#validateTransactionAddress">validateTransactionAddress</a></li><li><a href="global.html#validateTransactionUpdateRequest">validateTransactionUpdateRequest</a></li><li><a href="global.html#validateUserCreation">validateUserCreation</a></li></ul></div>
                 
             </nav>
         </div>
@@ -325,7 +325,7 @@
         <p class="tag-source">
             <a href="controllers_cryptocurrency.js.html" class="button">View Source</a>
             <span>
-                <a href="controllers_cryptocurrency.js.html">controllers/cryptocurrency.js</a>, <a href="controllers_cryptocurrency.js.html#line61">line 61</a>
+                <a href="controllers_cryptocurrency.js.html">controllers/cryptocurrency.js</a>, <a href="controllers_cryptocurrency.js.html#line57">line 57</a>
             </span>
         </p>
     
@@ -382,8 +382,8 @@
 
 
     
-    <h4 class="name" id="~createSignature">
-        <a class="href-link" href="#~createSignature">#</a>
+    <h4 class="name" id="~createAddress">
+        <a class="href-link" href="#~createAddress">#</a>
         
             
                 <span class='tag'>inner</span>
@@ -391,18 +391,18 @@
         
         <span class="code-name">
             
-                createSignature<span class="signature">(signature, creationDate<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {String}</span>
+                createAddress<span class="signature">(signature, creationDate<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {String}</span>
             
         </span>
     </h4>
     
 
     
-    <p class="summary">Creates a collision-free signature for a transaction.</p>
+    <p class="summary">Creates a collision-free address for a transaction.</p>
     
     
     <div class="description">
-        <p>Creates a collision-free signature for a transaction.</p>
+        <p>Creates a collision-free address for a transaction.</p>
     </div>
     
 
@@ -549,7 +549,7 @@
         <p class="tag-source">
             <a href="controllers_cryptocurrency.js.html" class="button">View Source</a>
             <span>
-                <a href="controllers_cryptocurrency.js.html">controllers/cryptocurrency.js</a>, <a href="controllers_cryptocurrency.js.html#line35">line 35</a>
+                <a href="controllers_cryptocurrency.js.html">controllers/cryptocurrency.js</a>, <a href="controllers_cryptocurrency.js.html#line36">line 36</a>
             </span>
         </p>
     
@@ -580,7 +580,7 @@
 
 <div class="columns">
     
-    <div class='param-desc column is-7'><p>New signature that avoids collisions.</p></div>
+    <div class='param-desc column is-7'><p>New address that avoids collisions.</p></div>
     
     
     <div class='column is-5 has-text-left'>
@@ -827,7 +827,7 @@
         <p class="tag-source">
             <a href="controllers_cryptocurrency.js.html" class="button">View Source</a>
             <span>
-                <a href="controllers_cryptocurrency.js.html">controllers/cryptocurrency.js</a>, <a href="controllers_cryptocurrency.js.html#line282">line 282</a>
+                <a href="controllers_cryptocurrency.js.html">controllers/cryptocurrency.js</a>, <a href="controllers_cryptocurrency.js.html#line291">line 291</a>
             </span>
         </p>
     
@@ -1079,7 +1079,7 @@
         <p class="tag-source">
             <a href="controllers_cryptocurrency.js.html" class="button">View Source</a>
             <span>
-                <a href="controllers_cryptocurrency.js.html">controllers/cryptocurrency.js</a>, <a href="controllers_cryptocurrency.js.html#line137">line 137</a>
+                <a href="controllers_cryptocurrency.js.html">controllers/cryptocurrency.js</a>, <a href="controllers_cryptocurrency.js.html#line131">line 131</a>
             </span>
         </p>
     
@@ -1120,7 +1120,7 @@
         
         <span class="code-name">
             
-                findTransaction<span class="signature">(address, removeSignature<span class="signature-attributes">opt</span>, removeType<span class="signature-attributes">opt</span>, res<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Promise.&lt;(<a href="Transaction.html">Transaction</a>|null)>}</span>
+                findTransaction<span class="signature">(address, removeType<span class="signature-attributes">opt</span>, res<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Promise.&lt;(<a href="Transaction.html">Transaction</a>|null)>}</span>
             
         </span>
     </h4>
@@ -1202,47 +1202,6 @@
   
 
   <td class="description last"><p>Address of the transaction.</p></td>
-</tr>
-
-
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>removeSignature</code></td>
-  
-
-  <td class="type">
-  
-      
-<span class="param-type">Boolean</span>
-
-
-  
-  </td>
-
-  
-      <td class="attributes">
-      
-          &lt;optional><br>
-      
-
-      
-
-      
-      </td>
-  
-
-  
-      <td class="default">
-      
-          false
-      
-      </td>
-  
-
-  <td class="description last"><p>Boolean that indicates if the signature should be removed.</p></td>
 </tr>
 
 
@@ -1608,7 +1567,7 @@
         <p class="tag-source">
             <a href="controllers_cryptocurrency.js.html" class="button">View Source</a>
             <span>
-                <a href="controllers_cryptocurrency.js.html">controllers/cryptocurrency.js</a>, <a href="controllers_cryptocurrency.js.html#line76">line 76</a>
+                <a href="controllers_cryptocurrency.js.html">controllers/cryptocurrency.js</a>, <a href="controllers_cryptocurrency.js.html#line72">line 72</a>
             </span>
         </p>
     
@@ -1710,6 +1669,8 @@
             <th>Type</th>
 
             
+            <th>Attributes</th>
+            
 
             
 
@@ -1736,6 +1697,14 @@
   </td>
 
   
+      <td class="attributes">
+      
+
+      
+
+      
+      </td>
+  
 
   
 
@@ -1760,6 +1729,14 @@
   
   </td>
 
+  
+      <td class="attributes">
+      
+
+      
+
+      
+      </td>
   
 
   
@@ -1786,10 +1763,123 @@
   </td>
 
   
+      <td class="attributes">
+      
+
+      
+
+      
+      </td>
+  
 
   
 
   <td class="description last"><p>Transaction address to query.</p></td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>req.query.expand</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">Boolean</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+          &lt;optional><br>
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"><p>If true, supporting transactions will be expanded.</p></td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>req.query.simplifyTransaction</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">Boolean</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+          &lt;optional><br>
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"><p>If true, the transaction will be simplified.</p></td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>req.query.simplifySupportingTransactions</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">Boolean</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+          &lt;optional><br>
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"><p>If true, the supporting transactions will be simplified.</p></td>
 </tr>
 
 
@@ -1995,7 +2085,7 @@
             
 <tr class="deep-level-0">
   
-      <td class="name"><code>req.query.expanded</code></td>
+      <td class="name"><code>req.query.expand</code></td>
   
 
   <td class="type">
@@ -2021,7 +2111,7 @@
 
   
 
-  <td class="description last"><p>If true supporting transactions which be expanded.</p></td>
+  <td class="description last"><p>If true, supporting transactions will be expanded.</p></td>
 </tr>
 
 
@@ -2131,6 +2221,41 @@
 
 
         
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>req.query.simplifyTransaction</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">Boolean</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+          &lt;optional><br>
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"><p>If true, a simplified version of the transactions will be returned. (Note that is mutually exclusive with req.query.expand)</p></td>
+</tr>
+
+
+        
         </tbody>
     </table>
 </div>
@@ -2174,7 +2299,272 @@
         <p class="tag-source">
             <a href="controllers_cryptocurrency.js.html" class="button">View Source</a>
             <span>
-                <a href="controllers_cryptocurrency.js.html">controllers/cryptocurrency.js</a>, <a href="controllers_cryptocurrency.js.html#line201">line 201</a>
+                <a href="controllers_cryptocurrency.js.html">controllers/cryptocurrency.js</a>, <a href="controllers_cryptocurrency.js.html#line199">line 199</a>
+            </span>
+        </p>
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+            
+                <div class="member">
+
+
+    
+    <h4 class="name" id="~putTransaction">
+        <a class="href-link" href="#~putTransaction">#</a>
+        
+            
+                <span class='tag'>inner</span>
+            
+        
+        <span class="code-name">
+            
+                putTransaction<span class="signature">(req, res)</span><span class="type-signature"></span>
+            
+        </span>
+    </h4>
+    
+
+    
+    <p class="summary">Puts a transaction in the blockchain, updating the users involved in it.</p>
+    
+    
+    <div class="description">
+        <p>Puts a transaction in the blockchain, updating the users involved in it.</p>
+    </div>
+    
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+<div class="table-container">
+    <table class="params table">
+        <thead>
+        <tr>
+            
+            <th>Name</th>
+            
+
+            <th>Type</th>
+
+            
+            <th>Attributes</th>
+            
+
+            
+
+            <th class="last">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>req</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type"><a href="Transaction.html">Transaction</a></span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"><p>Express request object.</p></td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>res</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">Response</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"><p>Response object to handle Express request.</p></td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>req.params.address</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">String</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"><p>Transaction address to update.</p></td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>req.query.approve</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">Boolean</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+          &lt;optional><br>
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"><p>If true, the transaction will be approved, otherwise it will be rejected.</p></td>
+</tr>
+
+
+        
+        </tbody>
+    </table>
+</div>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+
+    
+
+    
+
+    
+        <p class="tag-source">
+            <a href="controllers_cryptocurrency.js.html" class="button">View Source</a>
+            <span>
+                <a href="controllers_cryptocurrency.js.html">controllers/cryptocurrency.js</a>, <a href="controllers_cryptocurrency.js.html#line362">line 362</a>
             </span>
         </p>
     
@@ -2439,7 +2829,7 @@
         <p class="tag-source">
             <a href="controllers_cryptocurrency.js.html" class="button">View Source</a>
             <span>
-                <a href="controllers_cryptocurrency.js.html">controllers/cryptocurrency.js</a>, <a href="controllers_cryptocurrency.js.html#line320">line 320</a>
+                <a href="controllers_cryptocurrency.js.html">controllers/cryptocurrency.js</a>, <a href="controllers_cryptocurrency.js.html#line323">line 323</a>
             </span>
         </p>
     

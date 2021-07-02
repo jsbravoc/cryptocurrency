@@ -18,7 +18,7 @@ const { ERRORS } = require("../utils/errors");
  *
  * @param {String} address - Address of the transaction.
  * @param {Response} res- Express.js response object, used to access locals.
- * @return {Promise<{transactionObj: Transaction, txObj: SawtoothTransaction}|null>}} Promise containing the transaction object and the updated transaction object if its validity has changed.
+ * @returns {Promise<{transactionObj: Transaction, txObj: SawtoothTransaction}|null>}} Promise containing the transaction object and the updated transaction object if its validity has changed.
  */
 const updateInvalidTransaction = (address, res) => {
   return findByAddress(TYPE.TRANSACTION, address, false, res).then(
@@ -51,7 +51,7 @@ const updateInvalidTransaction = (address, res) => {
  * @param {String} address - Address of the user.
  * @param {Array<String>} transactions - Array of known transactions that must be updated (used to limit blockchain queries to the minimum).
  * @param {Response} res- Express.js response object, used to access locals.
- * @return {Promise<Array<SawtoothTransaction>>} Promise containing a list of transactions to post to the blockchain.
+ * @returns {Promise<Array<SawtoothTransaction>>} Promise containing a list of transactions to post to the blockchain.
  */
 const updateInvalidUserTransactions = (address, transactions, res) => {
   return findByAddress(TYPE.USER, address, false, res).then((user) => {
@@ -115,7 +115,7 @@ const updateInvalidUserTransactions = (address, transactions, res) => {
  * @param  {Array<String>} [users] - Array of known users to hold (now) invalid transactions.
  * @param {Array<String>} [transactions] - Array of known transactions that must be updated (used to limit blockchain queries to the minimum).
  * @param {Response} res- Express.js response object, used to access locals.
- * @return {Promise<Error | {responseCode, msg, payload}>} Promise containing the response of the Sawtooth REST API call.
+ * @returns {Promise<Error | {responseCode, msg, payload}>} Promise containing the response of the Sawtooth REST API call.
  */
 const updateInvalidUsersTransactions = (
   source,

@@ -66,7 +66,7 @@
             
             <nav>
                 
-                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Modules</h3><ul><li><a href="module-config.html">config</a></li><li><a href="module-controllers_common.html">controllers/common</a></li><li><a href="module-controllers_cryptocurrency.html">controllers/cryptocurrency</a></li><li><a href="module-controllers_users.html">controllers/users</a></li><li><a href="module-enforcer_cryptocurrency.html">enforcer/cryptocurrency</a></li><li><a href="module-routers_cryptocurrency.html">routers/cryptocurrency</a></li><li><a href="module-routers_dev_config.html">routers/dev/config</a></li><li><a href="module-routers_enforcer.html">routers/enforcer</a></li><li><a href="module-routers_users.html">routers/users</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-routers_cryptocurrency-cryptoRouter.html">cryptoRouter</a></li><li><a href="module-routers_dev_config-devConfig.html">devConfig</a></li><li><a href="module-routers_enforcer-enforcerRouter.html">enforcerRouter</a></li><li><a href="module-routers_users-usersRouter.html">usersRouter</a></li></ul><h3>Classes</h3><ul><li><a href="Asset.html">Asset</a></li><li><a href="BaseModel.html">BaseModel</a></li><li><a href="Permissions.html">Permissions</a></li><li><a href="Transaction.html">Transaction</a></li><li><a href="User.html">User</a></li></ul><h3>Global</h3><ul><li><a href="global.html#http">http</a></li><li><a href="global.html#HTTP_METHODS">HTTP_METHODS</a></li><li><a href="global.html#inputValidation">inputValidation</a></li><li><a href="global.html#normalizePort">normalizePort</a></li><li><a href="global.html#onError">onError</a></li><li><a href="global.html#port">port</a></li><li><a href="global.html#server">server</a></li><li><a href="global.html#TYPE">TYPE</a></li><li><a href="global.html#USER_TYPE">USER_TYPE</a></li><li><a href="global.html#validate">validate</a></li><li><a href="global.html#validateAssetExistence">validateAssetExistence</a></li><li><a href="global.html#validateExistingTransaction">validateExistingTransaction</a></li><li><a href="global.html#validatePendingTransaction">validatePendingTransaction</a></li><li><a href="global.html#validateTransactionAddress">validateTransactionAddress</a></li><li><a href="global.html#validateTransactionUpdateRequest">validateTransactionUpdateRequest</a></li><li><a href="global.html#validateUserCreation">validateUserCreation</a></li></ul></div>
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Modules</h3><ul><li><a href="module-config.html">config</a></li><li><a href="module-controllers_common.html">controllers/common</a></li><li><a href="module-controllers_cryptocurrency.html">controllers/cryptocurrency</a></li><li><a href="module-controllers_sawtooth.html">controllers/sawtooth</a></li><li><a href="module-controllers_users.html">controllers/users</a></li><li><a href="module-enforcer_cryptocurrency.html">enforcer/cryptocurrency</a></li><li><a href="module-routers_cryptocurrency.html">routers/cryptocurrency</a></li><li><a href="module-routers_dev_config.html">routers/dev/config</a></li><li><a href="module-routers_enforcer.html">routers/enforcer</a></li><li><a href="module-routers_users.html">routers/users</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-routers_cryptocurrency-cryptoRouter.html">cryptoRouter</a></li><li><a href="module-routers_dev_config-devConfig.html">devConfig</a></li><li><a href="module-routers_enforcer-enforcerRouter.html">enforcerRouter</a></li><li><a href="module-routers_users-usersRouter.html">usersRouter</a></li></ul><h3>Classes</h3><ul><li><a href="BaseModel.html">BaseModel</a></li><li><a href="Permissions.html">Permissions</a></li><li><a href="SawtoothBatch.html">SawtoothBatch</a></li><li><a href="SawtoothTransaction.html">SawtoothTransaction</a></li><li><a href="Transaction.html">Transaction</a></li><li><a href="User.html">User</a></li></ul><h3>Global</h3><ul><li><a href="global.html#http">http</a></li><li><a href="global.html#HTTP_METHODS">HTTP_METHODS</a></li><li><a href="global.html#inputValidation">inputValidation</a></li><li><a href="global.html#normalizePort">normalizePort</a></li><li><a href="global.html#onError">onError</a></li><li><a href="global.html#port">port</a></li><li><a href="global.html#server">server</a></li><li><a href="global.html#TYPE">TYPE</a></li><li><a href="global.html#USER_TYPE">USER_TYPE</a></li><li><a href="global.html#validate">validate</a></li><li><a href="global.html#validateExistingTransaction">validateExistingTransaction</a></li><li><a href="global.html#validateObjExistence">validateObjExistence</a></li><li><a href="global.html#validatePendingTransaction">validatePendingTransaction</a></li><li><a href="global.html#validateTransactionAddress">validateTransactionAddress</a></li><li><a href="global.html#validateTransactionUpdateRequest">validateTransactionUpdateRequest</a></li><li><a href="global.html#validateUserCreation">validateUserCreation</a></li></ul></div>
                 
             </nav>
         </div>
@@ -203,8 +203,8 @@
 
 
     
-    <h4 class="name" id="~_putAsset">
-        <a class="href-link" href="#~_putAsset">#</a>
+    <h4 class="name" id="~_putObject">
+        <a class="href-link" href="#~_putObject">#</a>
         
             
                 <span class='tag'>inner</span>
@@ -212,18 +212,18 @@
         
         <span class="code-name">
             
-                _putAsset<span class="signature">(type, httpMethod, source, object)</span><span class="type-signature"> &rarr; {Promise.&lt;({responseCode, msg, payload}|Error)>}</span>
+                _putObject<span class="signature">(type, httpMethod, source, object)</span><span class="type-signature"> &rarr; {Promise.&lt;({responseCode, msg, payload}|Error)>}</span>
             
         </span>
     </h4>
     
 
     
-    <p class="summary">Puts an asset in the blockchain.</p>
+    <p class="summary">Puts an transaction in the blockchain.</p>
     
     
     <div class="description">
-        <p>Puts an asset in the blockchain.</p>
+        <p>Puts an transaction in the blockchain.</p>
     </div>
     
 
@@ -277,7 +277,7 @@
 
   
 
-  <td class="description last"><p>Type of asset, such as TRANSACTION or USER (@see <a href="global.html#TYPE">TYPE</a>).</p></td>
+  <td class="description last"><p>Type of transaction, such as TRANSACTION or USER (@see <a href="global.html#TYPE">TYPE</a>).</p></td>
 </tr>
 
 
@@ -355,7 +355,7 @@
 
   
 
-  <td class="description last"><p>Asset object.</p></td>
+  <td class="description last"><p>Transaction object.</p></td>
 </tr>
 
 
@@ -403,7 +403,7 @@
         <p class="tag-source">
             <a href="controllers_common.js.html" class="button">View Source</a>
             <span>
-                <a href="controllers_common.js.html">controllers/common.js</a>, <a href="controllers_common.js.html#line257">line 257</a>
+                <a href="controllers_common.js.html">controllers/common.js</a>, <a href="controllers_common.js.html#line342">line 342</a>
             </span>
         </p>
     
@@ -460,238 +460,6 @@
 
 
     
-    <h4 class="name" id="~buildAssetTransaction">
-        <a class="href-link" href="#~buildAssetTransaction">#</a>
-        
-            
-                <span class='tag'>inner</span>
-            
-        
-        <span class="code-name">
-            
-                buildAssetTransaction<span class="signature">(type, httpMethod, object)</span><span class="type-signature"> &rarr; {<a href="Asset.html">Asset</a>}</span>
-            
-        </span>
-    </h4>
-    
-
-    
-    <p class="summary">Builds a transaction of an asset (User, Transaction, etc).</p>
-    
-    
-    <div class="description">
-        <p>Builds a transaction of an asset (User, Transaction, etc).</p>
-    </div>
-    
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-<div class="table-container">
-    <table class="params table">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
-
-            <th>Type</th>
-
-            
-
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>type</code></td>
-  
-
-  <td class="type">
-  
-      
-<span class="param-type">String</span>
-
-
-  
-  </td>
-
-  
-
-  
-
-  <td class="description last"><p>Type of asset, such as TRANSACTION or USER (@see <a href="global.html#TYPE">TYPE</a>).</p></td>
-</tr>
-
-
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>httpMethod</code></td>
-  
-
-  <td class="type">
-  
-      
-<span class="param-type"><a href="global.html#HTTP_METHODS">HTTP_METHODS</a></span>
-
-
-  
-  </td>
-
-  
-
-  
-
-  <td class="description last"><p>PUT or POST (@see <a href="global.html#HTTP_METHODS">HTTP_METHODS</a>).</p></td>
-</tr>
-
-
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>object</code></td>
-  
-
-  <td class="type">
-  
-      
-<span class="param-type"><a href="User.html">User</a></span>
-|
-
-<span class="param-type"><a href="Transaction.html">Transaction</a></span>
-
-
-  
-  </td>
-
-  
-
-  
-
-  <td class="description last"><p>Asset object, such as <a href="User.html">User</a>, <a href="Transaction.html">Transaction</a>.</p></td>
-</tr>
-
-
-        
-        </tbody>
-    </table>
-</div>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    
-
-    
-
-    
-
-    
-        <p class="tag-source">
-            <a href="controllers_common.js.html" class="button">View Source</a>
-            <span>
-                <a href="controllers_common.js.html">controllers/common.js</a>, <a href="controllers_common.js.html#line314">line 314</a>
-            </span>
-        </p>
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <div class='columns method-parameter'>
-        <div class="column is-2"><label>Returns:</label></div>
-        <div class="column is-10">
-            
-                    
-
-<div class="columns">
-    
-    <div class='param-desc column is-7'><p>Asset (namely a transaction) of the Sawtooth REST API.</p></div>
-    
-    
-    <div class='column is-5 has-text-left'>
-        <label>Type: </label>
-        
-<span class="param-type"><a href="Asset.html">Asset</a></span>
-
-
-    </div>
-    
-</div>
-
-                
-        </div>
-    </div>
-
-
-
-
-</div>
-            
-                <div class="member">
-
-
-    
     <h4 class="name" id="~buildBatch">
         <a class="href-link" href="#~buildBatch">#</a>
         
@@ -708,11 +476,11 @@
     
 
     
-    <p class="summary">Creates an array of assets (namely transactions) for the Sawtooth REST API.</p>
+    <p class="summary">Creates an array of transactions (namely batches) for the Sawtooth REST API.</p>
     
     
     <div class="description">
-        <p>Creates an array of assets (namely transactions) for the Sawtooth REST API.</p>
+        <p>Creates an array of transactions (namely batches) for the Sawtooth REST API.</p>
     </div>
     
 
@@ -864,7 +632,7 @@
         <p class="tag-source">
             <a href="controllers_common.js.html" class="button">View Source</a>
             <span>
-                <a href="controllers_common.js.html">controllers/common.js</a>, <a href="controllers_common.js.html#line232">line 232</a>
+                <a href="controllers_common.js.html">controllers/common.js</a>, <a href="controllers_common.js.html#line317">line 317</a>
             </span>
         </p>
     
@@ -895,7 +663,7 @@
 
 <div class="columns">
     
-    <div class='param-desc column is-7'><p>Array of assets (namely transactions) for the Sawtooth REST API.</p></div>
+    <div class='param-desc column is-7'><p>Array of transactions (namely Batches) for the Sawtooth REST API.</p></div>
     
     
     <div class='column is-5 has-text-left'>
@@ -921,8 +689,8 @@
 
 
     
-    <h4 class="name" id="~findAllAssets">
-        <a class="href-link" href="#~findAllAssets">#</a>
+    <h4 class="name" id="~buildObjectTransaction">
+        <a class="href-link" href="#~buildObjectTransaction">#</a>
         
             
                 <span class='tag'>inner</span>
@@ -930,18 +698,623 @@
         
         <span class="code-name">
             
-                findAllAssets<span class="signature">(type, source, limit<span class="signature-attributes">opt</span>, removeSignature<span class="signature-attributes">opt</span>, removeType<span class="signature-attributes">opt</span>, res<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Promise.&lt;(Array.&lt;(<a href="Transaction.html">Transaction</a>|<a href="User.html">User</a>)>|Error)>}</span>
+                buildObjectTransaction<span class="signature">(type, httpMethod, object)</span><span class="type-signature"> &rarr; {<a href="SawtoothTransaction.html">SawtoothTransaction</a>}</span>
             
         </span>
     </h4>
     
 
     
-    <p class="summary">Finds and returns all assets of a type.</p>
+    <p class="summary">Builds a transaction of an object (User, Transaction, etc).</p>
     
     
     <div class="description">
-        <p>Finds and returns all assets of a type.</p>
+        <p>Builds a transaction of an object (User, Transaction, etc).</p>
+    </div>
+    
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+<div class="table-container">
+    <table class="params table">
+        <thead>
+        <tr>
+            
+            <th>Name</th>
+            
+
+            <th>Type</th>
+
+            
+
+            
+
+            <th class="last">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>type</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">String</span>
+
+
+  
+  </td>
+
+  
+
+  
+
+  <td class="description last"><p>Type of object, such as TRANSACTION or USER (@see <a href="global.html#TYPE">TYPE</a>).</p></td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>httpMethod</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type"><a href="global.html#HTTP_METHODS">HTTP_METHODS</a></span>
+
+
+  
+  </td>
+
+  
+
+  
+
+  <td class="description last"><p>PUT or POST (@see <a href="global.html#HTTP_METHODS">HTTP_METHODS</a>).</p></td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>object</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type"><a href="User.html">User</a></span>
+|
+
+<span class="param-type"><a href="Transaction.html">Transaction</a></span>
+
+
+  
+  </td>
+
+  
+
+  
+
+  <td class="description last"><p>Transaction object, such as <a href="User.html">User</a>, <a href="Transaction.html">Transaction</a>.</p></td>
+</tr>
+
+
+        
+        </tbody>
+    </table>
+</div>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+
+    
+
+    
+
+    
+        <p class="tag-source">
+            <a href="controllers_common.js.html" class="button">View Source</a>
+            <span>
+                <a href="controllers_common.js.html">controllers/common.js</a>, <a href="controllers_common.js.html#line394">line 394</a>
+            </span>
+        </p>
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div class='columns method-parameter'>
+        <div class="column is-2"><label>Returns:</label></div>
+        <div class="column is-10">
+            
+                    
+
+<div class="columns">
+    
+    <div class='param-desc column is-7'><p>Transaction of the Sawtooth REST API.</p></div>
+    
+    
+    <div class='column is-5 has-text-left'>
+        <label>Type: </label>
+        
+<span class="param-type"><a href="SawtoothTransaction.html">SawtoothTransaction</a></span>
+
+
+    </div>
+    
+</div>
+
+                
+        </div>
+    </div>
+
+
+
+
+</div>
+            
+                <div class="member">
+
+
+    
+    <h4 class="name" id="~configRedisCache">
+        <a class="href-link" href="#~configRedisCache">#</a>
+        
+            
+                <span class='tag'>inner</span>
+            
+        
+        <span class="code-name">
+            
+                configRedisCache<span class="signature">(cacheManager, useRedisStore)</span><span class="type-signature"></span>
+            
+        </span>
+    </h4>
+    
+
+    
+    <p class="summary">Sets the redis cache store.</p>
+    
+    
+    <div class="description">
+        <p>Sets the redis cache store.</p>
+    </div>
+    
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+<div class="table-container">
+    <table class="params table">
+        <thead>
+        <tr>
+            
+            <th>Name</th>
+            
+
+            <th>Type</th>
+
+            
+
+            
+            <th>Default</th>
+            
+
+            <th class="last">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>cacheManager</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">cacheManager.Cache</span>
+|
+
+<span class="param-type">cacheManager.StoreConfig</span>
+
+
+  
+  </td>
+
+  
+
+  
+      <td class="default">
+      
+      </td>
+  
+
+  <td class="description last"><p>Redis cache manager.</p></td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>useRedisStore</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">Boolean</span>
+
+
+  
+  </td>
+
+  
+
+  
+      <td class="default">
+      
+          true
+      
+      </td>
+  
+
+  <td class="description last"><p>If false, redisCache can be set to any object.</p></td>
+</tr>
+
+
+        
+        </tbody>
+    </table>
+</div>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+
+    
+
+    
+
+    
+        <p class="tag-source">
+            <a href="controllers_common.js.html" class="button">View Source</a>
+            <span>
+                <a href="controllers_common.js.html">controllers/common.js</a>, <a href="controllers_common.js.html#line48">line 48</a>
+            </span>
+        </p>
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+            
+                <div class="member">
+
+
+    
+    <h4 class="name" id="~deleteObjectInCache">
+        <a class="href-link" href="#~deleteObjectInCache">#</a>
+        
+            
+                <span class='tag'>inner</span>
+            
+        
+        <span class="code-name">
+            
+                deleteObjectInCache<span class="signature">(type, address)</span><span class="type-signature"></span>
+            
+        </span>
+    </h4>
+    
+
+    
+    <p class="summary">Deletes an object from the redis cache store.</p>
+    
+    
+    <div class="description">
+        <p>Deletes an object from the redis cache store.</p>
+    </div>
+    
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+<div class="table-container">
+    <table class="params table">
+        <thead>
+        <tr>
+            
+            <th>Name</th>
+            
+
+            <th>Type</th>
+
+            
+
+            
+
+            <th class="last">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>type</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type"><a href="global.html#TYPE">TYPE</a></span>
+
+
+  
+  </td>
+
+  
+
+  
+
+  <td class="description last"><p>Type of the object.</p></td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>address</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">String</span>
+
+
+  
+  </td>
+
+  
+
+  
+
+  <td class="description last"><p>Address or txid of the object.</p></td>
+</tr>
+
+
+        
+        </tbody>
+    </table>
+</div>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+
+    
+
+    
+
+    
+        <p class="tag-source">
+            <a href="controllers_common.js.html" class="button">View Source</a>
+            <span>
+                <a href="controllers_common.js.html">controllers/common.js</a>, <a href="controllers_common.js.html#line109">line 109</a>
+            </span>
+        </p>
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+            
+                <div class="member">
+
+
+    
+    <h4 class="name" id="~findAllObjects">
+        <a class="href-link" href="#~findAllObjects">#</a>
+        
+            
+                <span class='tag'>inner</span>
+            
+        
+        <span class="code-name">
+            
+                findAllObjects<span class="signature">(type, source, limit<span class="signature-attributes">opt</span>, removeType<span class="signature-attributes">opt</span>, res<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Promise.&lt;(Array.&lt;(<a href="Transaction.html">Transaction</a>|<a href="User.html">User</a>)>|Error)>}</span>
+            
+        </span>
+    </h4>
+    
+
+    
+    <p class="summary">Finds and returns all transactions of a type.</p>
+    
+    
+    <div class="description">
+        <p>Finds and returns all transactions of a type.</p>
     </div>
     
 
@@ -989,7 +1362,7 @@
   <td class="type">
   
       
-<span class="param-type">String</span>
+<span class="param-type"><a href="global.html#TYPE">TYPE</a></span>
 
 
   
@@ -1011,7 +1384,7 @@
       </td>
   
 
-  <td class="description last"><p>Type of asset, such as TRANSACTION or USER (@see <a href="global.html#TYPE">TYPE</a>).</p></td>
+  <td class="description last"><p>Type of transaction, such as TRANSACTION or USER (@see <a href="global.html#TYPE">TYPE</a>).</p></td>
 </tr>
 
 
@@ -1089,48 +1462,7 @@
       </td>
   
 
-  <td class="description last"><p>Maximum number of assets to return.</p></td>
-</tr>
-
-
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>removeSignature</code></td>
-  
-
-  <td class="type">
-  
-      
-<span class="param-type">Boolean</span>
-
-
-  
-  </td>
-
-  
-      <td class="attributes">
-      
-          &lt;optional><br>
-      
-
-      
-
-      
-      </td>
-  
-
-  
-      <td class="default">
-      
-          false
-      
-      </td>
-  
-
-  <td class="description last"><p>Boolean that indicates if the signature should be removed.</p></td>
+  <td class="description last"><p>Maximum number of transactions to return.</p></td>
 </tr>
 
 
@@ -1260,7 +1592,7 @@
         <p class="tag-source">
             <a href="controllers_common.js.html" class="button">View Source</a>
             <span>
-                <a href="controllers_common.js.html">controllers/common.js</a>, <a href="controllers_common.js.html#line157">line 157</a>
+                <a href="controllers_common.js.html">controllers/common.js</a>, <a href="controllers_common.js.html#line245">line 245</a>
             </span>
         </p>
     
@@ -1292,7 +1624,7 @@
 <div class="columns">
     
     <div class='param-desc column is-7'><ul>
-<li>Promise of the assets returned.</li>
+<li>Promise of the object array returned by the Sawtooth API.</li>
 </ul></div>
     
     
@@ -1328,18 +1660,18 @@
         
         <span class="code-name">
             
-                findByAddress<span class="signature">(type, txid, removeSignature<span class="signature-attributes">opt</span>, removeType<span class="signature-attributes">opt</span>, res<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Promise.&lt;(<a href="Transaction.html">Transaction</a>|<a href="User.html">User</a>|null)>}</span>
+                findByAddress<span class="signature">(type, txid, removeType<span class="signature-attributes">opt</span>, res<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Promise.&lt;(<a href="Transaction.html">Transaction</a>|<a href="User.html">User</a>|null)>}</span>
             
         </span>
     </h4>
     
 
     
-    <p class="summary">Finds and returns an asset in the blockchain.</p>
+    <p class="summary">Finds and returns a transaction in the blockchain.</p>
     
     
     <div class="description">
-        <p>Finds and returns an asset in the blockchain.</p>
+        <p>Finds and returns a transaction in the blockchain.</p>
     </div>
     
 
@@ -1409,7 +1741,7 @@
       </td>
   
 
-  <td class="description last"><p>Type of asset, such as TRANSACTION or USER (<a href="global.html#TYPE">TYPE</a>).</p></td>
+  <td class="description last"><p>Type of transaction stored in the blockchain, such as TRANSACTION or USER (<a href="global.html#TYPE">TYPE</a>).</p></td>
 </tr>
 
 
@@ -1446,48 +1778,7 @@
       </td>
   
 
-  <td class="description last"><p>Asset unique identification (before calculated address).</p></td>
-</tr>
-
-
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>removeSignature</code></td>
-  
-
-  <td class="type">
-  
-      
-<span class="param-type">Boolean</span>
-
-
-  
-  </td>
-
-  
-      <td class="attributes">
-      
-          &lt;optional><br>
-      
-
-      
-
-      
-      </td>
-  
-
-  
-      <td class="default">
-      
-          false
-      
-      </td>
-  
-
-  <td class="description last"><p>Boolean that indicates if the signature should be removed.</p></td>
+  <td class="description last"><p>Transaction unique identification (before calculated address).</p></td>
 </tr>
 
 
@@ -1617,7 +1908,7 @@
         <p class="tag-source">
             <a href="controllers_common.js.html" class="button">View Source</a>
             <span>
-                <a href="controllers_common.js.html">controllers/common.js</a>, <a href="controllers_common.js.html#line74">line 74</a>
+                <a href="controllers_common.js.html">controllers/common.js</a>, <a href="controllers_common.js.html#line164">line 164</a>
             </span>
         </p>
     
@@ -1648,7 +1939,7 @@
 
 <div class="columns">
     
-    <div class='param-desc column is-7'><p>Promise of the asset if found or null if not found.</p></div>
+    <div class='param-desc column is-7'><p>Promise of the object if found or null if not found.</p></div>
     
     
     <div class='column is-5 has-text-left'>
@@ -1690,11 +1981,11 @@
     
 
     
-    <p class="summary"><p>Generates the address of a key with a predefined length</p>.</p>
+    <p class="summary">Generates the address of a key with a predefined length.</p>
     
     
     <div class="description">
-        <p>Generates the address of a key with a predefined length</p>
+        <p>Generates the address of a key with a predefined length.</p>
     </div>
     
 
@@ -1853,7 +2144,7 @@
         <p class="tag-source">
             <a href="controllers_common.js.html" class="button">View Source</a>
             <span>
-                <a href="controllers_common.js.html">controllers/common.js</a>, <a href="controllers_common.js.html#line38">line 38</a>
+                <a href="controllers_common.js.html">controllers/common.js</a>, <a href="controllers_common.js.html#line129">line 129</a>
             </span>
         </p>
     
@@ -1910,6 +2201,210 @@
 
 
     
+    <h4 class="name" id="~getRedisCacheKey">
+        <a class="href-link" href="#~getRedisCacheKey">#</a>
+        
+            
+                <span class='tag'>inner</span>
+            
+        
+        <span class="code-name">
+            
+                getRedisCacheKey<span class="signature">(type, address)</span><span class="type-signature"> &rarr; {String}</span>
+            
+        </span>
+    </h4>
+    
+
+    
+    <p class="summary">Returns the redis cache key for the given object.</p>
+    
+    
+    <div class="description">
+        <p>Returns the redis cache key for the given object.</p>
+    </div>
+    
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+<div class="table-container">
+    <table class="params table">
+        <thead>
+        <tr>
+            
+            <th>Name</th>
+            
+
+            <th>Type</th>
+
+            
+
+            
+
+            <th class="last">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>type</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type"><a href="global.html#TYPE">TYPE</a></span>
+
+
+  
+  </td>
+
+  
+
+  
+
+  <td class="description last"><p>Type of the object.</p></td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>address</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">String</span>
+
+
+  
+  </td>
+
+  
+
+  
+
+  <td class="description last"><p>Address or txid of the object.</p></td>
+</tr>
+
+
+        
+        </tbody>
+    </table>
+</div>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+
+    
+
+    
+
+    
+        <p class="tag-source">
+            <a href="controllers_common.js.html" class="button">View Source</a>
+            <span>
+                <a href="controllers_common.js.html">controllers/common.js</a>, <a href="controllers_common.js.html#line69">line 69</a>
+            </span>
+        </p>
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div class='columns method-parameter'>
+        <div class="column is-2"><label>Returns:</label></div>
+        <div class="column is-10">
+            
+                    
+
+<div class="columns">
+    
+    <div class='param-desc column is-7'><p>The redis cache key.</p></div>
+    
+    
+    <div class='column is-5 has-text-left'>
+        <label>Type: </label>
+        
+<span class="param-type">String</span>
+
+
+    </div>
+    
+</div>
+
+                
+        </div>
+    </div>
+
+
+
+
+</div>
+            
+                <div class="member">
+
+
+    
     <h4 class="name" id="~getTransactionAddress">
         <a class="href-link" href="#~getTransactionAddress">#</a>
         
@@ -1926,11 +2421,11 @@
     
 
     
-    <p class="summary"><p>Generates the address of a transaction</p>.</p>
+    <p class="summary">Generates the address of a transaction.</p>
     
     
     <div class="description">
-        <p>Generates the address of a transaction</p>
+        <p>Generates the address of a transaction.</p>
     </div>
     
 
@@ -2032,7 +2527,7 @@
         <p class="tag-source">
             <a href="controllers_common.js.html" class="button">View Source</a>
             <span>
-                <a href="controllers_common.js.html">controllers/common.js</a>, <a href="controllers_common.js.html#line48">line 48</a>
+                <a href="controllers_common.js.html">controllers/common.js</a>, <a href="controllers_common.js.html#line139">line 139</a>
             </span>
         </p>
     
@@ -2211,7 +2706,7 @@
         <p class="tag-source">
             <a href="controllers_common.js.html" class="button">View Source</a>
             <span>
-                <a href="controllers_common.js.html">controllers/common.js</a>, <a href="controllers_common.js.html#line57">line 57</a>
+                <a href="controllers_common.js.html">controllers/common.js</a>, <a href="controllers_common.js.html#line148">line 148</a>
             </span>
         </p>
     
@@ -2284,11 +2779,11 @@
     
 
     
-    <p class="summary"><p>Generates the sha512 of a string</p>.</p>
+    <p class="summary">Generates the sha512 of a string.</p>
     
     
     <div class="description">
-        <p>Generates the sha512 of a string</p>
+        <p>Generates the sha512 of a string.</p>
     </div>
     
 
@@ -2390,7 +2885,7 @@
         <p class="tag-source">
             <a href="controllers_common.js.html" class="button">View Source</a>
             <span>
-                <a href="controllers_common.js.html">controllers/common.js</a>, <a href="controllers_common.js.html#line29">line 29</a>
+                <a href="controllers_common.js.html">controllers/common.js</a>, <a href="controllers_common.js.html#line120">line 120</a>
             </span>
         </p>
     
@@ -2447,8 +2942,8 @@
 
 
     
-    <h4 class="name" id="~putAsset">
-        <a class="href-link" href="#~putAsset">#</a>
+    <h4 class="name" id="~putBatch">
+        <a class="href-link" href="#~putBatch">#</a>
         
             
                 <span class='tag'>inner</span>
@@ -2456,18 +2951,247 @@
         
         <span class="code-name">
             
-                putAsset<span class="signature">(type, httpMethod, source, req, res)</span><span class="type-signature"> &rarr; {Promise.&lt;({responseCode, msg, payload}|Error)>}</span>
+                putBatch<span class="signature">(httpMethod, source, arrayOfObjects)</span><span class="type-signature"> &rarr; {Promise.&lt;({responseCode, msg, payload}|Error)>}</span>
             
         </span>
     </h4>
     
 
     
-    <p class="summary">Puts an asset in the blockchain.</p>
+    <p class="summary">Puts a batch of transactions into the blockchain.</p>
     
     
     <div class="description">
-        <p>Puts an asset in the blockchain.</p>
+        <p>Puts a batch of transactions into the blockchain.</p>
+    </div>
+    
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+<div class="table-container">
+    <table class="params table">
+        <thead>
+        <tr>
+            
+            <th>Name</th>
+            
+
+            <th>Type</th>
+
+            
+
+            
+
+            <th class="last">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>httpMethod</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type"><a href="global.html#HTTP_METHODS">HTTP_METHODS</a></span>
+
+
+  
+  </td>
+
+  
+
+  
+
+  <td class="description last"><p>PUT or POST (@see <a href="global.html#HTTP_METHODS">HTTP_METHODS</a>).</p></td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>source</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">String</span>
+
+
+  
+  </td>
+
+  
+
+  
+
+  <td class="description last"><p>Endpoint source that invoked function (used for logging).</p></td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>arrayOfObjects</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">Array.&lt;<a href="SawtoothTransaction.html">SawtoothTransaction</a>></span>
+
+
+  
+  </td>
+
+  
+
+  
+
+  <td class="description last"><p>Array of objects to be inserted into the blockchain.</p></td>
+</tr>
+
+
+        
+        </tbody>
+    </table>
+</div>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+
+    
+
+    
+
+    
+        <p class="tag-source">
+            <a href="controllers_common.js.html" class="button">View Source</a>
+            <span>
+                <a href="controllers_common.js.html">controllers/common.js</a>, <a href="controllers_common.js.html#line429">line 429</a>
+            </span>
+        </p>
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div class='columns method-parameter'>
+        <div class="column is-2"><label>Returns:</label></div>
+        <div class="column is-10">
+            
+                    
+
+<div class="columns">
+    
+    <div class='param-desc column is-7'><p>Promise of the batch post request. If successfully resolved, contains responseCode, msg, payload</p></div>
+    
+    
+    <div class='column is-5 has-text-left'>
+        <label>Type: </label>
+        
+<span class="param-type">Promise.&lt;({responseCode, msg, payload}|Error)></span>
+
+
+    </div>
+    
+</div>
+
+                
+        </div>
+    </div>
+
+
+
+
+</div>
+            
+                <div class="member">
+
+
+    
+    <h4 class="name" id="~putObject">
+        <a class="href-link" href="#~putObject">#</a>
+        
+            
+                <span class='tag'>inner</span>
+            
+        
+        <span class="code-name">
+            
+                putObject<span class="signature">(type, httpMethod, source, req, res)</span><span class="type-signature"> &rarr; {Promise.&lt;({responseCode, msg, payload}|Error)>}</span>
+            
+        </span>
+    </h4>
+    
+
+    
+    <p class="summary">Puts an object in the blockchain.</p>
+    
+    
+    <div class="description">
+        <p>Puts an object in the blockchain.</p>
     </div>
     
 
@@ -2511,7 +3235,7 @@
   <td class="type">
   
       
-<span class="param-type">String</span>
+<span class="param-type"><a href="global.html#TYPE">TYPE</a></span>
 
 
   
@@ -2521,7 +3245,7 @@
 
   
 
-  <td class="description last"><p>Type of asset, such as TRANSACTION or USER (@see <a href="global.html#TYPE">TYPE</a>).</p></td>
+  <td class="description last"><p>Type of object, such as TRANSACTION or USER (@see <a href="global.html#TYPE">TYPE</a>).</p></td>
 </tr>
 
 
@@ -2669,7 +3393,7 @@
         <p class="tag-source">
             <a href="controllers_common.js.html" class="button">View Source</a>
             <span>
-                <a href="controllers_common.js.html">controllers/common.js</a>, <a href="controllers_common.js.html#line390">line 390</a>
+                <a href="controllers_common.js.html">controllers/common.js</a>, <a href="controllers_common.js.html#line471">line 471</a>
             </span>
         </p>
     
@@ -2726,8 +3450,8 @@
 
 
     
-    <h4 class="name" id="~putBatch">
-        <a class="href-link" href="#~putBatch">#</a>
+    <h4 class="name" id="~retrieveObjectInCache">
+        <a class="href-link" href="#~retrieveObjectInCache">#</a>
         
             
                 <span class='tag'>inner</span>
@@ -2735,18 +3459,18 @@
         
         <span class="code-name">
             
-                putBatch<span class="signature">(httpMethod, source, arrayOfAssets)</span><span class="type-signature"> &rarr; {Promise.&lt;({responseCode, msg, payload}|Error)>}</span>
+                retrieveObjectInCache<span class="signature">(type, address)</span><span class="type-signature"> &rarr; {<a href="Transaction.html">Transaction</a>|<a href="User.html">User</a>|undefined}</span>
             
         </span>
     </h4>
     
 
     
-    <p class="summary">Puts a batch of assets into the blockchain.</p>
+    <p class="summary">Retrieves an object from the redis cache store.</p>
     
     
     <div class="description">
-        <p>Puts a batch of assets into the blockchain.</p>
+        <p>Retrieves an object from the redis cache store.</p>
     </div>
     
 
@@ -2784,13 +3508,13 @@
             
 <tr class="deep-level-0">
   
-      <td class="name"><code>httpMethod</code></td>
+      <td class="name"><code>type</code></td>
   
 
   <td class="type">
   
       
-<span class="param-type"><a href="global.html#HTTP_METHODS">HTTP_METHODS</a></span>
+<span class="param-type"><a href="global.html#TYPE">TYPE</a></span>
 
 
   
@@ -2800,7 +3524,7 @@
 
   
 
-  <td class="description last"><p>PUT or POST (@see <a href="global.html#HTTP_METHODS">HTTP_METHODS</a>).</p></td>
+  <td class="description last"><p>Type of the object.</p></td>
 </tr>
 
 
@@ -2809,7 +3533,7 @@
             
 <tr class="deep-level-0">
   
-      <td class="name"><code>source</code></td>
+      <td class="name"><code>address</code></td>
   
 
   <td class="type">
@@ -2825,32 +3549,7 @@
 
   
 
-  <td class="description last"><p>Endpoint source that invoked function (used for logging).</p></td>
-</tr>
-
-
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>arrayOfAssets</code></td>
-  
-
-  <td class="type">
-  
-      
-<span class="param-type">Object</span>
-
-
-  
-  </td>
-
-  
-
-  
-
-  <td class="description last"><p>Array of assets to be inserted into the blockchain.</p></td>
+  <td class="description last"><p>Address or txid of the object.</p></td>
 </tr>
 
 
@@ -2898,7 +3597,7 @@
         <p class="tag-source">
             <a href="controllers_common.js.html" class="button">View Source</a>
             <span>
-                <a href="controllers_common.js.html">controllers/common.js</a>, <a href="controllers_common.js.html#line352">line 352</a>
+                <a href="controllers_common.js.html">controllers/common.js</a>, <a href="controllers_common.js.html#line95">line 95</a>
             </span>
         </p>
     
@@ -2929,13 +3628,19 @@
 
 <div class="columns">
     
-    <div class='param-desc column is-7'><p>Promise of the batch post request. If successfully resolved, contains responseCode, msg, payload</p></div>
+    <div class='param-desc column is-7'><p>Object retrieved from cache.</p></div>
     
     
     <div class='column is-5 has-text-left'>
         <label>Type: </label>
         
-<span class="param-type">Promise.&lt;({responseCode, msg, payload}|Error)></span>
+<span class="param-type"><a href="Transaction.html">Transaction</a></span>
+|
+
+<span class="param-type"><a href="User.html">User</a></span>
+|
+
+<span class="param-type">undefined</span>
 
 
     </div>
@@ -2945,6 +3650,213 @@
                 
         </div>
     </div>
+
+
+
+
+</div>
+            
+                <div class="member">
+
+
+    
+    <h4 class="name" id="~storeObjectInCache">
+        <a class="href-link" href="#~storeObjectInCache">#</a>
+        
+            
+                <span class='tag'>inner</span>
+            
+        
+        <span class="code-name">
+            
+                storeObjectInCache<span class="signature">(type, address, object)</span><span class="type-signature"></span>
+            
+        </span>
+    </h4>
+    
+
+    
+    <p class="summary">Sets an object in the redis cache store.</p>
+    
+    
+    <div class="description">
+        <p>Sets an object in the redis cache store.</p>
+    </div>
+    
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+<div class="table-container">
+    <table class="params table">
+        <thead>
+        <tr>
+            
+            <th>Name</th>
+            
+
+            <th>Type</th>
+
+            
+
+            
+
+            <th class="last">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>type</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type"><a href="global.html#TYPE">TYPE</a></span>
+
+
+  
+  </td>
+
+  
+
+  
+
+  <td class="description last"><p>Type of the object.</p></td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>address</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">String</span>
+
+
+  
+  </td>
+
+  
+
+  
+
+  <td class="description last"><p>Address or txid of the object.</p></td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>object</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type"><a href="Transaction.html">Transaction</a></span>
+|
+
+<span class="param-type"><a href="User.html">User</a></span>
+
+
+  
+  </td>
+
+  
+
+  
+
+  <td class="description last"><p>Object to store.</p></td>
+</tr>
+
+
+        
+        </tbody>
+    </table>
+</div>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+
+    
+
+    
+
+    
+        <p class="tag-source">
+            <a href="controllers_common.js.html" class="button">View Source</a>
+            <span>
+                <a href="controllers_common.js.html">controllers/common.js</a>, <a href="controllers_common.js.html#line79">line 79</a>
+            </span>
+        </p>
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

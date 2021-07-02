@@ -9,17 +9,21 @@ const Permissions = require("./Permissions");
  * @constructor
  * @param {Object} user - The user object to create.
  * @param {String} user.address - The unique address of the user.
+ * @param {String} [user.active] - Represents if the user is active (can make transactions) or not.
+ * @param {String} user.balance - Represents the balance of the user.
  * @param {String} [user.role] - The role of the user.
  * @param {String} [user.description] - The description of the user.
  * @param {String} user.public_key - The public key of the user.
  * @param {Object} [user.return_to] - Key-value object containing actions and addresses of users who will receive the user's transactions upon the action execution (ex. user_retire: 'cs_department')
- * @param {Permissions} user.permissions - The permissions of the user.
+ * @param {Permissions} [user.permissions] - User permissions in the system.
+ * @param {Array<String>} [user.latest_transactions] - The latest transactions of the user.
+ * @param {Array<String>} [user.pending_transactions] - The pending transactions of the user.
  */
 class User extends BaseModel {
   constructor({
     address,
     role,
-    active,
+    active = true,
     balance,
     description,
     public_key,

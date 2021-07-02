@@ -4,16 +4,25 @@ services:
 
 #Sawtooth----------------------------------
 
-  settings-tp:
-    image: hyperledger/sawtooth-settings-tp:1.2.6
-    container_name: sawtooth-settings-tp-default
-    depends_on:
-      - validator
-    entrypoint: settings-tp -vv -C tcp://validator:4004
+  crypto-redis:
+    image: redis:latest
+    container_name: crypto-redis
+    ports:
+        - 6379:6379
+    volumes:
+        - ./config/redis.conf:/redis.conf
+    command: [ "redis-server", "/redis.conf" ]
 
-  validator:
+  crypto-settings-tp:
+    image: hyperledger/sawtooth-settings-tp:1.2.6
+    container_name: crypto-settings-tp
+    depends_on:
+      - crypto-validator
+    entrypoint: settings-tp -vv -C tcp://crypto-validator:4004
+
+  crypto-validator:
     image: hyperledger/sawtooth-validator:1.2.6
-    container_name: sawtooth-validator-default
+    container_name: crypto-validator
     expose:
       - 4004
     ports:
@@ -30,7 +39,7 @@ services:
           -o config.batch && \
         sawadm genesis config-genesis.batch config.batch && \
         sawtooth-validator -vv \
-          --endpoint tcp://validator:8800 \
+          --endpoint tcp://crypto-validator:8800 \
           --bind component:tcp://eth0:4004 \
           --bind network:tcp://eth0:8800 \
           --bind consensus:tcp://eth0:5050 \
@@ -39,26 +48,16 @@ services:
 
   devmode-engine:
     image: hyperledger/sawtooth-devmode-engine-rust:1.2.4
-    container_name: sawtooth-devmode-engine-rust-default
+    container_name: crypto-consensus-engine
     depends_on:
-      - validator
-    entrypoint: devmode-engine-rust -C tcp://validator:5050
+      - crypto-validator
+    entrypoint: devmode-engine-rust -C tcp://crypto-validator:5050
 
   rest-api:
     image: hyperledger/sawtooth-rest-api:1.2.6
-    container_name: sawtooth-rest-api-default
+    container_name: crypto-sawtooth-rest-api
     ports:
       - "8008:8008"
     depends_on:
-      - validator
-    entrypoint: sawtooth-rest-api -C tcp://validator:4004 --bind rest-api:8008
-
-  shell:
-    image: hyperledger/sawtooth-shell:1.2.6
-    container_name: sawtooth-shell-default
-    depends_on:
-      - rest-api
-    entrypoint: "bash -c \"\
-        sawtooth keygen && \
-        tail -f /dev/null \
-        \""
+      - crypto-validator
+    entrypoint: sawtooth-rest-api -C tcp://crypto-validator:4004 --bind rest-api:8008

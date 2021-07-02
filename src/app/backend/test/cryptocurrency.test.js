@@ -231,6 +231,7 @@ describe(`Cryptocurrency Test Suite`, () => {
     const createdUserCallback = ({ res, alias, callback }) => {
       const address = users[alias].address;
       return expect(res).to.satisfy((res) => {
+        console.log(res.body);
         createdVariables.transactions.user[address] = res.body;
         if (res.statusCode === 201) {
           console.log(
@@ -258,6 +259,7 @@ describe(`Cryptocurrency Test Suite`, () => {
         ? users[senderAlias].address
         : undefined;
       return expect(res).to.satisfy((res) => {
+        console.log(res.body);
         if (!senderAlias && recipientAddress)
           createdVariables.transactions.transaction[recipientAddress].coinbase =
             res.body;
@@ -1040,11 +1042,13 @@ describe(`Cryptocurrency Test Suite`, () => {
         });
         it("Pending valid thru transaction should be created successfully", (done) => {
           const now = new Date();
+          const creationDate = new Date();
           now.setSeconds(now.getSeconds() + 5);
           createTransaction({
             amount: 1,
             senderAlias: "W1000",
             recipientAlias: "W0",
+            creationDate,
             valid_thru: now.toISOString(),
             pending: true,
             description: "Expiring transaction",
@@ -1089,11 +1093,13 @@ describe(`Cryptocurrency Test Suite`, () => {
         });
         it("Valid thru transaction should be created successfully", (done) => {
           const now = new Date();
+          const creationDate = new Date();
           now.setSeconds(now.getSeconds() + 5);
           createTransaction({
             amount: 25,
             senderAlias: "CantTransferW1000",
             recipientAlias: "ToDeleteW1000",
+            creationDate,
             valid_thru: now.toISOString(),
             description: "Expiring valid transaction",
             callback: ({ res }) => {
@@ -1742,11 +1748,13 @@ describe(`Cryptocurrency Test Suite`, () => {
           this.timeout(25000);
           it("Expiring lastest transactions should be deleted successfully", (done) => {
             const now = new Date();
+            const creationDate = new Date();
             now.setSeconds(now.getSeconds() + 2);
             createTransaction({
               amount: 1,
               senderAlias: "W1000",
               recipientAlias: "W0",
+              creationDate,
               valid_thru: now.toISOString(),
               description: "Expiring valid transaction",
               callback: ({ res }) => {
@@ -1792,11 +1800,13 @@ describe(`Cryptocurrency Test Suite`, () => {
           });
           it("Non expiring lastest transactions should not be deleted", (done) => {
             const now = new Date();
+            const creationDate = new Date();
             now.setSeconds(now.getSeconds() + 60);
             createTransaction({
               amount: 1,
               senderAlias: "W1000",
               recipientAlias: "W0",
+              creationDate,
               valid_thru: now.toISOString(),
               description: "Expiring valid transaction",
               callback: ({ res }) => {
@@ -2758,9 +2768,60 @@ describe(`Cryptocurrency Test Suite`, () => {
       });
     });
   });
+  describe(`Redis cache fallback`, function () {
+    this.timeout(8000);
+    this.slow(5000);
+    describe(`${CRYPTO_ENDPOINT} fallback test`, () => {
+      describe(`Redis fallback requests`, () => {
+        describe(`GET ${CRYPTO_ENDPOINT}/:address`, () => {
+          it("Should return the transaction even if it has no connection to Sawtooth REST API", (done) => {
+            chai
+              .request(API_URL)
+              .get(
+                `${CRYPTO_ENDPOINT}/${
+                  createdVariables.transactions.transaction[users.W1000.address]
+                    .coinbase.payload.address
+                }`
+              )
+              .end(function (err, res) {
+                expect(res).to.have.status(200);
+                done();
+              });
+          });
+        });
+      });
+    });
+    describe(`${USERS_ENDPOINT} fallback test`, () => {
+      describe(`Redis fallback requests`, () => {
+        describe(`GET ${USERS_ENDPOINT}/:address`, () => {
+          it("Should return the user even if it has no connection to Sawtooth REST API", (done) => {
+            chai
+              .request(API_URL)
+              .get(`${USERS_ENDPOINT}/${users.W1000.address}`)
+              .end(function (err, res) {
+                expect(res).to.have.status(200);
+                done();
+              });
+          });
+        });
+      });
+    });
+  });
   describe(`Hyperledger Sawtooth Error Tests`, function () {
     this.timeout(8000);
     this.slow(5000);
+    before(function (done) {
+      this.timeout(8000);
+      chai
+        .request(API_URL)
+        .post(`${CONFIG_ENDPOINT}`)
+        .send({ USE_REDIS: "false" })
+        .end(function (err, res) {
+          expect(res).to.have.status(200);
+          expect(res.body.variables.USE_REDIS).to.eq("false");
+          done();
+        });
+    });
     describe(`${CRYPTO_ENDPOINT} errors test`, () => {
       describe(`Sawtooth-dependant requests`, () => {
         describe(`GET ${CRYPTO_ENDPOINT}`, () => {

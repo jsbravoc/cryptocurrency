@@ -5,7 +5,7 @@
   
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title> enforcer/cryptocurrency</title>
+  <title> controllers/sawtooth</title>
 
   <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -74,7 +74,7 @@
             <div class="content">
                 <header class="page-title">
                     <p>Module</p>
-                    <h1>enforcer/cryptocurrency</h1>
+                    <h1>controllers/sawtooth</h1>
                 </header>
                 
 
@@ -95,7 +95,7 @@
     <div class="container-overview">
     
         
-            <div class="description"><p>Enforcer controller functionality</p></div>
+            <div class="description"><p>Sawtooth controller functionality</p></div>
         
 
         
@@ -147,9 +147,9 @@
 
     
         <p class="tag-source">
-            <a href="enforcer_cryptocurrency.js.html" class="button">View Source</a>
+            <a href="sawtooth_sawtooth_controller.js.html" class="button">View Source</a>
             <span>
-                <a href="enforcer_cryptocurrency.js.html">enforcer/cryptocurrency.js</a>, <a href="enforcer_cryptocurrency.js.html#line1">line 1</a>
+                <a href="sawtooth_sawtooth_controller.js.html">sawtooth/sawtooth_controller.js</a>, <a href="sawtooth_sawtooth_controller.js.html#line1">line 1</a>
             </span>
         </p>
     
@@ -203,8 +203,8 @@
 
 
     
-    <h4 class="name" id="~enforceValidTransactionsMiddleware">
-        <a class="href-link" href="#~enforceValidTransactionsMiddleware">#</a>
+    <h4 class="name" id="~buildBatch">
+        <a class="href-link" href="#~buildBatch">#</a>
         
             
                 <span class='tag'>inner</span>
@@ -212,18 +212,18 @@
         
         <span class="code-name">
             
-                enforceValidTransactionsMiddleware<span class="signature">(req, res, next)</span><span class="type-signature"></span>
+                buildBatch<span class="signature">(batch)</span><span class="type-signature"> &rarr; {protobuf.Batch}</span>
             
         </span>
     </h4>
     
 
     
-    <p class="summary">Verifies and updates invalid user transactions.</p>
+    <p class="summary">Builds a complete Sawtooth REST API Batch object from a SawtoothBatch instance.</p>
     
     
     <div class="description">
-        <p>Verifies and updates invalid user transactions.</p>
+        <p>Builds a complete Sawtooth REST API Batch object from a SawtoothBatch instance.</p>
     </div>
     
 
@@ -248,8 +248,6 @@
             <th>Type</th>
 
             
-            <th>Attributes</th>
-            
 
             
 
@@ -263,167 +261,23 @@
             
 <tr class="deep-level-0">
   
-      <td class="name"><code>req</code></td>
+      <td class="name"><code>batch</code></td>
   
 
   <td class="type">
   
       
-<span class="param-type">Request</span>
+<span class="param-type"><a href="SawtoothBatch.html">SawtoothBatch</a></span>
 
 
   
   </td>
 
   
-      <td class="attributes">
-      
-
-      
-
-      
-      </td>
-  
 
   
 
-  <td class="description last"><p>Express request object.</p></td>
-</tr>
-
-
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>res</code></td>
-  
-
-  <td class="type">
-  
-      
-<span class="param-type">Response</span>
-
-
-  
-  </td>
-
-  
-      <td class="attributes">
-      
-
-      
-
-      
-      </td>
-  
-
-  
-
-  <td class="description last"><p>Response object to handle Express request.</p></td>
-</tr>
-
-
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>next</code></td>
-  
-
-  <td class="type">
-  
-      
-<span class="param-type">function</span>
-
-
-  
-  </td>
-
-  
-      <td class="attributes">
-      
-
-      
-
-      
-      </td>
-  
-
-  
-
-  <td class="description last"><p>Express.js next callback.</p></td>
-</tr>
-
-
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>req.query.users</code></td>
-  
-
-  <td class="type">
-  
-      
-<span class="param-type">String</span>
-
-
-  
-  </td>
-
-  
-      <td class="attributes">
-      
-          &lt;optional><br>
-      
-
-      
-
-      
-      </td>
-  
-
-  
-
-  <td class="description last"><p>Comma separated list of addresses of users to validate.</p></td>
-</tr>
-
-
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>req.query.transactions</code></td>
-  
-
-  <td class="type">
-  
-      
-<span class="param-type">String</span>
-
-
-  
-  </td>
-
-  
-      <td class="attributes">
-      
-          &lt;optional><br>
-      
-
-      
-
-      
-      </td>
-  
-
-  
-
-  <td class="description last"><p>Comma separated list of addresses of transactions to update.</p></td>
+  <td class="description last"><p>SawtoothBatch object instance.</p></td>
 </tr>
 
 
@@ -469,9 +323,9 @@
 
     
         <p class="tag-source">
-            <a href="enforcer_cryptocurrency.js.html" class="button">View Source</a>
+            <a href="sawtooth_sawtooth_controller.js.html" class="button">View Source</a>
             <span>
-                <a href="enforcer_cryptocurrency.js.html">enforcer/cryptocurrency.js</a>, <a href="enforcer_cryptocurrency.js.html#line169">line 169</a>
+                <a href="sawtooth_sawtooth_controller.js.html">sawtooth/sawtooth_controller.js</a>, <a href="sawtooth_sawtooth_controller.js.html#line97">line 97</a>
             </span>
         </p>
     
@@ -494,6 +348,31 @@
 
 
 
+    <div class='columns method-parameter'>
+        <div class="column is-2"><label>Returns:</label></div>
+        <div class="column is-10">
+            
+                    
+
+<div class="columns">
+    
+    <div class='param-desc column is-7'><p>Sawtooth REST API batch object.</p></div>
+    
+    
+    <div class='column is-5 has-text-left'>
+        <label>Type: </label>
+        
+<span class="param-type">protobuf.Batch</span>
+
+
+    </div>
+    
+</div>
+
+                
+        </div>
+    </div>
+
 
 
 
@@ -503,8 +382,8 @@
 
 
     
-    <h4 class="name" id="~updateInvalidTransaction">
-        <a class="href-link" href="#~updateInvalidTransaction">#</a>
+    <h4 class="name" id="~buildTransaction">
+        <a class="href-link" href="#~buildTransaction">#</a>
         
             
                 <span class='tag'>inner</span>
@@ -512,19 +391,673 @@
         
         <span class="code-name">
             
-                updateInvalidTransaction<span class="signature">(address, res-)</span><span class="type-signature"> &rarr; {Promise.&lt;({transactionObj: <a href="Transaction.html">Transaction</a>, txObj: <a href="SawtoothTransaction.html">SawtoothTransaction</a>}|null)>}</span>
+                buildTransaction<span class="signature">(transaction)</span><span class="type-signature"> &rarr; {protobuf.Transaction}</span>
             
         </span>
     </h4>
     
 
     
-    <p class="summary">Returns the updated transaction object &amp; transaction object in case its validity has changed.</p>
+    <p class="summary">Builds a complete Sawtooth REST API Transaction object from a SawtoothTransaction instance.</p>
     
     
     <div class="description">
-        <p>Returns the updated transaction object &amp; transaction object in case its validity has changed.
-This mainly handles expiring transactions (with valid_thru property).</p>
+        <p>Builds a complete Sawtooth REST API Transaction object from a SawtoothTransaction instance.</p>
+    </div>
+    
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+<div class="table-container">
+    <table class="params table">
+        <thead>
+        <tr>
+            
+            <th>Name</th>
+            
+
+            <th>Type</th>
+
+            
+
+            
+
+            <th class="last">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>transaction</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type"><a href="SawtoothTransaction.html">SawtoothTransaction</a></span>
+
+
+  
+  </td>
+
+  
+
+  
+
+  <td class="description last"><p>SawtoothTransaction object instance.</p></td>
+</tr>
+
+  
+  
+    
+<tr class="deep-level-1">
+  
+      <td class="name"><code>transactionFamily</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">String</span>
+
+
+  
+  </td>
+
+  
+
+  
+
+  <td class="description last"><p>The transaction family of the transaction.</p></td>
+</tr>
+
+  
+    
+<tr class="deep-level-1">
+  
+      <td class="name"><code>transactionFamilyVersion</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">String</span>
+
+
+  
+  </td>
+
+  
+
+  
+
+  <td class="description last"><p>The transaction family version of the transaction.</p></td>
+</tr>
+
+  
+    
+<tr class="deep-level-1">
+  
+      <td class="name"><code>inputs</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">Array</span>
+
+
+  
+  </td>
+
+  
+
+  
+
+  <td class="description last"><p>Array of addresses that are the inputs (read access) of the transaction.</p></td>
+</tr>
+
+  
+    
+<tr class="deep-level-1">
+  
+      <td class="name"><code>outputs</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">Array</span>
+
+
+  
+  </td>
+
+  
+
+  
+
+  <td class="description last"><p>Array of addresses that are the outputs (write access) of the transaction.</p></td>
+</tr>
+
+  
+    
+<tr class="deep-level-1">
+  
+      <td class="name"><code>payload</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">String</span>
+
+
+  
+  </td>
+
+  
+
+  
+
+  <td class="description last"><p>JSON stringified object to insert into the blockchain.</p></td>
+</tr>
+
+  
+
+
+        
+        </tbody>
+    </table>
+</div>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+
+    
+
+    
+
+    
+        <p class="tag-source">
+            <a href="sawtooth_sawtooth_controller.js.html" class="button">View Source</a>
+            <span>
+                <a href="sawtooth_sawtooth_controller.js.html">sawtooth/sawtooth_controller.js</a>, <a href="sawtooth_sawtooth_controller.js.html#line61">line 61</a>
+            </span>
+        </p>
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div class='columns method-parameter'>
+        <div class="column is-2"><label>Returns:</label></div>
+        <div class="column is-10">
+            
+                    
+
+<div class="columns">
+    
+    <div class='param-desc column is-7'><p>Sawtooth REST API transaction object.</p></div>
+    
+    
+    <div class='column is-5 has-text-left'>
+        <label>Type: </label>
+        
+<span class="param-type">protobuf.Transaction</span>
+
+
+    </div>
+    
+</div>
+
+                
+        </div>
+    </div>
+
+
+
+
+</div>
+            
+                <div class="member">
+
+
+    
+    <h4 class="name" id="~hash256">
+        <a class="href-link" href="#~hash256">#</a>
+        
+            
+                <span class='tag'>inner</span>
+            
+        
+        <span class="code-name">
+            
+                hash256<span class="signature">(x)</span><span class="type-signature"> &rarr; {String}</span>
+            
+        </span>
+    </h4>
+    
+
+    
+    <p class="summary">Generates the sha256 of a string.</p>
+    
+    
+    <div class="description">
+        <p>Generates the sha256 of a string.</p>
+    </div>
+    
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+<div class="table-container">
+    <table class="params table">
+        <thead>
+        <tr>
+            
+            <th>Name</th>
+            
+
+            <th>Type</th>
+
+            
+
+            
+
+            <th class="last">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>x</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">String</span>
+
+
+  
+  </td>
+
+  
+
+  
+
+  <td class="description last"><p>The string to hash.</p></td>
+</tr>
+
+
+        
+        </tbody>
+    </table>
+</div>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+
+    
+
+    
+
+    
+        <p class="tag-source">
+            <a href="sawtooth_sawtooth_controller.js.html" class="button">View Source</a>
+            <span>
+                <a href="sawtooth_sawtooth_controller.js.html">sawtooth/sawtooth_controller.js</a>, <a href="sawtooth_sawtooth_controller.js.html#line24">line 24</a>
+            </span>
+        </p>
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div class='columns method-parameter'>
+        <div class="column is-2"><label>Returns:</label></div>
+        <div class="column is-10">
+            
+                    
+
+<div class="columns">
+    
+    <div class='param-desc column is-7'><p>The hashed string.</p></div>
+    
+    
+    <div class='column is-5 has-text-left'>
+        <label>Type: </label>
+        
+<span class="param-type">String</span>
+
+
+    </div>
+    
+</div>
+
+                
+        </div>
+    </div>
+
+
+
+
+</div>
+            
+                <div class="member">
+
+
+    
+    <h4 class="name" id="~hash512">
+        <a class="href-link" href="#~hash512">#</a>
+        
+            
+                <span class='tag'>inner</span>
+            
+        
+        <span class="code-name">
+            
+                hash512<span class="signature">(x)</span><span class="type-signature"> &rarr; {String}</span>
+            
+        </span>
+    </h4>
+    
+
+    
+    <p class="summary">Generates the sha512 of a string.</p>
+    
+    
+    <div class="description">
+        <p>Generates the sha512 of a string.</p>
+    </div>
+    
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+<div class="table-container">
+    <table class="params table">
+        <thead>
+        <tr>
+            
+            <th>Name</th>
+            
+
+            <th>Type</th>
+
+            
+
+            
+
+            <th class="last">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>x</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">String</span>
+
+
+  
+  </td>
+
+  
+
+  
+
+  <td class="description last"><p>The string to hash.</p></td>
+</tr>
+
+
+        
+        </tbody>
+    </table>
+</div>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+
+    
+
+    
+
+    
+        <p class="tag-source">
+            <a href="sawtooth_sawtooth_controller.js.html" class="button">View Source</a>
+            <span>
+                <a href="sawtooth_sawtooth_controller.js.html">sawtooth/sawtooth_controller.js</a>, <a href="sawtooth_sawtooth_controller.js.html#line16">line 16</a>
+            </span>
+        </p>
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div class='columns method-parameter'>
+        <div class="column is-2"><label>Returns:</label></div>
+        <div class="column is-10">
+            
+                    
+
+<div class="columns">
+    
+    <div class='param-desc column is-7'><p>The hashed string.</p></div>
+    
+    
+    <div class='column is-5 has-text-left'>
+        <label>Type: </label>
+        
+<span class="param-type">String</span>
+
+
+    </div>
+    
+</div>
+
+                
+        </div>
+    </div>
+
+
+
+
+</div>
+            
+                <div class="member">
+
+
+    
+    <h4 class="name" id="~queryState">
+        <a class="href-link" href="#~queryState">#</a>
+        
+            
+                <span class='tag'>inner</span>
+            
+        
+        <span class="code-name">
+            
+                queryState<span class="signature">(address)</span><span class="type-signature"> &rarr; {AxiosResponse}</span>
+            
+        </span>
+    </h4>
+    
+
+    
+    <p class="summary">Queries the state of the blockchain, given an address to query.</p>
+    
+    
+    <div class="description">
+        <p>Queries the state of the blockchain, given an address to query.</p>
     </div>
     
 
@@ -578,32 +1111,7 @@ This mainly handles expiring transactions (with valid_thru property).</p>
 
   
 
-  <td class="description last"><p>Address of the transaction.</p></td>
-</tr>
-
-
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>res-</code></td>
-  
-
-  <td class="type">
-  
-      
-<span class="param-type">Response</span>
-
-
-  
-  </td>
-
-  
-
-  
-
-  <td class="description last"><p>Express.js response object, used to access locals.</p></td>
+  <td class="description last"><p>Address to query.</p></td>
 </tr>
 
 
@@ -649,9 +1157,9 @@ This mainly handles expiring transactions (with valid_thru property).</p>
 
     
         <p class="tag-source">
-            <a href="enforcer_cryptocurrency.js.html" class="button">View Source</a>
+            <a href="sawtooth_sawtooth_controller.js.html" class="button">View Source</a>
             <span>
-                <a href="enforcer_cryptocurrency.js.html">enforcer/cryptocurrency.js</a>, <a href="enforcer_cryptocurrency.js.html#line23">line 23</a>
+                <a href="sawtooth_sawtooth_controller.js.html">sawtooth/sawtooth_controller.js</a>, <a href="sawtooth_sawtooth_controller.js.html#line145">line 145</a>
             </span>
         </p>
     
@@ -682,13 +1190,13 @@ This mainly handles expiring transactions (with valid_thru property).</p>
 
 <div class="columns">
     
-    <div class='param-desc column is-7'><p>} Promise containing the transaction object and the updated transaction object if its validity has changed.</p></div>
+    <div class='param-desc column is-7'><p>Sawtooth REST API response object.</p></div>
     
     
     <div class='column is-5 has-text-left'>
         <label>Type: </label>
         
-<span class="param-type">Promise.&lt;({transactionObj: <a href="Transaction.html">Transaction</a>, txObj: <a href="SawtoothTransaction.html">SawtoothTransaction</a>}|null)></span>
+<span class="param-type">AxiosResponse</span>
 
 
     </div>
@@ -708,8 +1216,8 @@ This mainly handles expiring transactions (with valid_thru property).</p>
 
 
     
-    <h4 class="name" id="~updateInvalidUsersTransactions">
-        <a class="href-link" href="#~updateInvalidUsersTransactions">#</a>
+    <h4 class="name" id="~sendBatch">
+        <a class="href-link" href="#~sendBatch">#</a>
         
             
                 <span class='tag'>inner</span>
@@ -717,336 +1225,18 @@ This mainly handles expiring transactions (with valid_thru property).</p>
         
         <span class="code-name">
             
-                updateInvalidUsersTransactions<span class="signature">(source, users<span class="signature-attributes">opt</span>, transactions<span class="signature-attributes">opt</span>, res-)</span><span class="type-signature"> &rarr; {Promise.&lt;(Error|{responseCode, msg, payload})>}</span>
+                sendBatch<span class="signature">(transactions)</span><span class="type-signature"> &rarr; {AxiosResponse}</span>
             
         </span>
     </h4>
     
 
     
-    <p class="summary">Updates the (now) invalid transactions in the Blockchain.</p>
+    <p class="summary">Sends a batch to the Sawtooth REST API.</p>
     
     
     <div class="description">
-        <p>Updates the (now) invalid transactions in the Blockchain.
-This mainly handles expiring transactions (with valid_thru property).
-NOTE: users &amp; transactions parameters <strong>should</strong> be passed. If not, the function will search for invalid transaction in all the transactions of all the users.
-This call increment the processing time exponentially, and (if enough users &amp; transactions exists), may break the REST API. (Devmode Algorithm at least).</p>
-    </div>
-    
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-<div class="table-container">
-    <table class="params table">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
-
-            <th>Type</th>
-
-            
-            <th>Attributes</th>
-            
-
-            
-            <th>Default</th>
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>source</code></td>
-  
-
-  <td class="type">
-  
-      
-<span class="param-type">String</span>
-
-
-  
-  </td>
-
-  
-      <td class="attributes">
-      
-
-      
-
-      
-      </td>
-  
-
-  
-      <td class="default">
-      
-      </td>
-  
-
-  <td class="description last"><p>String description of the initializer of the request, used for logging.</p></td>
-</tr>
-
-
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>users</code></td>
-  
-
-  <td class="type">
-  
-      
-<span class="param-type">Array.&lt;String></span>
-
-
-  
-  </td>
-
-  
-      <td class="attributes">
-      
-          &lt;optional><br>
-      
-
-      
-
-      
-      </td>
-  
-
-  
-      <td class="default">
-      
-          null
-      
-      </td>
-  
-
-  <td class="description last"><p>Array of known users to hold (now) invalid transactions.</p></td>
-</tr>
-
-
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>transactions</code></td>
-  
-
-  <td class="type">
-  
-      
-<span class="param-type">Array.&lt;String></span>
-
-
-  
-  </td>
-
-  
-      <td class="attributes">
-      
-          &lt;optional><br>
-      
-
-      
-
-      
-      </td>
-  
-
-  
-      <td class="default">
-      
-          null
-      
-      </td>
-  
-
-  <td class="description last"><p>Array of known transactions that must be updated (used to limit blockchain queries to the minimum).</p></td>
-</tr>
-
-
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>res-</code></td>
-  
-
-  <td class="type">
-  
-      
-<span class="param-type">Response</span>
-
-
-  
-  </td>
-
-  
-      <td class="attributes">
-      
-
-      
-
-      
-      </td>
-  
-
-  
-      <td class="default">
-      
-      </td>
-  
-
-  <td class="description last"><p>Express.js response object, used to access locals.</p></td>
-</tr>
-
-
-        
-        </tbody>
-    </table>
-</div>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    
-
-    
-
-    
-
-    
-        <p class="tag-source">
-            <a href="enforcer_cryptocurrency.js.html" class="button">View Source</a>
-            <span>
-                <a href="enforcer_cryptocurrency.js.html">enforcer/cryptocurrency.js</a>, <a href="enforcer_cryptocurrency.js.html#line120">line 120</a>
-            </span>
-        </p>
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <div class='columns method-parameter'>
-        <div class="column is-2"><label>Returns:</label></div>
-        <div class="column is-10">
-            
-                    
-
-<div class="columns">
-    
-    <div class='param-desc column is-7'><p>Promise containing the response of the Sawtooth REST API call.</p></div>
-    
-    
-    <div class='column is-5 has-text-left'>
-        <label>Type: </label>
-        
-<span class="param-type">Promise.&lt;(Error|{responseCode, msg, payload})></span>
-
-
-    </div>
-    
-</div>
-
-                
-        </div>
-    </div>
-
-
-
-
-</div>
-            
-                <div class="member">
-
-
-    
-    <h4 class="name" id="~updateInvalidUserTransactions">
-        <a class="href-link" href="#~updateInvalidUserTransactions">#</a>
-        
-            
-                <span class='tag'>inner</span>
-            
-        
-        <span class="code-name">
-            
-                updateInvalidUserTransactions<span class="signature">(address, transactions, res-)</span><span class="type-signature"> &rarr; {Promise.&lt;Array.&lt;<a href="SawtoothTransaction.html">SawtoothTransaction</a>>>}</span>
-            
-        </span>
-    </h4>
-    
-
-    
-    <p class="summary">Returns a list of transactions to update to a user specified.</p>
-    
-    
-    <div class="description">
-        <p>Returns a list of transactions to update to a user specified.
-This mainly handles expiring transactions (with valid_thru property).</p>
+        <p>Sends a batch to the Sawtooth REST API.</p>
     </div>
     
 
@@ -1084,38 +1274,13 @@ This mainly handles expiring transactions (with valid_thru property).</p>
             
 <tr class="deep-level-0">
   
-      <td class="name"><code>address</code></td>
-  
-
-  <td class="type">
-  
-      
-<span class="param-type">String</span>
-
-
-  
-  </td>
-
-  
-
-  
-
-  <td class="description last"><p>Address of the user.</p></td>
-</tr>
-
-
-        
-
-            
-<tr class="deep-level-0">
-  
       <td class="name"><code>transactions</code></td>
   
 
   <td class="type">
   
       
-<span class="param-type">Array.&lt;String></span>
+<span class="param-type">Array.&lt;<a href="SawtoothTransaction.html">SawtoothTransaction</a>></span>
 
 
   
@@ -1125,32 +1290,7 @@ This mainly handles expiring transactions (with valid_thru property).</p>
 
   
 
-  <td class="description last"><p>Array of known transactions that must be updated (used to limit blockchain queries to the minimum).</p></td>
-</tr>
-
-
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>res-</code></td>
-  
-
-  <td class="type">
-  
-      
-<span class="param-type">Response</span>
-
-
-  
-  </td>
-
-  
-
-  
-
-  <td class="description last"><p>Express.js response object, used to access locals.</p></td>
+  <td class="description last"><p>List of transactions of the batch to send.</p></td>
 </tr>
 
 
@@ -1196,9 +1336,9 @@ This mainly handles expiring transactions (with valid_thru property).</p>
 
     
         <p class="tag-source">
-            <a href="enforcer_cryptocurrency.js.html" class="button">View Source</a>
+            <a href="sawtooth_sawtooth_controller.js.html" class="button">View Source</a>
             <span>
-                <a href="enforcer_cryptocurrency.js.html">enforcer/cryptocurrency.js</a>, <a href="enforcer_cryptocurrency.js.html#line56">line 56</a>
+                <a href="sawtooth_sawtooth_controller.js.html">sawtooth/sawtooth_controller.js</a>, <a href="sawtooth_sawtooth_controller.js.html#line118">line 118</a>
             </span>
         </p>
     
@@ -1229,13 +1369,217 @@ This mainly handles expiring transactions (with valid_thru property).</p>
 
 <div class="columns">
     
-    <div class='param-desc column is-7'><p>Promise containing a list of transactions to post to the blockchain.</p></div>
+    <div class='param-desc column is-7'><p>Sawtooth REST API response object.</p></div>
     
     
     <div class='column is-5 has-text-left'>
         <label>Type: </label>
         
-<span class="param-type">Promise.&lt;Array.&lt;<a href="SawtoothTransaction.html">SawtoothTransaction</a>>></span>
+<span class="param-type">AxiosResponse</span>
+
+
+    </div>
+    
+</div>
+
+                
+        </div>
+    </div>
+
+
+
+
+</div>
+            
+                <div class="member">
+
+
+    
+    <h4 class="name" id="~sign">
+        <a class="href-link" href="#~sign">#</a>
+        
+            
+                <span class='tag'>inner</span>
+            
+        
+        <span class="code-name">
+            
+                sign<span class="signature">(dataBytes, privateKey)</span><span class="type-signature"> &rarr; {String}</span>
+            
+        </span>
+    </h4>
+    
+
+    
+    <p class="summary">Generates the signature of a byte array, given a private key.</p>
+    
+    
+    <div class="description">
+        <p>Generates the signature of a byte array, given a private key.</p>
+    </div>
+    
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+<div class="table-container">
+    <table class="params table">
+        <thead>
+        <tr>
+            
+            <th>Name</th>
+            
+
+            <th>Type</th>
+
+            
+
+            
+
+            <th class="last">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>dataBytes</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">Uint8Array</span>
+
+
+  
+  </td>
+
+  
+
+  
+
+  <td class="description last"><p>The array of bytes to sign.</p></td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>privateKey</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">String</span>
+
+
+  
+  </td>
+
+  
+
+  
+
+  <td class="description last"><p>Hexadecimal representation of the private key.</p></td>
+</tr>
+
+
+        
+        </tbody>
+    </table>
+</div>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+
+    
+
+    
+
+    
+        <p class="tag-source">
+            <a href="sawtooth_sawtooth_controller.js.html" class="button">View Source</a>
+            <span>
+                <a href="sawtooth_sawtooth_controller.js.html">sawtooth/sawtooth_controller.js</a>, <a href="sawtooth_sawtooth_controller.js.html#line40">line 40</a>
+            </span>
+        </p>
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div class='columns method-parameter'>
+        <div class="column is-2"><label>Returns:</label></div>
+        <div class="column is-10">
+            
+                    
+
+<div class="columns">
+    
+    <div class='param-desc column is-7'><p>The hexadecimal representation of the signature.</p></div>
+    
+    
+    <div class='column is-5 has-text-left'>
+        <label>Type: </label>
+        
+<span class="param-type">String</span>
 
 
     </div>

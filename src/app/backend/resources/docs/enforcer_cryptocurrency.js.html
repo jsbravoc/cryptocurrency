@@ -68,7 +68,7 @@
             
             <nav>
                 
-                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Modules</h3><ul><li><a href="module-config.html">config</a></li><li><a href="module-controllers_common.html">controllers/common</a></li><li><a href="module-controllers_cryptocurrency.html">controllers/cryptocurrency</a></li><li><a href="module-controllers_users.html">controllers/users</a></li><li><a href="module-enforcer_cryptocurrency.html">enforcer/cryptocurrency</a></li><li><a href="module-routers_cryptocurrency.html">routers/cryptocurrency</a></li><li><a href="module-routers_dev_config.html">routers/dev/config</a></li><li><a href="module-routers_enforcer.html">routers/enforcer</a></li><li><a href="module-routers_users.html">routers/users</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-routers_cryptocurrency-cryptoRouter.html">cryptoRouter</a></li><li><a href="module-routers_dev_config-devConfig.html">devConfig</a></li><li><a href="module-routers_enforcer-enforcerRouter.html">enforcerRouter</a></li><li><a href="module-routers_users-usersRouter.html">usersRouter</a></li></ul><h3>Classes</h3><ul><li><a href="Asset.html">Asset</a></li><li><a href="BaseModel.html">BaseModel</a></li><li><a href="Permissions.html">Permissions</a></li><li><a href="Transaction.html">Transaction</a></li><li><a href="User.html">User</a></li></ul><h3>Global</h3><ul><li><a href="global.html#http">http</a></li><li><a href="global.html#HTTP_METHODS">HTTP_METHODS</a></li><li><a href="global.html#inputValidation">inputValidation</a></li><li><a href="global.html#normalizePort">normalizePort</a></li><li><a href="global.html#onError">onError</a></li><li><a href="global.html#port">port</a></li><li><a href="global.html#server">server</a></li><li><a href="global.html#TYPE">TYPE</a></li><li><a href="global.html#USER_TYPE">USER_TYPE</a></li><li><a href="global.html#validate">validate</a></li><li><a href="global.html#validateAssetExistence">validateAssetExistence</a></li><li><a href="global.html#validateExistingTransaction">validateExistingTransaction</a></li><li><a href="global.html#validatePendingTransaction">validatePendingTransaction</a></li><li><a href="global.html#validateTransactionAddress">validateTransactionAddress</a></li><li><a href="global.html#validateTransactionUpdateRequest">validateTransactionUpdateRequest</a></li><li><a href="global.html#validateUserCreation">validateUserCreation</a></li></ul></div>
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Modules</h3><ul><li><a href="module-config.html">config</a></li><li><a href="module-controllers_common.html">controllers/common</a></li><li><a href="module-controllers_cryptocurrency.html">controllers/cryptocurrency</a></li><li><a href="module-controllers_sawtooth.html">controllers/sawtooth</a></li><li><a href="module-controllers_users.html">controllers/users</a></li><li><a href="module-enforcer_cryptocurrency.html">enforcer/cryptocurrency</a></li><li><a href="module-routers_cryptocurrency.html">routers/cryptocurrency</a></li><li><a href="module-routers_dev_config.html">routers/dev/config</a></li><li><a href="module-routers_enforcer.html">routers/enforcer</a></li><li><a href="module-routers_users.html">routers/users</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-routers_cryptocurrency-cryptoRouter.html">cryptoRouter</a></li><li><a href="module-routers_dev_config-devConfig.html">devConfig</a></li><li><a href="module-routers_enforcer-enforcerRouter.html">enforcerRouter</a></li><li><a href="module-routers_users-usersRouter.html">usersRouter</a></li></ul><h3>Classes</h3><ul><li><a href="BaseModel.html">BaseModel</a></li><li><a href="Permissions.html">Permissions</a></li><li><a href="SawtoothBatch.html">SawtoothBatch</a></li><li><a href="SawtoothTransaction.html">SawtoothTransaction</a></li><li><a href="Transaction.html">Transaction</a></li><li><a href="User.html">User</a></li></ul><h3>Global</h3><ul><li><a href="global.html#http">http</a></li><li><a href="global.html#HTTP_METHODS">HTTP_METHODS</a></li><li><a href="global.html#inputValidation">inputValidation</a></li><li><a href="global.html#normalizePort">normalizePort</a></li><li><a href="global.html#onError">onError</a></li><li><a href="global.html#port">port</a></li><li><a href="global.html#server">server</a></li><li><a href="global.html#TYPE">TYPE</a></li><li><a href="global.html#USER_TYPE">USER_TYPE</a></li><li><a href="global.html#validate">validate</a></li><li><a href="global.html#validateExistingTransaction">validateExistingTransaction</a></li><li><a href="global.html#validateObjExistence">validateObjExistence</a></li><li><a href="global.html#validatePendingTransaction">validatePendingTransaction</a></li><li><a href="global.html#validateTransactionAddress">validateTransactionAddress</a></li><li><a href="global.html#validateTransactionUpdateRequest">validateTransactionUpdateRequest</a></li><li><a href="global.html#validateUserCreation">validateUserCreation</a></li></ul></div>
                 
             </nav>
         </div>
@@ -90,8 +90,8 @@
  */
 const {
   findByAddress,
-  findAllAssets,
-  buildAssetTransaction,
+  findAllObjects,
+  buildObjectTransaction,
   putBatch,
 } = require("../controllers/common");
 const { TYPE, HTTP_METHODS } = require("../utils/constants");
@@ -100,15 +100,15 @@ const { createError } = require("../validators/common");
 const { ERRORS } = require("../utils/errors");
 
 /**
- * Returns the updated transaction object &amp; asset in case its validity has changed.
+ * Returns the updated transaction object &amp; transaction object in case its validity has changed.
  * This mainly handles expiring transactions (with valid_thru property).
  *
  * @param {String} address - Address of the transaction.
  * @param {Response} res- Express.js response object, used to access locals.
- * @return {Promise&lt;{transactionObj: Transaction, assetObj: Asset}|null>}} Promise containing the asset and the updated transaction object if its validity has changed.
+ * @returns {Promise&lt;{transactionObj: Transaction, txObj: SawtoothTransaction}|null>}} Promise containing the transaction object and the updated transaction object if its validity has changed.
  */
 const updateInvalidTransaction = (address, res) => {
-  return findByAddress(TYPE.TRANSACTION, address, false, false, res).then(
+  return findByAddress(TYPE.TRANSACTION, address, false, res).then(
     (transaction) => {
       if (
         transaction &amp;&amp;
@@ -119,7 +119,7 @@ const updateInvalidTransaction = (address, res) => {
         transaction.valid = transaction.checkValidity();
         return {
           transactionObj: transaction,
-          assetObj: buildAssetTransaction(
+          txObj: buildObjectTransaction(
             TYPE.TRANSACTION,
             HTTP_METHODS.PUT,
             transaction
@@ -138,10 +138,10 @@ const updateInvalidTransaction = (address, res) => {
  * @param {String} address - Address of the user.
  * @param {Array&lt;String>} transactions - Array of known transactions that must be updated (used to limit blockchain queries to the minimum).
  * @param {Response} res- Express.js response object, used to access locals.
- * @return {Promise&lt;Array&lt;Asset>>} Promise containing a list of assets to post to the blockchain.
+ * @returns {Promise&lt;Array&lt;SawtoothTransaction>>} Promise containing a list of transactions to post to the blockchain.
  */
 const updateInvalidUserTransactions = (address, transactions, res) => {
-  return findByAddress(TYPE.USER, address, false, false, res).then((user) => {
+  return findByAddress(TYPE.USER, address, false, res).then((user) => {
     const promises = [];
     const arrayOfTransactions = [];
     let requiresUpdate = false;
@@ -155,10 +155,10 @@ const updateInvalidUserTransactions = (address, transactions, res) => {
         promises.push(
           updateInvalidTransaction(transaction, res).then((response) => {
             if (response) {
-              const { transactionObj, assetObj } = response;
+              const { transactionObj, txObj } = response;
               requiresUpdate = true;
               user.removeInvalidTransaction(transactionObj);
-              arrayOfTransactions.push(assetObj);
+              arrayOfTransactions.push(txObj);
             }
           })
         );
@@ -172,10 +172,10 @@ const updateInvalidUserTransactions = (address, transactions, res) => {
         promises.push(
           updateInvalidTransaction(transaction, res).then((response) => {
             if (response) {
-              const { assetObj } = response;
+              const { txObj } = response;
               requiresUpdate = true;
               user.removePendingTransaction(transaction);
-              arrayOfTransactions.push(assetObj);
+              arrayOfTransactions.push(txObj);
             }
           })
         );
@@ -184,7 +184,7 @@ const updateInvalidUserTransactions = (address, transactions, res) => {
     return Promise.all(promises).then(() => {
       if (requiresUpdate) {
         arrayOfTransactions.push(
-          buildAssetTransaction(TYPE.USER, HTTP_METHODS.PUT, user)
+          buildObjectTransaction(TYPE.USER, HTTP_METHODS.PUT, user)
         );
       }
       return arrayOfTransactions;
@@ -202,7 +202,7 @@ const updateInvalidUserTransactions = (address, transactions, res) => {
  * @param  {Array&lt;String>} [users] - Array of known users to hold (now) invalid transactions.
  * @param {Array&lt;String>} [transactions] - Array of known transactions that must be updated (used to limit blockchain queries to the minimum).
  * @param {Response} res- Express.js response object, used to access locals.
- * @return {Promise&lt;Error | {responseCode, msg, payload}>} Promise containing the response of the Sawtooth REST API call.
+ * @returns {Promise&lt;Error | {responseCode, msg, payload}>} Promise containing the response of the Sawtooth REST API call.
  */
 const updateInvalidUsersTransactions = (
   source,
@@ -214,7 +214,7 @@ const updateInvalidUsersTransactions = (
   const promiseOfUsers = [];
   if (Array.isArray(users) &amp;&amp; users.length > 0) {
     users.forEach((user) => {
-      promiseOfUsers.push(findByAddress(TYPE.USER, user, false, false, res));
+      promiseOfUsers.push(findByAddress(TYPE.USER, user, false, res));
     });
   } else {
     logFormatted(
@@ -222,7 +222,7 @@ const updateInvalidUsersTransactions = (
       SEVERITY.WARN
     );
     promiseOfUsers.push(
-      findAllAssets(TYPE.USER, source, undefined, false, false, res)
+      findAllObjects(TYPE.USER, source, undefined, false, res)
     );
   }
   return Promise.all(promiseOfUsers).then((users) => {

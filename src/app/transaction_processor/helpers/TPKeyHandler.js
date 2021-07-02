@@ -31,32 +31,22 @@ module.exports = function ({ TP_FAMILY, TP_VERSION, TP_NAMESPACE, handlers }) {
         );
       }
       if (!handlers[type]) {
-        console.log("Transaction object type error", txObject);
-        console.error(
-          `Transaction type error, missing ${type}, expected type between ${Object.keys(
-            handlers
-          )}`
-        );
         throw new InvalidTransaction(
           `Transaction type error, missing ${type}, expected type between ${Object.keys(
             handlers
           )}`
         );
       }
-      if (true) {
-        try {
-          await handlers[type][httpMethod](context, txObject);
-        } catch (e) {
-          console.log("ERROR during:", e);
-          if (e instanceof InternalError) {
-            //Catch InternalError and don't make the TP unavailable
-            console.log(e);
-          } else {
-            throw e;
-          }
-        }
-      } else {
+      try {
         await handlers[type][httpMethod](context, txObject);
+      } catch (e) {
+        console.log("ERROR during:", e);
+        if (e instanceof InternalError) {
+          //Catch InternalError and don't make the TP unavailable
+          console.log(e);
+        } else {
+          throw e;
+        }
       }
     }
   }

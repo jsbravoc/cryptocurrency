@@ -13,15 +13,106 @@ const {
 } = require("../utils/constants");
 const { SEVERITY, logFormatted } = require("../utils/logger");
 
-const { queryState, sendTransaction } = require("../sawtooth/sawtooth-helpers");
+const { queryState, sendBatch } = require("../sawtooth/sawtooth_controller");
 const Transaction = require("../models/Transaction");
 const User = require("../models/User");
 const SawtoothTransaction = require("../models/SawtoothTransaction");
 
+const cacheManager = require("cache-manager");
+const redisStore = require("cache-manager-redis");
+
+let redisCache;
+//Wrap redisCache functionality
+if (
+  process.env.USE_REDIS === "true" &&
+  process.env.REDIS_HOST !== undefined &&
+  process.env.REDIS_PORT !== undefined
+)
+  redisCache = cacheManager.caching({
+    store: redisStore,
+    host: process.env.REDIS_HOST,
+    port: process.env.REDIS_PORT,
+    auth_pass: process.env.REDIS_PASSWORD,
+    db: 0,
+    ttl: 6000,
+  });
 //#region [AUXILIARY FUNCTIONS]
 
 /**
- * Generates the sha512 of a string
+ * Sets the redis cache store.
+ *
+ * @param {cacheManager.Cache | cacheManager.StoreConfig } cacheManager - Redis cache manager.
+ * @param {Boolean} useRedisStore - If false, redisCache can be set to any object.
+ */
+
+const configRedisCache = (cacheManager, useRedisStore = true) => {
+  if (!useRedisStore) {
+    redisCache = cacheManager;
+  } else {
+    redisCache = cacheManager.caching({
+      store: redisStore,
+      db: 0,
+      ttl: 6000,
+      ...cacheManager,
+    });
+  }
+};
+
+/**
+ * Returns the redis cache key for the given object.
+ *
+ * @param {TYPE} type - Type of the object.
+ * @param {String} address - Address or txid of the object.
+ * @returns {String} The redis cache key.
+ */
+
+const getRedisCacheKey = (type, address) => `${type}-${address}`;
+
+/**
+ * Sets an object in the redis cache store.
+ *
+ * @param {TYPE} type - Type of the object.
+ * @param {String} address - Address or txid of the object.
+ * @param {Transaction | User} object - Object to store.
+ */
+
+const storeObjectInCache = (type, address, object) => {
+  console.log("REDIS - Stored obj", type, address);
+  return redisCache.set(
+    getRedisCacheKey(type, address),
+    JSON.stringify(object)
+  );
+};
+
+/**
+ * Retrieves an object from the redis cache store.
+ *
+ * @param {TYPE} type - Type of the object.
+ * @param {String} address - Address or txid of the object.
+ * @returns {Transaction | User | undefined } Object retrieved from cache.
+ */
+
+const retrieveObjectInCache = (type, address) => {
+  console.log("REDIS - Retrieved obj", type, address);
+  return redisCache
+    .get(getRedisCacheKey(type, address))
+    .then((result) => JSON.parse(result));
+};
+
+/**
+ * Deletes an object from the redis cache store.
+ *
+ * @param {TYPE} type - Type of the object.
+ * @param {String} address - Address or txid of the object.
+ */
+
+const deleteObjectInCache = (type, address) => {
+  console.log("REDIS - Deleted obj", type, address);
+  return redisCache.del(getRedisCacheKey(type, address));
+};
+
+/**
+ * Generates the sha512 of a string.
  *
  * @param {String} x - The string to hash.
  * @returns {String} The hashed string.
@@ -29,7 +120,7 @@ const SawtoothTransaction = require("../models/SawtoothTransaction");
 const hash512 = (x) => crypto.createHash("sha512").update(x).digest("hex");
 
 /**
- * Generates the address of a key with a predefined length
+ * Generates the address of a key with a predefined length.
  *
  * @param {String} key - The string to hash and generate an address,
  * @param {Number} [length] - The length of the resulting address (used to substring the string).
@@ -40,7 +131,7 @@ const getAddress = (key, length = 64) => hash512(key).slice(0, length);
 const PREFIX = getAddress(TRANSACTION_FAMILY, 6);
 
 /**
- * Generates the address of a transaction
+ * Generates the address of a transaction.
  *
  * @param {String} txid - Unique transaction id.
  * @returns {String} The generated address of the transaction.
@@ -68,10 +159,45 @@ const getUserAddress = (userId) =>
  * @param {String} txid - Transaction unique identification (before calculated address).
  * @param {Boolean} [removeType] - Boolean that indicates if the type should be removed.
  * @param {Response} [res] - Express.js response object, used to access locals.
- * @return {Promise<Transaction|User|null>} Promise of the object if found or null if not found.
+ * @returns {Promise<Transaction|User|null>} Promise of the object if found or null if not found.
  */
 const findByAddress = (type, txid, removeType = false, res = null) => {
-  let addressToQuery;
+  const queryCallback = (addressToQuery) =>
+    queryState(addressToQuery)
+      .then((response) => {
+        storeObjectInCache(type, txid, response);
+        switch (type) {
+          case TYPE.TRANSACTION:
+            if (res && res.locals) {
+              if (!res.locals.transaction) res.locals.transaction = {};
+              res.locals.transaction[response.address] = new Transaction(
+                response
+              );
+            }
+            response = new Transaction(response).toObject(removeType);
+
+            break;
+          case TYPE.USER:
+            if (res && res.locals) {
+              if (!res.locals.user) res.locals.user = {};
+              res.locals.user[response.address] = new User(response);
+            }
+            response = new User(response).toObject(removeType);
+            break;
+        }
+        return response;
+      })
+      .catch((err) => {
+        //State not found. There is no state data at the address specified
+        if (
+          err.response &&
+          err.response.data &&
+          err.response.data.error &&
+          err.response.data.error.code === 75
+        ) {
+          return null;
+        } else return Promise.reject(err);
+      });
 
   switch (type) {
     case TYPE.TRANSACTION:
@@ -84,56 +210,32 @@ const findByAddress = (type, txid, removeType = false, res = null) => {
         return Promise.resolve(
           new Transaction(res.locals.transaction[txid]).toObject(removeType)
         );
-      addressToQuery = getTransactionAddress(txid);
-      break;
+      return retrieveObjectInCache(type, txid).then((result) => {
+        if (result) {
+          return Promise.resolve(new Transaction(result).toObject(removeType));
+        } else {
+          return queryCallback(getTransactionAddress(txid));
+        }
+      });
     case TYPE.USER:
       if (res && res.locals && res.locals.user && res.locals.user[txid])
         return Promise.resolve(
           new User(res.locals.user[txid]).toObject(removeType)
         );
-      addressToQuery = getUserAddress(txid);
-      break;
+      return retrieveObjectInCache(type, txid).then((result) => {
+        if (result) {
+          return Promise.resolve(new User(result).toObject(removeType));
+        } else {
+          return queryCallback(getUserAddress(txid));
+        }
+      });
   }
-  return queryState(addressToQuery)
-    .then((response) => {
-      switch (type) {
-        case TYPE.TRANSACTION:
-          if (res && res.locals) {
-            if (!res.locals.transaction) res.locals.transaction = {};
-            res.locals.transaction[response.address] = new Transaction(
-              response
-            );
-          }
-          response = new Transaction(response).toObject(removeType);
-
-          break;
-        case TYPE.USER:
-          if (res && res.locals) {
-            if (!res.locals.user) res.locals.user = {};
-            res.locals.user[response.address] = new User(response);
-          }
-          response = new User(response).toObject(removeType);
-          break;
-      }
-      return response;
-    })
-    .catch((err) => {
-      //State not found. There is no state data at the address specified
-      if (
-        err.response &&
-        err.response.data &&
-        err.response.data.error &&
-        err.response.data.error.code === 75
-      ) {
-        return null;
-      } else return Promise.reject(err);
-    });
 };
 
 /**
  * Finds and returns all transactions of a type.
  * @pre A request to an endpoint of a transaction is made. The endpoint must be GET /{transactionType}
- * @param {String} type - Type of transaction, such as TRANSACTION or USER (@see {@link TYPE}).
+ * @param {TYPE} type - Type of transaction, such as TRANSACTION or USER (@see {@link TYPE}).
  * @param {String} source - Endpoint source that invoked function (used for logging).
  * @param {Number} [limit] - Maximum number of transactions to return.
  * @param {Boolean} [removeType] - Boolean that indicates if the type should be removed.
@@ -176,6 +278,7 @@ const findAllObjects = (
         )
         .map((d) => {
           let base = JSON.parse(Buffer.from(d.data, "base64"));
+          storeObjectInCache(type, base.address, base);
           switch (type) {
             case TYPE.TRANSACTION:
               if (res) {
@@ -237,14 +340,12 @@ const buildBatch = ({ inputs, outputs, payload }, ...args) => {
  * @returns {Promise<{ responseCode, msg, payload }| Error >}  Promise of the batch post request. If successfully resolved, contains responseCode, msg, payload
  */
 const _putObject = (type, httpMethod, source, object) => {
-  let txObject;
-  let txid;
+  let txid = object.address;
+  let txObject = object.toString(false, httpMethod);
   let txAddress;
   let txName;
 
-  txid = object.address;
-  txObject = object.toString(false, httpMethod);
-
+  deleteObjectInCache(type, txid);
   switch (type) {
     case TYPE.TRANSACTION:
       txName = "Transaction";
@@ -257,21 +358,20 @@ const _putObject = (type, httpMethod, source, object) => {
       break;
   }
 
-  const txPayload = txObject;
-
   const batch = buildBatch({
-    payload: txPayload,
+    payload: txObject,
     inputs: [txAddress],
     outputs: [txAddress],
   });
 
   logFormatted(`${source} | BATCH Request:`, SEVERITY.NOTIFY, ...batch);
 
-  return sendTransaction(batch).then((sawtoothResponse) => {
+  return sendBatch(batch).then((sawtoothResponse) => {
     logFormatted(
       `${source}  | BATCH Response: ${sawtoothResponse.status} - ${sawtoothResponse.statusText}`,
       SEVERITY.SUCCESS
     );
+
     const responseCode = httpMethod === HTTP_METHODS.POST ? 201 : 200;
     const responseMessage = `${txName} ${
       httpMethod === HTTP_METHODS.POST ? "created" : "updated"
@@ -323,14 +423,18 @@ const buildObjectTransaction = (type, httpMethod, object) => {
  *
  * @param {HTTP_METHODS} httpMethod - PUT or POST (@see {@link HTTP_METHODS}).
  * @param {String} source - Endpoint source that invoked function (used for logging).
- * @param {Object} arrayOfObjects - Array of objects to be inserted into the blockchain.
+ * @param {Array<SawtoothTransaction>} arrayOfObjects - Array of objects to be inserted into the blockchain.
  * @returns {Promise<{ responseCode, msg, payload }| Error >} Promise of the batch post request. If successfully resolved, contains responseCode, msg, payload
  */
 const putBatch = (httpMethod, source, arrayOfObjects) => {
   const batch = buildBatch(...arrayOfObjects);
 
+  arrayOfObjects.forEach((tx) => {
+    const obj = JSON.parse(tx.payload);
+    deleteObjectInCache(obj.type, obj.address);
+  });
   logFormatted(`${source} | BATCH Request:`, SEVERITY.NOTIFY, batch);
-  return sendTransaction(batch).then((sawtoothResponse) => {
+  return sendBatch(batch).then((sawtoothResponse) => {
     logFormatted(
       `${source} | BATCH Response: ${sawtoothResponse.status} - ${sawtoothResponse.statusText}`,
       SEVERITY.SUCCESS
@@ -357,12 +461,12 @@ const putBatch = (httpMethod, source, arrayOfObjects) => {
 /**
  * Puts an object in the blockchain.
  *
- * @param {String} type - Type of object, such as TRANSACTION or USER (@see {@link TYPE}).
+ * @param {TYPE} type - Type of object, such as TRANSACTION or USER (@see {@link TYPE}).
  * @param {HTTP_METHODS} httpMethod - PUT or POST (@see {@link HTTP_METHODS}).
  * @param {String} source - Endpoint source that invoked function (used for logging).
  * @param {Request} req - Http request object.
  * @param {Response} res - Response object to handle Express request.
- * @return {Promise<{ responseCode, msg, payload }| Error >} Promise of the Sawtooth REST API request response.
+ * @returns {Promise<{ responseCode, msg, payload }| Error >} Promise of the Sawtooth REST API request response.
  */
 const putObject = (type, httpMethod, source, req, res) => {
   let txObject;
@@ -379,7 +483,7 @@ const putObject = (type, httpMethod, source, req, res) => {
 };
 
 //#endregion
-
+module.exports.configRedisCache = configRedisCache;
 module.exports.hash512 = hash512;
 module.exports.getTransactionAddress = getTransactionAddress;
 module.exports.getUserAddress = getUserAddress;
