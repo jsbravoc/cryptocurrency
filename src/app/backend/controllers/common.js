@@ -36,6 +36,12 @@ if (
     db: 0,
     ttl: 6000,
   });
+else
+  redisCache = {
+    get: () => Promise.resolve(undefined),
+    set: () => Promise.resolve(undefined),
+    del: () => Promise.resolve(undefined),
+  };
 //#region [AUXILIARY FUNCTIONS]
 
 /**
@@ -77,7 +83,6 @@ const getRedisCacheKey = (type, address) => `${type}-${address}`;
  */
 
 const storeObjectInCache = (type, address, object) => {
-  console.log("REDIS - Stored obj", type, address);
   return redisCache.set(
     getRedisCacheKey(type, address),
     JSON.stringify(object)
@@ -93,10 +98,10 @@ const storeObjectInCache = (type, address, object) => {
  */
 
 const retrieveObjectInCache = (type, address) => {
-  console.log("REDIS - Retrieved obj", type, address);
-  return redisCache
-    .get(getRedisCacheKey(type, address))
-    .then((result) => JSON.parse(result));
+  return redisCache.get(getRedisCacheKey(type, address)).then((result) => {
+    if (result === undefined) return result;
+    return JSON.parse(result);
+  });
 };
 
 /**
@@ -107,7 +112,6 @@ const retrieveObjectInCache = (type, address) => {
  */
 
 const deleteObjectInCache = (type, address) => {
-  console.log("REDIS - Deleted obj", type, address);
   return redisCache.del(getRedisCacheKey(type, address));
 };
 

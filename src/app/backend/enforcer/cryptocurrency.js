@@ -18,17 +18,13 @@ const { ERRORS } = require("../utils/errors");
  *
  * @param {String} address - Address of the transaction.
  * @param {Response} res- Express.js response object, used to access locals.
+ * @param {Boolean} isLastest - Boolean that indicates the transaction state (lastest or pending).
  * @returns {Promise<{transactionObj: Transaction, txObj: SawtoothTransaction}|null>}} Promise containing the transaction object and the updated transaction object if its validity has changed.
  */
-const updateInvalidTransaction = (address, res) => {
+const updateInvalidTransaction = (address, res, isLastest = true) => {
   return findByAddress(TYPE.TRANSACTION, address, false, res).then(
     (transaction) => {
-      if (
-        transaction &&
-        ((!transaction.pending &&
-          transaction.checkValidity() !== transaction.valid) ||
-          (transaction.pending && !transaction.checkValidity()))
-      ) {
+      if (transaction && !transaction.checkValidity()) {
         transaction.valid = transaction.checkValidity();
         return {
           transactionObj: transaction,
@@ -66,7 +62,7 @@ const updateInvalidUserTransactions = (address, transactions, res) => {
         : user.latest_transactions || []
       ).forEach((transaction) => {
         promises.push(
-          updateInvalidTransaction(transaction, res).then((response) => {
+          updateInvalidTransaction(transaction, res, true).then((response) => {
             if (response) {
               const { transactionObj, txObj } = response;
               requiresUpdate = true;
@@ -83,7 +79,7 @@ const updateInvalidUserTransactions = (address, transactions, res) => {
         : user.pending_transactions || []
       ).forEach((transaction) => {
         promises.push(
-          updateInvalidTransaction(transaction, res).then((response) => {
+          updateInvalidTransaction(transaction, res, false).then((response) => {
             if (response) {
               const { txObj } = response;
               requiresUpdate = true;

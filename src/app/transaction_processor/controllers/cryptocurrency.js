@@ -4,6 +4,7 @@ const {
   InternalError,
 } = require("sawtooth-sdk/processor/exceptions");
 const { logFormatted, SEVERITY } = require("../utils/logger");
+const Transaction = require("../models/Transaction");
 async function postTransaction(context, transaction, timeout) {
   let addresses = await context.setState(
     {
@@ -18,12 +19,13 @@ async function postTransaction(context, transaction, timeout) {
   if (addresses.length === 0) {
     throw new InternalError("State Error!");
   }
+
   logFormatted(
-    `Added transaction state ${transaction.address} -> ${getTransactionAddress(
-      transaction.address
-    )}`,
+    `Added transaction state ${transaction.address.slice(
+      -5
+    )} ... -> ${getTransactionAddress(transaction.address).slice(-5)}`,
     SEVERITY.SUCCESS,
-    transaction
+    new Transaction(transaction).toSimplifiedObject()
   );
 }
 

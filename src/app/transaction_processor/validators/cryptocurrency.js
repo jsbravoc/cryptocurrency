@@ -98,7 +98,7 @@ const inputValidation = (obj) => {
   return sanitizedObj;
 };
 
-const postValidationChain = (context, obj) => {
+const postTxValidationChain = (context, obj) => {
   return new Promise((resolve, reject) => {
     let sanitizedObj;
     try {
@@ -212,5 +212,160 @@ const postValidationChain = (context, obj) => {
   });
 };
 
+const putTxValidationChain = (context, obj) => {
+  return new Promise((resolve, reject) => {
+    let sanitizedObj;
+    try {
+      sanitizedObj = obj;
+      resolve(sanitizedObj);
+    } catch (error) {
+      reject(error);
+    }
+  }).then((sanitizedObj) => {
+    let validatedObjs = [
+      validateObjExistence(
+        context,
+        TYPE.TRANSACTION,
+        sanitizedObj.address,
+        true
+      ),
+    ];
+    //Note that updated transactions (but not approved nor rejected) don't require user reading access.
+    if (
+      sanitizedObj.pending === false &&
+      (!sanitizedObj.valid_thru ||
+        new Date(sanitizedObj.valid_thru) > new Date())
+    ) {
+      console.log("Obj", sanitizedObj);
+      validatedObjs.push(
+        validateObjExistence(context, TYPE.USER, sanitizedObj.recipient, true)
+      );
+      if (sanitizedObj.sender)
+        validatedObjs.push(
+          validateObjExistence(context, TYPE.USER, sanitizedObj.sender, true)
+        );
+    }
+
+    //Note that this are the same validations as in backend/validators/cryptocurrency.js
+    return Promise.all(validatedObjs)
+      .then(([existingTx, recipientUser, senderUser]) => {
+        console.log("sanitizedObj", sanitizedObj);
+        if (existingTx.pending !== true)
+          if (
+            existingTx.valid_thru &&
+            new Date(existingTx.valid_thru) > new Date()
+          )
+            return Promise.reject(
+              "ERRORS.TRANSACTION.LOGIC.TRANSACTION_IS_NOT_EXPIRED"
+            );
+          else if (!existingTx.valid_thru)
+            return Promise.reject(
+              "ERRORS.TRANSACTION.INPUT.TRANSACTION_IS_NOT_PENDING"
+            );
+        if (sanitizedObj.valid === true) {
+          if (recipientUser.active === false) {
+            return Promise.reject("ERRORS.USER.LOGIC.USER_IS_NOT_ACTIVE");
+          } else if (senderUser) {
+            if (senderUser.active === false) {
+              return Promise.reject("ERRORS.USER.LOGIC.USER_IS_NOT_ACTIVE");
+            } else if (
+              senderUser.permissions &&
+              senderUser.permissions.transfer_to &&
+              senderUser.permissions.transfer_to[sanitizedObj.recipient] ===
+                false
+            ) {
+              return Promise.reject(
+                "ERRORS.USER.LOGIC.USER_DOES_NOT_HAVE_TRANSFER_PERMISSIONS"
+              );
+            }
+            if (senderUser.balance < sanitizedObj.amount)
+              return Promise.reject("ERRORS.USER.INPUT.INSUFFICIENT_FUNDS");
+            if (
+              !Array.isArray(senderUser.latest_transactions) ||
+              senderUser.latest_transactions.length === 0
+            )
+              return Promise.reject("ERRORS.USER.INPUT.NO_TRANSACTIONS");
+
+            /**
+             * The following validations are TP specific.
+             * The backend API resolved the transaction request into a full (Sawtooth-wise) transaction, thus the full transaction can (and must)
+             * be validated by the TP.
+             */
+            if (
+              !sanitizedObj.supporting_transactions ||
+              !Array.isArray(sanitizedObj.supporting_transactions) ||
+              sanitizedObj.supporting_transactions.length === 0
+            )
+              return Promise.reject(
+                "ERRORS.TRANSACTION.INPUT.NO_SUPPORTING_TRANSACTIONS"
+              );
+            if (
+              Array.isArray(sanitizedObj.supporting_transactions) &&
+              sanitizedObj.supporting_transactions.length > 0
+            ) {
+              const validatedTxOrigin = [];
+              sanitizedObj.supporting_transactions.forEach((tx) => {
+                validatedTxOrigin.push(
+                  validateObjExistence(
+                    context,
+                    TYPE.TRANSACTION,
+                    tx,
+                    true
+                  ).then((transaction) => {
+                    if (transaction.recipient !== senderUser.address) {
+                      return Promise.reject(
+                        "ERRORS.TRANSACTION.LOGIC.TRANSACTION_OWNERSHIP_MISMATCH"
+                      );
+                    }
+                    return transaction;
+                  })
+                );
+              });
+              return Promise.all(validatedTxOrigin)
+                .then((supportingTransactions) => {
+                  let amountToFulfill = sanitizedObj.amount;
+                  supportingTransactions.forEach((tx) => {
+                    amountToFulfill -= tx.amount;
+                  });
+                  if (amountToFulfill > 0) {
+                    return Promise.reject(
+                      "ERRORS.TRANSACTION.LOGIC.INSUFFICIENT_SUPPORTING_TRANSACTIONS"
+                    );
+                  }
+                })
+                .catch((err) => {
+                  return Promise.reject(err);
+                });
+            }
+          } else if (
+            recipientUser &&
+            recipientUser.permissions &&
+            recipientUser.permissions.coinbase !== true
+          ) {
+            return Promise.reject(
+              "ERRORS.USER.LOGIC.USER_DOES_NOT_HAVE_PERMISSIONS"
+            );
+          }
+        } else {
+          //Note that expiring transactions can be updated. Thus, invalid transactions can be supported if and only if its valid_thru date is after the current date.
+          if (
+            (!sanitizedObj.valid_thru ||
+              new Date(existingTx.valid_thru) > new Date()) &&
+            Array.isArray(sanitizedObj.supporting_transactions) &&
+            sanitizedObj.supporting_transactions.length > 0
+          )
+            return Promise.reject(
+              "ERRORS.TRANSACTION.INPUT.INVALID_SUPPORTED_TRANSACTION"
+            );
+        }
+      })
+      .catch((err) => {
+        console.log("Catched error: ", err);
+        return Promise.reject(err);
+      });
+  });
+};
+
 module.exports.inputValidation = inputValidation;
-module.exports.postValidationChain = postValidationChain;
+module.exports.postTxValidationChain = postTxValidationChain;
+module.exports.putTxValidationChain = putTxValidationChain;

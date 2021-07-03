@@ -17,7 +17,8 @@ const {
 } = require("sawtooth-sdk/processor/exceptions");
 const {
   inputValidation,
-  postValidationChain,
+  postTxValidationChain,
+  putTxValidationChain,
 } = require("./validators/cryptocurrency");
 const { postTransaction } = require("./controllers/cryptocurrency");
 const { postUser } = require("./controllers/users");
@@ -31,10 +32,9 @@ const handlers = {
         SEVERITY.NOTIFY
       );
       try {
-        await postValidationChain(context, txObject);
+        await postTxValidationChain(context, txObject);
         await postTransaction(context, txObject);
       } catch (error) {
-        console.error(error);
         throw new InvalidTransaction(error);
       }
     },
@@ -43,7 +43,12 @@ const handlers = {
         `Handling put transaction with address ${txObject.address}`,
         SEVERITY.NOTIFY
       );
-      await postTransaction(context, txObject);
+      try {
+        await putTxValidationChain(context, txObject);
+        await postTransaction(context, txObject);
+      } catch (error) {
+        throw new InvalidTransaction(error);
+      }
     },
   },
   [TYPE.USER]: {

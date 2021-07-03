@@ -353,11 +353,16 @@ const updateTransaction = (req, res) => {
 /**
  * Puts a transaction in the blockchain, updating the users involved in it.
  *
- * @param {Transaction} req - Express request object.
+ *
+ * @param {Transaction} transaction - Transaction object to insert into the blockchain.
+ * @param {HTTP_METHODS} method - HTTP method to use.
+ * @param {Object} options - Options to disable the sender and/or recipient with the transaction.
+ * @param {Boolean} options.disableSender - If true, the sender will be disabled upon the transaction creation.
+ * @param {Boolean} options.disableRecipient - If true, the recipient will be disabled upon the transaction creation.
  * @param {Response} res - Response object to handle Express request.
- * @param {String} req.params.address - Transaction address to update.
- * @param {Boolean} [req.query.approve] - If true, the transaction will be approved, otherwise it will be rejected.
- * @post Returns the transaction in res object. If an error happens, response object has the error.
+ * @param {Request} req - Express request object.
+ * @param {Response} res - Response object to handle Express request.
+ * @post Puts the transaction batch in the blockchain.
  */
 const putTransaction = (
   transaction,

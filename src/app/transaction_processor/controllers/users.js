@@ -4,6 +4,7 @@ const {
   InternalError,
 } = require("sawtooth-sdk/processor/exceptions");
 const { logFormatted, SEVERITY } = require("../utils/logger");
+const User = require("../models/User");
 async function postUser(context, user, timeout) {
   let addresses = await context.setState(
     {
@@ -17,11 +18,11 @@ async function postUser(context, user, timeout) {
   }
 
   logFormatted(
-    `Added transaction state ${user.address} -> ${getUserAddress(
+    `Added transaction state ${user.address.slice(-5)}... -> ${getUserAddress(
       user.address
-    )}`,
+    ).slice(-5)}`,
     SEVERITY.SUCCESS,
-    user
+    new User(user).toSimplifiedObject()
   );
 }
 

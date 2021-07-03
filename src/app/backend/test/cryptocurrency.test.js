@@ -231,7 +231,6 @@ describe(`Cryptocurrency Test Suite`, () => {
     const createdUserCallback = ({ res, alias, callback }) => {
       const address = users[alias].address;
       return expect(res).to.satisfy((res) => {
-        console.log(res.body);
         createdVariables.transactions.user[address] = res.body;
         if (res.statusCode === 201) {
           console.log(
@@ -259,7 +258,6 @@ describe(`Cryptocurrency Test Suite`, () => {
         ? users[senderAlias].address
         : undefined;
       return expect(res).to.satisfy((res) => {
-        console.log(res.body);
         if (!senderAlias && recipientAddress)
           createdVariables.transactions.transaction[recipientAddress].coinbase =
             res.body;
@@ -2768,45 +2766,48 @@ describe(`Cryptocurrency Test Suite`, () => {
       });
     });
   });
-  describe(`Redis cache fallback`, function () {
-    this.timeout(8000);
-    this.slow(5000);
-    describe(`${CRYPTO_ENDPOINT} fallback test`, () => {
-      describe(`Redis fallback requests`, () => {
-        describe(`GET ${CRYPTO_ENDPOINT}/:address`, () => {
-          it("Should return the transaction even if it has no connection to Sawtooth REST API", (done) => {
-            chai
-              .request(API_URL)
-              .get(
-                `${CRYPTO_ENDPOINT}/${
-                  createdVariables.transactions.transaction[users.W1000.address]
-                    .coinbase.payload.address
-                }`
-              )
-              .end(function (err, res) {
-                expect(res).to.have.status(200);
-                done();
-              });
+  if (process.env.USE_REDIS === "true") {
+    describe(`Redis cache fallback`, function () {
+      this.timeout(8000);
+      this.slow(5000);
+      describe(`${CRYPTO_ENDPOINT} fallback test`, () => {
+        describe(`Redis fallback requests`, () => {
+          describe(`GET ${CRYPTO_ENDPOINT}/:address`, () => {
+            it("Should return the transaction even if it has no connection to Sawtooth REST API", (done) => {
+              chai
+                .request(API_URL)
+                .get(
+                  `${CRYPTO_ENDPOINT}/${
+                    createdVariables.transactions.transaction[
+                      users.W1000.address
+                    ].coinbase.payload.address
+                  }`
+                )
+                .end(function (err, res) {
+                  expect(res).to.have.status(200);
+                  done();
+                });
+            });
+          });
+        });
+      });
+      describe(`${USERS_ENDPOINT} fallback test`, () => {
+        describe(`Redis fallback requests`, () => {
+          describe(`GET ${USERS_ENDPOINT}/:address`, () => {
+            it("Should return the user even if it has no connection to Sawtooth REST API", (done) => {
+              chai
+                .request(API_URL)
+                .get(`${USERS_ENDPOINT}/${users.W1000.address}`)
+                .end(function (err, res) {
+                  expect(res).to.have.status(200);
+                  done();
+                });
+            });
           });
         });
       });
     });
-    describe(`${USERS_ENDPOINT} fallback test`, () => {
-      describe(`Redis fallback requests`, () => {
-        describe(`GET ${USERS_ENDPOINT}/:address`, () => {
-          it("Should return the user even if it has no connection to Sawtooth REST API", (done) => {
-            chai
-              .request(API_URL)
-              .get(`${USERS_ENDPOINT}/${users.W1000.address}`)
-              .end(function (err, res) {
-                expect(res).to.have.status(200);
-                done();
-              });
-          });
-        });
-      });
-    });
-  });
+  }
   describe(`Hyperledger Sawtooth Error Tests`, function () {
     this.timeout(8000);
     this.slow(5000);
