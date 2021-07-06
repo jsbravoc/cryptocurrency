@@ -18,10 +18,9 @@ const { ERRORS } = require("../utils/errors");
  *
  * @param {String} address - Address of the transaction.
  * @param {Response} res- Express.js response object, used to access locals.
- * @param {Boolean} isLastest - Boolean that indicates the transaction state (lastest or pending).
  * @returns {Promise<{transactionObj: Transaction, txObj: SawtoothTransaction}|null>}} Promise containing the transaction object and the updated transaction object if its validity has changed.
  */
-const updateInvalidTransaction = (address, res, isLastest = true) => {
+const updateInvalidTransaction = (address, res) => {
   return findByAddress(TYPE.TRANSACTION, address, false, res).then(
     (transaction) => {
       if (transaction && !transaction.checkValidity()) {

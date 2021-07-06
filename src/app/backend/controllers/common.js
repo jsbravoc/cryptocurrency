@@ -47,19 +47,19 @@ if (
 /**
  * Sets the redis cache store.
  *
- * @param {cacheManager.Cache | cacheManager.StoreConfig } cacheManager - Redis cache manager.
+ * @param {cacheManager.Cache | cacheManager.StoreConfig } cacheConfig - Redis cache manager.
  * @param {Boolean} useRedisStore - If false, redisCache can be set to any object.
  */
 
-const configRedisCache = (cacheManager, useRedisStore = true) => {
+const configRedisCache = (cacheConfig, useRedisStore = true) => {
   if (!useRedisStore) {
-    redisCache = cacheManager;
+    redisCache = cacheConfig;
   } else {
     redisCache = cacheManager.caching({
       store: redisStore,
       db: 0,
       ttl: 6000,
-      ...cacheManager,
+      ...cacheConfig,
     });
   }
 };

@@ -25,6 +25,7 @@ const users = {
   ToDeleteW1000: new User({ address: uuidv4() }),
   ToDelete: new User({ address: uuidv4() }),
   Inactive: new User({ address: uuidv4() }),
+  Redis: new User({ address: uuidv4() }),
 };
 const createdVariables = {
   transactions: {
@@ -36,6 +37,7 @@ const createdVariables = {
       [users.ToDeleteW1000.address]: {},
       [users.ToDelete.address]: {},
       [users.Inactive.address]: {},
+      [users.Redis.address]: {},
     },
     transaction: {
       [users.W1000.address]: {},
@@ -45,6 +47,7 @@ const createdVariables = {
       [users.ToDeleteW1000.address]: {},
       [users.ToDelete.address]: {},
       [users.Inactive.address]: {},
+      [users.Redis.address]: {},
     },
   },
 };
@@ -250,7 +253,6 @@ describe(`Cryptocurrency Test Suite`, () => {
       pending,
       signature,
       res,
-      address,
       callback,
     }) => {
       const recipientAddress = users[recipientAlias].address;
@@ -2750,15 +2752,14 @@ describe(`Cryptocurrency Test Suite`, () => {
           });
         });
         describe("Change environment variable", () => {
-          it("SAWTOOTH_REST environment variable should be changed", (done) => {
-            const newUrl = `http://${uuidv4()}`;
+          it("USE_REDIS environment variable should be changed", (done) => {
             chai
               .request(API_URL)
               .post(`${CONFIG_ENDPOINT}`)
-              .send({ SAWTOOTH_REST: newUrl })
+              .send({ USE_REDIS: "true" })
               .end(function (err, res) {
                 expect(res).to.have.status(200);
-                expect(res.body.variables.SAWTOOTH_REST).to.eq(newUrl);
+                expect(res.body.variables.USE_REDIS).to.eq("true");
                 done();
               });
           });
@@ -2766,10 +2767,92 @@ describe(`Cryptocurrency Test Suite`, () => {
       });
     });
   });
+
+  describe(`Functionality without Redis`, function () {
+    this.timeout(8000);
+    this.slow(5000);
+    before(function (done) {
+      this.timeout(8000);
+      chai
+        .request(API_URL)
+        .post(`${CONFIG_ENDPOINT}`)
+        .send({ USE_REDIS: "false" })
+        .end(function (err, res) {
+          expect(res).to.have.status(200);
+          expect(res.body.variables.USE_REDIS).to.eq("false");
+          done();
+        });
+    });
+    describe(`${CRYPTO_ENDPOINT}`, () => {
+      describe(`Wrap Redis' set & get function`, () => {
+        describe(`GET ${CRYPTO_ENDPOINT}/:address`, () => {
+          it("Should return the transaction specified", (done) => {
+            chai
+              .request(API_URL)
+              .get(
+                `${CRYPTO_ENDPOINT}/${
+                  createdVariables.transactions.transaction[users.W1000.address]
+                    .coinbase.payload.address
+                }`
+              )
+              .end(function (err, res) {
+                expect(res).to.have.status(200);
+                done();
+              });
+          });
+        });
+      });
+      describe(`Wrap Redis' del function`, () => {
+        describe(`POST ${USERS_ENDPOINT}`, () => {
+          it("Should create the user specified", (done) => {
+            createUser({
+              alias: "Redis",
+              coinbasePermission: true,
+              active: true,
+              callback: ({ res }) => {
+                expect(res).to.have.status(201);
+                done();
+              },
+            });
+          });
+        });
+      });
+    });
+    describe(`${USERS_ENDPOINT} fallback test`, () => {
+      describe(`Redis fallback requests`, () => {
+        describe(`GET ${USERS_ENDPOINT}/:address`, () => {
+          it("Should return the user even if it has no connection to Sawtooth REST API", (done) => {
+            chai
+              .request(API_URL)
+              .get(`${USERS_ENDPOINT}/${users.W1000.address}`)
+              .end(function (err, res) {
+                expect(res).to.have.status(200);
+                done();
+              });
+          });
+        });
+      });
+    });
+  });
+
   if (process.env.USE_REDIS === "true") {
     describe(`Redis cache fallback`, function () {
       this.timeout(8000);
       this.slow(5000);
+      before(function (done) {
+        const newUrl = `http://${uuidv4()}.com`;
+        this.timeout(8000);
+        chai
+          .request(API_URL)
+          .post(`${CONFIG_ENDPOINT}`)
+          .send({ SAWTOOTH_REST: newUrl, USE_REDIS: "true" })
+          .end(function (err, res) {
+            expect(res).to.have.status(200);
+            expect(res.body.variables.SAWTOOTH_REST).to.eq(newUrl);
+            expect(res.body.variables.USE_REDIS).to.eq("true");
+            done();
+          });
+      });
       describe(`${CRYPTO_ENDPOINT} fallback test`, () => {
         describe(`Redis fallback requests`, () => {
           describe(`GET ${CRYPTO_ENDPOINT}/:address`, () => {
@@ -2812,13 +2895,15 @@ describe(`Cryptocurrency Test Suite`, () => {
     this.timeout(8000);
     this.slow(5000);
     before(function (done) {
+      const newUrl = `http://${uuidv4()}.com`;
       this.timeout(8000);
       chai
         .request(API_URL)
         .post(`${CONFIG_ENDPOINT}`)
-        .send({ USE_REDIS: "false" })
+        .send({ SAWTOOTH_REST: newUrl, USE_REDIS: "false" })
         .end(function (err, res) {
           expect(res).to.have.status(200);
+          expect(res.body.variables.SAWTOOTH_REST).to.eq(newUrl);
           expect(res.body.variables.USE_REDIS).to.eq("false");
           done();
         });
