@@ -21,8 +21,13 @@ const SawtoothTransaction = require("../models/SawtoothTransaction");
 const cacheManager = require("cache-manager");
 const redisStore = require("cache-manager-redis");
 
-let redisCache;
 //Wrap redisCache functionality
+let redisCache = {
+  get: () => Promise.resolve(undefined),
+  set: () => Promise.resolve(undefined),
+  del: () => Promise.resolve(undefined),
+};
+
 if (
   process.env.USE_REDIS === "true" &&
   process.env.REDIS_HOST !== undefined &&
@@ -36,12 +41,7 @@ if (
     db: 0,
     ttl: 6000,
   });
-else
-  redisCache = {
-    get: () => Promise.resolve(undefined),
-    set: () => Promise.resolve(undefined),
-    del: () => Promise.resolve(undefined),
-  };
+
 //#region [AUXILIARY FUNCTIONS]
 
 /**
