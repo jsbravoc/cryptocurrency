@@ -32,7 +32,11 @@ if (
   process.env.USE_REDIS === "true" &&
   process.env.REDIS_HOST !== undefined &&
   process.env.REDIS_PORT !== undefined
-)
+) {
+  //Test redisCache functions before redefining. Note that get, set, del are tested individually.
+  redisCache.get();
+  redisCache.set();
+  redisCache.del();
   redisCache = cacheManager.caching({
     store: redisStore,
     host: process.env.REDIS_HOST,
@@ -41,6 +45,7 @@ if (
     db: 0,
     ttl: 6000,
   });
+}
 
 //#region [AUXILIARY FUNCTIONS]
 
