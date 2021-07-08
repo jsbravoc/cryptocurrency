@@ -66,7 +66,7 @@
             
             <nav>
                 
-                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Modules</h3><ul><li><a href="module-config.html">config</a></li><li><a href="module-controllers_common.html">controllers/common</a></li><li><a href="module-controllers_cryptocurrency.html">controllers/cryptocurrency</a></li><li><a href="module-controllers_users.html">controllers/users</a></li><li><a href="module-enforcer_cryptocurrency.html">enforcer/cryptocurrency</a></li><li><a href="module-routers_cryptocurrency.html">routers/cryptocurrency</a></li><li><a href="module-routers_dev_config.html">routers/dev/config</a></li><li><a href="module-routers_enforcer.html">routers/enforcer</a></li><li><a href="module-routers_users.html">routers/users</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-routers_cryptocurrency-cryptoRouter.html">cryptoRouter</a></li><li><a href="module-routers_dev_config-devConfig.html">devConfig</a></li><li><a href="module-routers_enforcer-enforcerRouter.html">enforcerRouter</a></li><li><a href="module-routers_users-usersRouter.html">usersRouter</a></li></ul><h3>Classes</h3><ul><li><a href="Asset.html">Asset</a></li><li><a href="BaseModel.html">BaseModel</a></li><li><a href="Permissions.html">Permissions</a></li><li><a href="Transaction.html">Transaction</a></li><li><a href="User.html">User</a></li></ul><h3>Global</h3><ul><li><a href="global.html#http">http</a></li><li><a href="global.html#HTTP_METHODS">HTTP_METHODS</a></li><li><a href="global.html#inputValidation">inputValidation</a></li><li><a href="global.html#normalizePort">normalizePort</a></li><li><a href="global.html#onError">onError</a></li><li><a href="global.html#port">port</a></li><li><a href="global.html#server">server</a></li><li><a href="global.html#TYPE">TYPE</a></li><li><a href="global.html#USER_TYPE">USER_TYPE</a></li><li><a href="global.html#validate">validate</a></li><li><a href="global.html#validateAssetExistence">validateAssetExistence</a></li><li><a href="global.html#validateExistingTransaction">validateExistingTransaction</a></li><li><a href="global.html#validatePendingTransaction">validatePendingTransaction</a></li><li><a href="global.html#validateTransactionAddress">validateTransactionAddress</a></li><li><a href="global.html#validateTransactionUpdateRequest">validateTransactionUpdateRequest</a></li><li><a href="global.html#validateUserCreation">validateUserCreation</a></li></ul></div>
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Modules</h3><ul><li><a href="module-config.html">config</a></li><li><a href="module-controllers_common.html">controllers/common</a></li><li><a href="module-controllers_cryptocurrency.html">controllers/cryptocurrency</a></li><li><a href="module-controllers_sawtooth.html">controllers/sawtooth</a></li><li><a href="module-controllers_users.html">controllers/users</a></li><li><a href="module-enforcer_cryptocurrency.html">enforcer/cryptocurrency</a></li><li><a href="module-routers_cryptocurrency.html">routers/cryptocurrency</a></li><li><a href="module-routers_dev_config.html">routers/dev/config</a></li><li><a href="module-routers_enforcer.html">routers/enforcer</a></li><li><a href="module-routers_users.html">routers/users</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-routers_cryptocurrency-cryptoRouter.html">cryptoRouter</a></li><li><a href="module-routers_dev_config-devConfig.html">devConfig</a></li><li><a href="module-routers_enforcer-enforcerRouter.html">enforcerRouter</a></li><li><a href="module-routers_users-usersRouter.html">usersRouter</a></li></ul><h3>Classes</h3><ul><li><a href="BaseModel.html">BaseModel</a></li><li><a href="Permissions.html">Permissions</a></li><li><a href="SawtoothBatch.html">SawtoothBatch</a></li><li><a href="SawtoothTransaction.html">SawtoothTransaction</a></li><li><a href="Transaction.html">Transaction</a></li><li><a href="User.html">User</a></li></ul><h3>Global</h3><ul><li><a href="global.html#http">http</a></li><li><a href="global.html#HTTP_METHODS">HTTP_METHODS</a></li><li><a href="global.html#inputValidation">inputValidation</a></li><li><a href="global.html#normalizePort">normalizePort</a></li><li><a href="global.html#onError">onError</a></li><li><a href="global.html#port">port</a></li><li><a href="global.html#server">server</a></li><li><a href="global.html#TYPE">TYPE</a></li><li><a href="global.html#USER_TYPE">USER_TYPE</a></li><li><a href="global.html#validate">validate</a></li><li><a href="global.html#validateExistingTransaction">validateExistingTransaction</a></li><li><a href="global.html#validateObjExistence">validateObjExistence</a></li><li><a href="global.html#validatePendingTransaction">validatePendingTransaction</a></li><li><a href="global.html#validateTransactionAddress">validateTransactionAddress</a></li><li><a href="global.html#validateTransactionUpdateRequest">validateTransactionUpdateRequest</a></li><li><a href="global.html#validateUserCreation">validateUserCreation</a></li></ul></div>
                 
             </nav>
         </div>
@@ -512,18 +512,18 @@
         
         <span class="code-name">
             
-                updateInvalidTransaction<span class="signature">(address, res-)</span><span class="type-signature"> &rarr; {Promise.&lt;({transactionObj: <a href="Transaction.html">Transaction</a>, assetObj: <a href="Asset.html">Asset</a>}|null)>}</span>
+                updateInvalidTransaction<span class="signature">(address, res-)</span><span class="type-signature"> &rarr; {Promise.&lt;({transactionObj: <a href="Transaction.html">Transaction</a>, txObj: <a href="SawtoothTransaction.html">SawtoothTransaction</a>}|null)>}</span>
             
         </span>
     </h4>
     
 
     
-    <p class="summary">Returns the updated transaction object &amp; asset in case its validity has changed.</p>
+    <p class="summary">Returns the updated transaction object &amp; transaction object in case its validity has changed.</p>
     
     
     <div class="description">
-        <p>Returns the updated transaction object &amp; asset in case its validity has changed.
+        <p>Returns the updated transaction object &amp; transaction object in case its validity has changed.
 This mainly handles expiring transactions (with valid_thru property).</p>
     </div>
     
@@ -682,13 +682,13 @@ This mainly handles expiring transactions (with valid_thru property).</p>
 
 <div class="columns">
     
-    <div class='param-desc column is-7'><p>} Promise containing the asset and the updated transaction object if its validity has changed.</p></div>
+    <div class='param-desc column is-7'><p>} Promise containing the transaction object and the updated transaction object if its validity has changed.</p></div>
     
     
     <div class='column is-5 has-text-left'>
         <label>Type: </label>
         
-<span class="param-type">Promise.&lt;({transactionObj: <a href="Transaction.html">Transaction</a>, assetObj: <a href="Asset.html">Asset</a>}|null)></span>
+<span class="param-type">Promise.&lt;({transactionObj: <a href="Transaction.html">Transaction</a>, txObj: <a href="SawtoothTransaction.html">SawtoothTransaction</a>}|null)></span>
 
 
     </div>
@@ -1034,7 +1034,7 @@ This call increment the processing time exponentially, and (if enough users &amp
         
         <span class="code-name">
             
-                updateInvalidUserTransactions<span class="signature">(address, transactions, res-)</span><span class="type-signature"> &rarr; {Promise.&lt;Array.&lt;<a href="Asset.html">Asset</a>>>}</span>
+                updateInvalidUserTransactions<span class="signature">(address, transactions, res-)</span><span class="type-signature"> &rarr; {Promise.&lt;Array.&lt;<a href="SawtoothTransaction.html">SawtoothTransaction</a>>>}</span>
             
         </span>
     </h4>
@@ -1229,13 +1229,13 @@ This mainly handles expiring transactions (with valid_thru property).</p>
 
 <div class="columns">
     
-    <div class='param-desc column is-7'><p>Promise containing a list of assets to post to the blockchain.</p></div>
+    <div class='param-desc column is-7'><p>Promise containing a list of transactions to post to the blockchain.</p></div>
     
     
     <div class='column is-5 has-text-left'>
         <label>Type: </label>
         
-<span class="param-type">Promise.&lt;Array.&lt;<a href="Asset.html">Asset</a>>></span>
+<span class="param-type">Promise.&lt;Array.&lt;<a href="SawtoothTransaction.html">SawtoothTransaction</a>>></span>
 
 
     </div>

@@ -11,7 +11,8 @@
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "program": "${workspaceFolder}/src/app/backend/bin/www.js"
+           "program": "${workspaceFolder}/src/app/backend/bin/www.js"
+           // "program": "${workspaceFolder}/src/app/transaction_processor/index.js"
         }
     ]
 }

@@ -4,14 +4,14 @@ const { ERRORS } = require("../utils/errors");
 const {
   validate,
   createError,
-  validateAssetExistence,
+  validateObjExistence,
   createErrorObj,
 } = require("./common");
 const { findByAddress } = require("../controllers/common");
 const Transaction = require("../models/Transaction");
 const { MAXIMUM_FLOAT_PRECISION } = require("../utils/constants");
 const { getPublicKey } = require("../utils/signature");
-const { createSignature } = require("../controllers/cryptocurrency");
+const { createAddress } = require("../controllers/cryptocurrency");
 /**
  * Verifies if a transaction's request body is valid.
  * Conditions:
@@ -74,6 +74,7 @@ const inputValidation = validate([
     .trim()
     .bail(),
   body("sender").optional({ checkFalsy: true, checkNull: true }).trim(),
+  body("creator").optional({ checkFalsy: true, checkNull: true }).trim(),
   body("valid_thru")
     .optional({ checkFalsy: true, checkNull: true })
     .isISO8601()
@@ -146,7 +147,7 @@ const validateExistingTransaction = (
   shouldExist,
   { location = "body" } = null
 ) => {
-  return validateAssetExistence(
+  return validateObjExistence(
     TYPE.TRANSACTION,
     address,
     shouldExist,
@@ -165,11 +166,9 @@ const validateExistingTransaction = (
 };
 
 const verifyPostTransaction = (req, res, next) => {
-  const promises = [
-    findByAddress(TYPE.USER, req.body.recipient, false, false, res),
-  ];
+  const promises = [findByAddress(TYPE.USER, req.body.recipient, false, res)];
   if (req.body.sender) {
-    promises.push(findByAddress(TYPE.USER, req.body.sender, false, false, res));
+    promises.push(findByAddress(TYPE.USER, req.body.sender, false, res));
   }
   return Promise.all(promises).then(([recipientUser, senderUser]) => {
     if (!recipientUser) {
@@ -233,27 +232,13 @@ const verifyPostTransaction = (req, res, next) => {
             value: req.body.sender,
           },
         });
-      } /*
-        This cannot happen. Check utils/errors/index
-         else if (
-          !Array.isArray(senderUser.latest_transactions) ||
-          senderUser.latest_transactions.length === 0
-        ) {
-          return createError(req, res, {
-            error: ERRORS.USER.INPUT.NO_TRANSACTIONS,
-            params: {
-              address: req.body.sender,
-              param: "sender",
-              value: req.body.sender,
-            },
-          });
-        } */ else {
+      } else {
         let amountToFulfill = req.body.amount;
         let actualBalance = 0;
         const lastestTxPromises = [];
         (senderUser.latest_transactions || []).forEach((txid) => {
           lastestTxPromises.push(
-            findByAddress(TYPE.TRANSACTION, txid, false, false, res).then(
+            findByAddress(TYPE.TRANSACTION, txid, false, res).then(
               (supportingTransaction) => {
                 amountToFulfill -= supportingTransaction.amount;
                 actualBalance += supportingTransaction.amount;
@@ -268,7 +253,7 @@ const verifyPostTransaction = (req, res, next) => {
 
           (senderUser.pending_transactions || []).forEach((txid) => {
             pendingTxPromises.push(
-              findByAddress(TYPE.TRANSACTION, txid, false, false, res).then(
+              findByAddress(TYPE.TRANSACTION, txid, false, res).then(
                 (pendingTransaction) => {
                   //The user created a pending transaction, owing money to pending's transaction recipient (until approved or rejected)
                   if (
@@ -331,7 +316,7 @@ const verifyPostTransaction = (req, res, next) => {
  */
 const validatePendingTransaction = async (req, res, next) => {
   const { address } = req.params;
-  return findByAddress(TYPE.TRANSACTION, address, false, false, res).then(
+  return findByAddress(TYPE.TRANSACTION, address, false, res).then(
     (transaction) => {
       if (transaction.pending) {
         return next();
@@ -367,7 +352,6 @@ const validateTransactionSignature = (req, res, next) => {
     return findByAddress(
       TYPE.USER,
       creator || sender || recipient,
-      false,
       false,
       res
     ).then((user) => {
@@ -418,7 +402,7 @@ const validateTransactionApproval = (req, res, next) => {
     });
   }
 
-  return findByAddress(TYPE.TRANSACTION, address, false, false, res).then(
+  return findByAddress(TYPE.TRANSACTION, address, false, res).then(
     (transaction) => {
       const signatureObj = { approve: approve === "true" };
       if (req.body.description) {
@@ -431,13 +415,11 @@ const validateTransactionApproval = (req, res, next) => {
       if (expectedPublicKey) {
         const promises = [];
 
-        promises.push(
-          findByAddress(TYPE.USER, transaction.sender, false, false, res)
-        );
+        promises.push(findByAddress(TYPE.USER, transaction.sender, false, res));
         //transaction can be rejected by recipient
         if (approve === "false")
           promises.push(
-            findByAddress(TYPE.USER, transaction.recipient, false, false, res)
+            findByAddress(TYPE.USER, transaction.recipient, false, res)
           );
         return Promise.all(promises).then(([sender, recipient]) => {
           if (
@@ -504,7 +486,7 @@ const validateTransactionUpdate = (req, res, next) => {
         propertyName: "description",
       },
     });
-  return findByAddress(TYPE.TRANSACTION, address, false, false, res).then(
+  return findByAddress(TYPE.TRANSACTION, address, false, res).then(
     (transaction) => {
       const expectedPublicKey = getPublicKey(
         JSON.stringify({ description }),
@@ -512,8 +494,8 @@ const validateTransactionUpdate = (req, res, next) => {
       );
       if (expectedPublicKey) {
         const promises = [
-          findByAddress(TYPE.USER, transaction.creator, false, false, res),
-          findByAddress(TYPE.USER, transaction.sender, false, false, res),
+          findByAddress(TYPE.USER, transaction.creator, false, res),
+          findByAddress(TYPE.USER, transaction.sender, false, res),
         ];
         return Promise.all(promises).then(([creator, sender]) => {
           if (
@@ -558,7 +540,7 @@ module.exports.verifyPostTransaction = [
       req,
       res,
       next,
-      createSignature(req.body.signature, req.body.creationDate),
+      createAddress(req.body.signature, req.body.creationDate),
       false,
       {
         location: "body",

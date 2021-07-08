@@ -8,7 +8,7 @@ const { SEVERITY, logFormatted } = require("../utils/logger");
  * Validates an array of validations using express-validator.
  *
  * @param {Array} validations - Array of validation Promises.
- * @return {Function} Next callback if there was not any validation errors, void otherwise (response object will contain the validation errors).
+ * @returns {Function} Next callback if there was not any validation errors, void otherwise (response object will contain the validation errors).
  */
 const validate = (validations) => (req, res, next) => {
   return Promise.all(validations.map((validation) => validation.run(req))).then(
@@ -60,20 +60,20 @@ const createError = (
 };
 
 /**
- * Validates if a asset exists in the blockchain.
+ * Validates if a object exists in the blockchain.
  *
- * @param {String} type - Type of asset, @see TYPE
- * @param {String} txid - Asset unique identification (before calculated address)
- * @param {Boolean} shouldExist - Represents if the asset should or should not exist, used to manage error.
+ * @param {String} type - Type of object, @see TYPE
+ * @param {String} txid - Transaction unique identification (before calculated address)
+ * @param {Boolean} shouldExist - Represents if the object should or should not exist, used to manage error.
  * @param {Request} req - Express.js request object.
  * @param {Response} res - Express.js response object.
- * @return {Promise} Promise rejection if:
+ * @returns {Promise} Promise rejection if:
  *   The type was missing
- *   The asset exists and it should not exist
- *   The asset does not exist and should exist
+ *   The object exists and it should not exist
+ *   The object does not exist and should exist
  *  Otherwise resolves the obj.
  */
-const validateAssetExistence = (
+const validateObjExistence = (
   type,
   txid,
   shouldExist,
@@ -95,16 +95,15 @@ const validateAssetExistence = (
       break;
   }
   if (txid && txid !== "") {
-    return findByAddress(type, txid, false, false, res)
-      .then((existingAsset) => {
-        const expectedToExist = shouldExist && existingAsset === null;
-        const notExpectedToExist = !shouldExist && existingAsset !== null;
+    return findByAddress(type, txid, false, res)
+      .then((existingObj) => {
+        const expectedToExist = shouldExist && existingObj === null;
+        const notExpectedToExist = !shouldExist && existingObj !== null;
         if (expectedToExist || notExpectedToExist) {
           const errorMsg = `${type.toProperCase()} with address {${txid}} ${
             expectedToExist ? "does not" : "already"
           } exist${expectedToExist ? "" : "s"}`;
           logFormatted(errorMsg, SEVERITY.ERROR);
-          //      return Promise.reject(errorMsg);
           let errorObj;
           switch (type) {
             case TYPE.TRANSACTION:
@@ -157,7 +156,7 @@ const validateAssetExistence = (
           });
         }
         const obj = {};
-        obj[type] = existingAsset;
+        obj[type] = existingObj;
         return Promise.resolve(obj);
       })
       .catch((err) => {
@@ -185,7 +184,7 @@ const validateAssetExistence = (
     );
 };
 
-module.exports.validateAssetExistence = validateAssetExistence;
+module.exports.validateObjExistence = validateObjExistence;
 module.exports.validate = validate;
 module.exports.createError = createError;
 module.exports.createErrorObj = createErrorObj;

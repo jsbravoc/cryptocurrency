@@ -6,10 +6,10 @@ const { SEVERITY, logFormatted } = require("../utils/logger");
 
 const { HTTP_METHODS, TYPE } = require("../utils/constants");
 const {
-  findAllAssets,
+  findAllObjects,
   findByAddress,
-  putAsset,
-  _putAsset,
+  putObject,
+  _putObject,
   hash512,
 } = require("./common");
 
@@ -30,14 +30,10 @@ const { ERRORS } = require("../utils/errors");
  * @param {Boolean} [removeSignature] - Boolean that indicates if the signature should be removed.
  * @param {Boolean} [removeType] - Boolean that indicates if the type should be removed.
  * @param {Response} [res] - Express.js response object, used to access locals.
- * @return {Promise<User|null>} Promise containing the user object or null if not found.
+ * @returns {Promise<User|null>} Promise containing the user object or null if not found.
  */
-const findUser = (
-  address,
-  removeSignature = true,
-  removeType = true,
-  res = null
-) => findByAddress(TYPE.USER, address, removeSignature, removeType, res);
+const findUser = (address, removeType = true, res = null) =>
+  findByAddress(TYPE.USER, address, removeType, res);
 
 /**
  * Updates a user in the blockchain.
@@ -45,11 +41,10 @@ const findUser = (
  * @param {User} user - The user to update.
  * @param {Response} res - Express.js response object, used to access locals.
  * @param {String} [source] - Source function that invoked the request.
- * @return {Promise} Promise of the sawtooth REST API request response.
+ * @returns {Promise} Promise of the sawtooth REST API request response.
  */
-// eslint-disable-next-line no-unused-vars
 const _updateUser = (user, res, source = "[LOCAL USER UPDATE]") =>
-  _putAsset(TYPE.USER, HTTP_METHODS.PUT, source, user).then(
+  _putObject(TYPE.USER, HTTP_METHODS.PUT, source, user).then(
     ({ responseCode, msg, payload }) => {
       return res.status(responseCode).json({ msg, payload });
     }
@@ -64,6 +59,10 @@ const _updateUser = (user, res, source = "[LOCAL USER UPDATE]") =>
  *
  * @param {Request} req - Express request object.
  * @param {Response} res - Response object to handle Express request.
+ * @param {Boolean} [req.query.expand] - If true, latest & pending transactions which be expanded.
+ * @param {Number} [req.query.limit] - Maximum number of users to return.
+ * @param {Boolean} [req.query.simplifyUser] - If true, a simplified version of the users will be returned.
+ * @param {Boolean} [req.query.simplifyTransactions] - If true, a simplified version of the users' transactions will be returned (only if the transaction are expanded).
  * @post Returns array of users in res object. If an error happens, response object has the error.
  */
 const getUsers = (req, res) => {
@@ -71,32 +70,33 @@ const getUsers = (req, res) => {
     ? 0
     : Number(req.query.limit);
   const hidePublicKey = req.query.hidePublicKey === "true" || false;
-  const assetArray = [
-    findAllAssets(TYPE.USER, "GET /users", limit, true, true, res),
-  ];
-  const expanded = req.query.expanded === "true" || false;
+  const objArray = [findAllObjects(TYPE.USER, "GET /users", limit, true, res)];
+  const expand = req.query.expand === "true" || false;
+  const simplifyUser = req.query.simplifyUser === "true" || false;
+  const simplifyTransaction = req.query.simplifyTransaction === "true" || false;
 
-  if (expanded) {
-    assetArray.push(
-      findAllAssets(TYPE.TRANSACTION, "GET /users", limit, false, true, res)
+  if (expand && !simplifyUser) {
+    objArray.push(
+      findAllObjects(TYPE.TRANSACTION, "GET /users", limit, true, res)
     );
   }
-  return Promise.all(assetArray)
+  return Promise.all(objArray)
     .then(([userList, transactionList]) => {
-      if (!expanded) {
+      if (!expand) {
         hidePublicKey && userList.forEach((user) => delete user.public_key);
+        simplifyUser && userList.forEach((user) => user.toSimplifiedObject());
         return res.status(200).json(userList);
       }
       const dictionaryOfTransactions = {};
-      (transactionList || []).forEach((asset) => {
-        dictionaryOfTransactions[asset.signature] = asset;
+      (transactionList || []).forEach((obj) => {
+        dictionaryOfTransactions[obj.address] = obj;
       });
 
       let promises = [];
       (userList || []).forEach((user) => {
         promises.push(
           (user.latest_transactions || []).map((txid) =>
-            findTransaction(txid).then((transaction) =>
+            findTransaction(txid, true, res).then((transaction) =>
               expandSupportingTransactions(
                 transaction,
                 dictionaryOfTransactions
@@ -106,7 +106,7 @@ const getUsers = (req, res) => {
         );
         promises.push(
           (user.pending_transactions || []).map((txid) =>
-            findTransaction(txid).then((transaction) =>
+            findTransaction(txid, true, res).then((transaction) =>
               expandSupportingTransactions(
                 transaction,
                 dictionaryOfTransactions
@@ -124,16 +124,22 @@ const getUsers = (req, res) => {
           (values || []).forEach((tx) => {
             userList.forEach((user) => {
               const indexOfTx = (user.latest_transactions || []).indexOf(
-                tx.signature
+                tx.address
               );
               const indexOfPendingTx = (
                 user.pending_transactions || []
-              ).indexOf(tx.signature);
+              ).indexOf(tx.address);
               if (indexOfTx > -1) {
-                user.latest_transactions[indexOfTx] = tx;
+                if (simplifyTransaction) {
+                  user.latest_transactions[indexOfTx] = tx.toSimplifiedObject();
+                } else user.latest_transactions[indexOfTx] = tx;
               }
               if (indexOfPendingTx > -1) {
-                user.pending_transactions[indexOfPendingTx] = tx;
+                if (simplifyTransaction) {
+                  user.pending_transactions[
+                    indexOfPendingTx
+                  ] = tx.toSimplifiedObject();
+                } else user.pending_transactions[indexOfPendingTx] = tx;
               }
             });
           });
@@ -158,32 +164,37 @@ const getUsers = (req, res) => {
  *
  * @param {Request} req - Express request object.
  * @param {Response} res - Response object to handle Express request.
+ * @param {Boolean} [req.query.expand] - If true, latest & pending transactions which be expanded.
+ * @param {Boolean} [req.query.simplifyUser] - If true, a simplified version of the user will be returned.
+ * @param {Boolean} [req.query.simplifyTransaction] - If true, a simplified version of the users' transactions will be returned (only if the transaction are expanded).
  * @post Returns the user in res object. If an error happens, response object has the error.
  */
 const getUserByAddress = (req, res) => {
-  const expanded = req.query.expanded === "true" || false;
+  const expand = req.query.expand === "true" || false;
   const hidePublicKey = req.query.hidePublicKey === "true" || false;
-  return findUser(req.params.address, true, true, res).then((user) => {
+  const simplifyUser = req.query.simplifyUser === "true" || false;
+  const simplifyTransaction = req.query.simplifyTransaction === "true" || false;
+  return findUser(req.params.address, true, res).then((user) => {
     hidePublicKey && delete user.public_key;
-    if (!expanded) {
+    if (!expand) {
+      if (simplifyUser) user = user.toSimplifiedObject();
       return res.status(200).json(user);
     }
-    return findAllAssets(
+    return findAllObjects(
       TYPE.TRANSACTION,
       "GET /users",
-      0,
-      false,
+      undefined,
       true,
       res
     ).then((transactionList) => {
       let promises = [];
       const dictionaryOfTransactions = {};
-      (transactionList || []).forEach((asset) => {
-        dictionaryOfTransactions[asset.signature] = asset;
+      (transactionList || []).forEach((obj) => {
+        dictionaryOfTransactions[obj.address] = obj;
       });
       promises.push(
         (user.latest_transactions || []).map((txid) =>
-          findTransaction(txid).then((transaction) => {
+          findTransaction(txid, true, res).then((transaction) => {
             return expandSupportingTransactions(
               transaction,
               dictionaryOfTransactions
@@ -194,7 +205,7 @@ const getUserByAddress = (req, res) => {
 
       promises.push(
         (user.pending_transactions || []).map((txid) =>
-          findTransaction(txid).then((transaction) => {
+          findTransaction(txid, true, res).then((transaction) => {
             return expandSupportingTransactions(
               transaction,
               dictionaryOfTransactions
@@ -206,16 +217,22 @@ const getUserByAddress = (req, res) => {
       return Promise.all(promises).then((values) => {
         values.forEach((tx) => {
           const indexOfTx = (user.latest_transactions || []).indexOf(
-            tx.signature
+            tx.address
           );
           const indexOfPendingTx = (user.pending_transactions || []).indexOf(
-            tx.signature
+            tx.address
           );
           if (indexOfTx > -1) {
-            user.latest_transactions[indexOfTx] = tx;
+            if (simplifyTransaction)
+              user.latest_transactions[indexOfTx] = tx.toSimplifiedObject();
+            else user.latest_transactions[indexOfTx] = tx;
           }
           if (indexOfPendingTx > -1) {
-            user.pending_transactions[indexOfPendingTx] = tx;
+            if (simplifyTransaction)
+              user.pending_transactions[
+                indexOfPendingTx
+              ] = tx.toSimplifiedObject();
+            else user.pending_transactions[indexOfPendingTx] = tx;
           }
         });
         return res.status(200).json(user);
@@ -224,58 +241,92 @@ const getUserByAddress = (req, res) => {
   });
 };
 
+/**
+ * Creates a user in the blockchain.
+ *
+ * @param {Request} req - Http request object.
+ * @param {Response} res - Response object to handle Express request.
+ * @param {Object} req.body - The user object to create.
+ * @param {String} req.body.address - The unique address of the user.
+ * @param {String} [req.body.active] - Represents if the user is active (can make transactions) or not.
+ * @param {String} req.body.balance - Represents the balance of the user.
+ * @param {String} [req.body.role] - The role of the user.
+ * @param {String} [req.body.description] - The description of the user.
+ * @param {String} req.body.public_key - The public key of the user.
+ * @param {Object} [req.body.return_to] - Key-value object containing actions and addresses of user who will receive the user's transactions upon the action execution (ex. user_retire: 'cs_department')
+ * @param {Permissions} [req.body.permissions] - User permissions in the system.
+ * @returns {Promise<{ responseCode, msg, payload }| Error >} Promise of the Sawtooth REST API request response.
+ */
 const createUser = (req, res) =>
-  putAsset(TYPE.USER, HTTP_METHODS.POST, "POST /users", req, res);
+  putObject(TYPE.USER, HTTP_METHODS.POST, "POST /users", req, res);
 
+/**
+ * Updates a user in the blockchain.
+ *
+ * @param {Request} req - Http request object.
+ * @param {Response} res - Response object to handle Express request.
+ * @param {String} req.params.address - The unique address of the user.
+ * @param {Object} req.body - The user properties to update.
+ * @param {String} [req.body.active] - Represents if the user is active (can make transactions) or not.
+ * @param {String} [req.body.role] - The role of the user.
+ * @param {String} [req.body.description] - The description of the user.
+ * @param {Object} [req.body.return_to] - Key-value object containing actions and addresses of user who will receive the user's transactions upon the action execution (ex. user_retire: 'cs_department')
+ * @param {Permissions} [req.body.permissions] - User permissions in the system.
+ * @returns {Promise<{ responseCode, msg, payload }| Error >} Promise of the Sawtooth REST API request response.
+ */
 const updateUser = (req, res) => {
-  return findUser(req.params.address, true, true, res).then((existingUser) => {
+  return findUser(req.params.address, false, res).then((existingUser) => {
     const { role, description, permissions, return_to, active } = req.body;
-    if (role !== undefined) {
-      existingUser.role = role;
-    }
-    if (description !== undefined) {
-      existingUser.description = description;
-    }
-    if (permissions !== undefined) {
-      existingUser.permissions = permissions;
-    }
-    if (return_to !== undefined) {
-      existingUser.return_to = return_to;
-    }
-    if (active !== undefined) {
-      existingUser.active = active;
-    }
+    if (role !== undefined) existingUser.role = role;
+    if (description !== undefined) existingUser.description = description;
+    if (permissions !== undefined) existingUser.permissions = permissions;
+    if (return_to !== undefined) existingUser.return_to = return_to;
+    if (active !== undefined) existingUser.active = active;
     return _updateUser(existingUser, res, "PUT /users");
   });
 };
 
+/**
+ * Transfers one user's balance to another user in the blockchain.
+ *
+ * @param {Request} req - Http request object.
+ * @param {Response} res - Response object to handle Express request.
+ * @param {String} req.params.address - The unique address of the user to disable.
+ * @param {String} req.body.reason - The reason to disable the user.
+ * @returns {Promise<{ responseCode, msg, payload }| Error >} Promise of the Sawtooth REST API request response.
+ */
 const deleteUser = (req, res) => {
   const reason = req.body.reason;
-  return findUser(req.params.address, true, true, res).then((existingUser) => {
+  return findUser(req.params.address, false, res).then((existingUser) => {
     const recipient = existingUser.return_to[reason];
     const promises = [];
     (existingUser.latest_transactions || []).forEach((txid) => {
-      promises.push(findTransaction(txid));
+      promises.push(findTransaction(txid, false, res));
     });
     return Promise.all(promises).then((arrayOfTransactions) => {
       let amountToSend = 0;
       (arrayOfTransactions || []).forEach((tx) => {
         amountToSend += tx.amount;
       });
-      const transaction = new Transaction({
-        amount: amountToSend,
-        recipient,
-        sender: req.params.address,
-        description: `Resulting transaction of user's return_to ${reason}`,
-        signature: hash512(
-          `${
-            existingUser.public_key
-          },${amountToSend},${reason},${recipient},${new Date().toISOString()}`
-        ),
-      });
-      req.body = transaction;
-      existingUser.active = false;
-      return createTransaction(req, res, { disableSender: true });
+      if (amountToSend > 0) {
+        const transaction = new Transaction({
+          amount: amountToSend,
+          recipient,
+          sender: req.params.address,
+          description: `Resulting transaction of user's return_to ${reason}`,
+          signature: hash512(
+            `${
+              existingUser.public_key
+            },${amountToSend},${reason},${recipient},${new Date().toISOString()}`
+          ),
+        });
+        req.body = transaction;
+        existingUser.active = false;
+        return createTransaction(req, res, { disableSender: true });
+      } else {
+        existingUser.active = false;
+        return _updateUser(existingUser, res, "DELETE /users");
+      }
     });
   });
 };

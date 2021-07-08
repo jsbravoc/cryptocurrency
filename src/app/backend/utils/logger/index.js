@@ -26,7 +26,7 @@ const formatMessage = (msg, severity = 0) => {
   };
   const now = new Date();
   const identifier = chalk.black.bgWhite(
-    `CNK-BACKEND | ${now.toLocaleDateString("en-US", options)} `
+    `CNK-API | ${now.toLocaleDateString("en-US", options)} `
   );
   switch (severity) {
     case SEVERITY.SUCCESS:

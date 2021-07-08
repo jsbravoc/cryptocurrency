@@ -68,7 +68,7 @@
             
             <nav>
                 
-                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Modules</h3><ul><li><a href="module-config.html">config</a></li><li><a href="module-controllers_common.html">controllers/common</a></li><li><a href="module-controllers_cryptocurrency.html">controllers/cryptocurrency</a></li><li><a href="module-controllers_users.html">controllers/users</a></li><li><a href="module-enforcer_cryptocurrency.html">enforcer/cryptocurrency</a></li><li><a href="module-routers_cryptocurrency.html">routers/cryptocurrency</a></li><li><a href="module-routers_dev_config.html">routers/dev/config</a></li><li><a href="module-routers_enforcer.html">routers/enforcer</a></li><li><a href="module-routers_users.html">routers/users</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-routers_cryptocurrency-cryptoRouter.html">cryptoRouter</a></li><li><a href="module-routers_dev_config-devConfig.html">devConfig</a></li><li><a href="module-routers_enforcer-enforcerRouter.html">enforcerRouter</a></li><li><a href="module-routers_users-usersRouter.html">usersRouter</a></li></ul><h3>Classes</h3><ul><li><a href="Asset.html">Asset</a></li><li><a href="BaseModel.html">BaseModel</a></li><li><a href="Permissions.html">Permissions</a></li><li><a href="Transaction.html">Transaction</a></li><li><a href="User.html">User</a></li></ul><h3>Global</h3><ul><li><a href="global.html#http">http</a></li><li><a href="global.html#HTTP_METHODS">HTTP_METHODS</a></li><li><a href="global.html#inputValidation">inputValidation</a></li><li><a href="global.html#normalizePort">normalizePort</a></li><li><a href="global.html#onError">onError</a></li><li><a href="global.html#port">port</a></li><li><a href="global.html#server">server</a></li><li><a href="global.html#TYPE">TYPE</a></li><li><a href="global.html#USER_TYPE">USER_TYPE</a></li><li><a href="global.html#validate">validate</a></li><li><a href="global.html#validateAssetExistence">validateAssetExistence</a></li><li><a href="global.html#validateExistingTransaction">validateExistingTransaction</a></li><li><a href="global.html#validatePendingTransaction">validatePendingTransaction</a></li><li><a href="global.html#validateTransactionAddress">validateTransactionAddress</a></li><li><a href="global.html#validateTransactionUpdateRequest">validateTransactionUpdateRequest</a></li><li><a href="global.html#validateUserCreation">validateUserCreation</a></li></ul></div>
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Modules</h3><ul><li><a href="module-config.html">config</a></li><li><a href="module-controllers_common.html">controllers/common</a></li><li><a href="module-controllers_cryptocurrency.html">controllers/cryptocurrency</a></li><li><a href="module-controllers_sawtooth.html">controllers/sawtooth</a></li><li><a href="module-controllers_users.html">controllers/users</a></li><li><a href="module-enforcer_cryptocurrency.html">enforcer/cryptocurrency</a></li><li><a href="module-routers_cryptocurrency.html">routers/cryptocurrency</a></li><li><a href="module-routers_dev_config.html">routers/dev/config</a></li><li><a href="module-routers_enforcer.html">routers/enforcer</a></li><li><a href="module-routers_users.html">routers/users</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-routers_cryptocurrency-cryptoRouter.html">cryptoRouter</a></li><li><a href="module-routers_dev_config-devConfig.html">devConfig</a></li><li><a href="module-routers_enforcer-enforcerRouter.html">enforcerRouter</a></li><li><a href="module-routers_users-usersRouter.html">usersRouter</a></li></ul><h3>Classes</h3><ul><li><a href="BaseModel.html">BaseModel</a></li><li><a href="Permissions.html">Permissions</a></li><li><a href="SawtoothBatch.html">SawtoothBatch</a></li><li><a href="SawtoothTransaction.html">SawtoothTransaction</a></li><li><a href="Transaction.html">Transaction</a></li><li><a href="User.html">User</a></li></ul><h3>Global</h3><ul><li><a href="global.html#http">http</a></li><li><a href="global.html#HTTP_METHODS">HTTP_METHODS</a></li><li><a href="global.html#inputValidation">inputValidation</a></li><li><a href="global.html#normalizePort">normalizePort</a></li><li><a href="global.html#onError">onError</a></li><li><a href="global.html#port">port</a></li><li><a href="global.html#server">server</a></li><li><a href="global.html#TYPE">TYPE</a></li><li><a href="global.html#USER_TYPE">USER_TYPE</a></li><li><a href="global.html#validate">validate</a></li><li><a href="global.html#validateExistingTransaction">validateExistingTransaction</a></li><li><a href="global.html#validateObjExistence">validateObjExistence</a></li><li><a href="global.html#validatePendingTransaction">validatePendingTransaction</a></li><li><a href="global.html#validateTransactionAddress">validateTransactionAddress</a></li><li><a href="global.html#validateTransactionUpdateRequest">validateTransactionUpdateRequest</a></li><li><a href="global.html#validateUserCreation">validateUserCreation</a></li></ul></div>
                 
             </nav>
         </div>
@@ -91,14 +91,14 @@ const { ERRORS } = require("../utils/errors");
 const {
   validate,
   createError,
-  validateAssetExistence,
+  validateObjExistence,
   createErrorObj,
 } = require("./common");
 const { findByAddress } = require("../controllers/common");
 const Transaction = require("../models/Transaction");
 const { MAXIMUM_FLOAT_PRECISION } = require("../utils/constants");
 const { getPublicKey } = require("../utils/signature");
-const { createSignature } = require("../controllers/cryptocurrency");
+const { createAddress } = require("../controllers/cryptocurrency");
 /**
  * Verifies if a transaction's request body is valid.
  * Conditions:
@@ -161,6 +161,7 @@ const inputValidation = validate([
     .trim()
     .bail(),
   body("sender").optional({ checkFalsy: true, checkNull: true }).trim(),
+  body("creator").optional({ checkFalsy: true, checkNull: true }).trim(),
   body("valid_thru")
     .optional({ checkFalsy: true, checkNull: true })
     .isISO8601()
@@ -233,7 +234,7 @@ const validateExistingTransaction = (
   shouldExist,
   { location = "body" } = null
 ) => {
-  return validateAssetExistence(
+  return validateObjExistence(
     TYPE.TRANSACTION,
     address,
     shouldExist,
@@ -252,11 +253,9 @@ const validateExistingTransaction = (
 };
 
 const verifyPostTransaction = (req, res, next) => {
-  const promises = [
-    findByAddress(TYPE.USER, req.body.recipient, false, false, res),
-  ];
+  const promises = [findByAddress(TYPE.USER, req.body.recipient, false, res)];
   if (req.body.sender) {
-    promises.push(findByAddress(TYPE.USER, req.body.sender, false, false, res));
+    promises.push(findByAddress(TYPE.USER, req.body.sender, false, res));
   }
   return Promise.all(promises).then(([recipientUser, senderUser]) => {
     if (!recipientUser) {
@@ -320,27 +319,13 @@ const verifyPostTransaction = (req, res, next) => {
             value: req.body.sender,
           },
         });
-      } /*
-        This cannot happen. Check utils/errors/index
-         else if (
-          !Array.isArray(senderUser.latest_transactions) ||
-          senderUser.latest_transactions.length === 0
-        ) {
-          return createError(req, res, {
-            error: ERRORS.USER.INPUT.NO_TRANSACTIONS,
-            params: {
-              address: req.body.sender,
-              param: "sender",
-              value: req.body.sender,
-            },
-          });
-        } */ else {
+      } else {
         let amountToFulfill = req.body.amount;
         let actualBalance = 0;
         const lastestTxPromises = [];
         (senderUser.latest_transactions || []).forEach((txid) => {
           lastestTxPromises.push(
-            findByAddress(TYPE.TRANSACTION, txid, false, false, res).then(
+            findByAddress(TYPE.TRANSACTION, txid, false, res).then(
               (supportingTransaction) => {
                 amountToFulfill -= supportingTransaction.amount;
                 actualBalance += supportingTransaction.amount;
@@ -355,7 +340,7 @@ const verifyPostTransaction = (req, res, next) => {
 
           (senderUser.pending_transactions || []).forEach((txid) => {
             pendingTxPromises.push(
-              findByAddress(TYPE.TRANSACTION, txid, false, false, res).then(
+              findByAddress(TYPE.TRANSACTION, txid, false, res).then(
                 (pendingTransaction) => {
                   //The user created a pending transaction, owing money to pending's transaction recipient (until approved or rejected)
                   if (
@@ -418,7 +403,7 @@ const verifyPostTransaction = (req, res, next) => {
  */
 const validatePendingTransaction = async (req, res, next) => {
   const { address } = req.params;
-  return findByAddress(TYPE.TRANSACTION, address, false, false, res).then(
+  return findByAddress(TYPE.TRANSACTION, address, false, res).then(
     (transaction) => {
       if (transaction.pending) {
         return next();
@@ -454,7 +439,6 @@ const validateTransactionSignature = (req, res, next) => {
     return findByAddress(
       TYPE.USER,
       creator || sender || recipient,
-      false,
       false,
       res
     ).then((user) => {
@@ -505,7 +489,7 @@ const validateTransactionApproval = (req, res, next) => {
     });
   }
 
-  return findByAddress(TYPE.TRANSACTION, address, false, false, res).then(
+  return findByAddress(TYPE.TRANSACTION, address, false, res).then(
     (transaction) => {
       const signatureObj = { approve: approve === "true" };
       if (req.body.description) {
@@ -518,13 +502,11 @@ const validateTransactionApproval = (req, res, next) => {
       if (expectedPublicKey) {
         const promises = [];
 
-        promises.push(
-          findByAddress(TYPE.USER, transaction.sender, false, false, res)
-        );
+        promises.push(findByAddress(TYPE.USER, transaction.sender, false, res));
         //transaction can be rejected by recipient
         if (approve === "false")
           promises.push(
-            findByAddress(TYPE.USER, transaction.recipient, false, false, res)
+            findByAddress(TYPE.USER, transaction.recipient, false, res)
           );
         return Promise.all(promises).then(([sender, recipient]) => {
           if (
@@ -591,7 +573,7 @@ const validateTransactionUpdate = (req, res, next) => {
         propertyName: "description",
       },
     });
-  return findByAddress(TYPE.TRANSACTION, address, false, false, res).then(
+  return findByAddress(TYPE.TRANSACTION, address, false, res).then(
     (transaction) => {
       const expectedPublicKey = getPublicKey(
         JSON.stringify({ description }),
@@ -599,8 +581,8 @@ const validateTransactionUpdate = (req, res, next) => {
       );
       if (expectedPublicKey) {
         const promises = [
-          findByAddress(TYPE.USER, transaction.creator, false, false, res),
-          findByAddress(TYPE.USER, transaction.sender, false, false, res),
+          findByAddress(TYPE.USER, transaction.creator, false, res),
+          findByAddress(TYPE.USER, transaction.sender, false, res),
         ];
         return Promise.all(promises).then(([creator, sender]) => {
           if (
@@ -645,7 +627,7 @@ module.exports.verifyPostTransaction = [
       req,
       res,
       next,
-      createSignature(req.body.signature, req.body.creationDate),
+      createAddress(req.body.signature, req.body.creationDate),
       false,
       {
         location: "body",

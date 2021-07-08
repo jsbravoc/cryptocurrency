@@ -23,7 +23,9 @@ const users = {
   NoCoinbase: new User({ address: uuidv4() }),
   CantTransferW1000: new User({ address: uuidv4() }),
   ToDeleteW1000: new User({ address: uuidv4() }),
+  ToDelete: new User({ address: uuidv4() }),
   Inactive: new User({ address: uuidv4() }),
+  Redis: new User({ address: uuidv4() }),
 };
 const createdVariables = {
   transactions: {
@@ -33,7 +35,9 @@ const createdVariables = {
       [users.NoCoinbase.address]: {},
       [users.CantTransferW1000.address]: {},
       [users.ToDeleteW1000.address]: {},
+      [users.ToDelete.address]: {},
       [users.Inactive.address]: {},
+      [users.Redis.address]: {},
     },
     transaction: {
       [users.W1000.address]: {},
@@ -41,7 +45,9 @@ const createdVariables = {
       [users.NoCoinbase.address]: {},
       [users.CantTransferW1000.address]: {},
       [users.ToDeleteW1000.address]: {},
+      [users.ToDelete.address]: {},
       [users.Inactive.address]: {},
+      [users.Redis.address]: {},
     },
   },
 };
@@ -214,6 +220,8 @@ const createTransaction = ({
         amount,
         pending,
         signature: request.signature,
+        address:
+          res && res.body && res.body.payload ? res.body.payload.address : "",
       });
     });
   return true;
@@ -275,6 +283,8 @@ describe(`Cryptocurrency Test Suite`, () => {
             );
           if (callback) callback(res);
           return true;
+        } else {
+          console.log("ERR RESPONSE", res.body);
         }
         return false;
       });
@@ -337,6 +347,14 @@ describe(`Cryptocurrency Test Suite`, () => {
                   returnTo: {
                     default: users.W1000.address,
                     inactive: users.Inactive.address,
+                  },
+                  callback: createdUserCallback,
+                });
+                createUser({
+                  alias: "ToDelete",
+                  coinbasePermission: true,
+                  returnTo: {
+                    default: users.W1000.address,
                   },
                   callback: createdUserCallback,
                 });
@@ -424,12 +442,31 @@ describe(`Cryptocurrency Test Suite`, () => {
               });
           });
         });
+        describe("Get all simplified transactions (non expanded & simplified)", () => {
+          it("Non expanded transactions should be returned and should be simplified", (done) => {
+            chai
+              .request(API_URL)
+              .get(`${CRYPTO_ENDPOINT}`)
+              .query({ limit: 5, simplifyTransaction: true })
+              .end(function (err, res) {
+                expect(res.body).to.be.an("array");
+                expect(res).to.have.status(200);
+                res.body.forEach((transaction) => {
+                  if (transaction.supporting_transactions !== undefined)
+                    expect(transaction.supporting_transactions).to.satisfy(
+                      Number.isInteger
+                    );
+                });
+                done();
+              });
+          });
+        });
         describe("Get all transactions (expanded)", () => {
           it("All transactions returned should be expanded", (done) => {
             chai
               .request(API_URL)
               .get(`${CRYPTO_ENDPOINT}`)
-              .query({ expanded: true, limit: 5 })
+              .query({ expand: true, limit: 5 })
               .end(function (err, res) {
                 expect(res.body).to.be.an("array");
                 expect(res).to.have.status(200);
@@ -439,6 +476,25 @@ describe(`Cryptocurrency Test Suite`, () => {
                       expect(supporting_transaction).to.be.an("object");
                     }
                   );
+                });
+                done();
+              });
+          });
+        });
+        describe("Get all transactions (expanded & simplified -> simplifyTransaction should prevail)", () => {
+          it("Non expanded transactions should be returned and should be simplified", (done) => {
+            chai
+              .request(API_URL)
+              .get(`${CRYPTO_ENDPOINT}`)
+              .query({ limit: 5, simplifyTransaction: true, expand: true })
+              .end(function (err, res) {
+                expect(res.body).to.be.an("array");
+                expect(res).to.have.status(200);
+                res.body.forEach((transaction) => {
+                  if (transaction.supporting_transactions !== undefined)
+                    expect(transaction.supporting_transactions).to.satisfy(
+                      Number.isInteger
+                    );
                 });
                 done();
               });
@@ -512,7 +568,7 @@ describe(`Cryptocurrency Test Suite`, () => {
             .get(
               `${CRYPTO_ENDPOINT}/${
                 createdVariables.transactions.transaction[users.W1000.address]
-                  .coinbase.payload.signature
+                  .coinbase.payload.address
               }`
             )
             .end(function (err, res) {
@@ -527,10 +583,10 @@ describe(`Cryptocurrency Test Suite`, () => {
               `${CRYPTO_ENDPOINT}/${
                 createdVariables.transactions.transaction[
                   users.CantTransferW1000.address
-                ].W0.payload.signature
+                ].W0.payload.address
               }`
             )
-            .query({ expanded: true })
+            .query({ expand: true })
             .end(function (err, res) {
               expect(res).to.have.status(200);
               (res.body.supporting_transactions || []).forEach(
@@ -538,6 +594,50 @@ describe(`Cryptocurrency Test Suite`, () => {
                   expect(supporting_transaction).to.be.an("object");
                 }
               );
+              done();
+            });
+        });
+        it("Transaction should be retrieved and expanded successfully, with supporting transactions simplfied", (done) => {
+          chai
+            .request(API_URL)
+            .get(
+              `${CRYPTO_ENDPOINT}/${
+                createdVariables.transactions.transaction[
+                  users.CantTransferW1000.address
+                ].W0.payload.address
+              }`
+            )
+            .query({ expand: true, simplifySupportingTransactions: true })
+            .end(function (err, res) {
+              expect(res).to.have.status(200);
+              (res.body.supporting_transactions || []).forEach(
+                (supporting_transaction) => {
+                  expect(supporting_transaction).to.be.an("object");
+                  if (
+                    supporting_transaction.supporting_transactions !== undefined
+                  )
+                    expect(
+                      supporting_transaction.supporting_transactions
+                    ).to.satisfy(Number.isInteger);
+                }
+              );
+              done();
+            });
+        });
+        it("Transaction should be retrieved and simplified successfully", (done) => {
+          chai
+            .request(API_URL)
+            .get(
+              `${CRYPTO_ENDPOINT}/${
+                createdVariables.transactions.transaction[
+                  users.CantTransferW1000.address
+                ].W0.payload.address
+              }`
+            )
+            .query({ simplifyTransaction: true })
+            .end(function (err, res) {
+              expect(res).to.have.status(200);
+              expect(res.body.supporting_transactions).to.be.a("number");
               done();
             });
         });
@@ -693,7 +793,7 @@ describe(`Cryptocurrency Test Suite`, () => {
                 signature:
                   createdVariables.transactions.transaction[
                     users.CantTransferW1000.address
-                  ].W0.payload.signature + "1",
+                  ].W0.payload.address + "1",
               })
               .end(function (err, res) {
                 expect(res.body.errors).to.be.an("array");
@@ -942,11 +1042,13 @@ describe(`Cryptocurrency Test Suite`, () => {
         });
         it("Pending valid thru transaction should be created successfully", (done) => {
           const now = new Date();
+          const creationDate = new Date();
           now.setSeconds(now.getSeconds() + 5);
           createTransaction({
             amount: 1,
             senderAlias: "W1000",
             recipientAlias: "W0",
+            creationDate,
             valid_thru: now.toISOString(),
             pending: true,
             description: "Expiring transaction",
@@ -991,11 +1093,13 @@ describe(`Cryptocurrency Test Suite`, () => {
         });
         it("Valid thru transaction should be created successfully", (done) => {
           const now = new Date();
+          const creationDate = new Date();
           now.setSeconds(now.getSeconds() + 5);
           createTransaction({
             amount: 25,
             senderAlias: "CantTransferW1000",
             recipientAlias: "ToDeleteW1000",
+            creationDate,
             valid_thru: now.toISOString(),
             description: "Expiring valid transaction",
             callback: ({ res }) => {
@@ -1035,7 +1139,7 @@ describe(`Cryptocurrency Test Suite`, () => {
                 setTimeout(() => {
                   chai
                     .request(API_URL)
-                    .put(`${CRYPTO_ENDPOINT}/${createdTransaction.signature}`)
+                    .put(`${CRYPTO_ENDPOINT}/${createdTransaction.address}`)
                     .end(function (err, res) {
                       expect(res.body.errors).to.be.an("array");
                       expect(res).to.have.status(400);
@@ -1057,7 +1161,7 @@ describe(`Cryptocurrency Test Suite`, () => {
                 setTimeout(() => {
                   chai
                     .request(API_URL)
-                    .put(`${CRYPTO_ENDPOINT}/${createdTransaction.signature}`)
+                    .put(`${CRYPTO_ENDPOINT}/${createdTransaction.address}`)
                     .query({ approve: true })
                     .end(function (err, res) {
                       expect(res.body.errors).to.be.an("array");
@@ -1080,7 +1184,7 @@ describe(`Cryptocurrency Test Suite`, () => {
                 setTimeout(() => {
                   chai
                     .request(API_URL)
-                    .put(`${CRYPTO_ENDPOINT}/${createdTransaction.signature}`)
+                    .put(`${CRYPTO_ENDPOINT}/${createdTransaction.address}`)
                     .query({ description: "new description" })
                     .end(function (err, res) {
                       expect(res.body.errors).to.be.an("array");
@@ -1108,7 +1212,7 @@ describe(`Cryptocurrency Test Suite`, () => {
                 setTimeout(() => {
                   chai
                     .request(API_URL)
-                    .put(`${CRYPTO_ENDPOINT}/${createdTransaction.signature}`)
+                    .put(`${CRYPTO_ENDPOINT}/${createdTransaction.address}`)
                     .send({ signature })
                     .end(function (err, res) {
                       expect(res.body.errors).to.be.an("array");
@@ -1148,7 +1252,7 @@ describe(`Cryptocurrency Test Suite`, () => {
                   );
                   chai
                     .request(API_URL)
-                    .put(`${CRYPTO_ENDPOINT}/${createdTransaction.signature}`)
+                    .put(`${CRYPTO_ENDPOINT}/${createdTransaction.address}`)
                     .query({ approve: "not-true", signature })
                     .end(function (err, res) {
                       expect(res.body.errors).to.be.an("array");
@@ -1169,7 +1273,7 @@ describe(`Cryptocurrency Test Suite`, () => {
               .put(
                 `${CRYPTO_ENDPOINT}/${
                   createdVariables.transactions.transaction[users.W1000.address]
-                    .coinbase.payload.signature
+                    .coinbase.payload.address
                 }`
               )
               .end(function (err, res) {
@@ -1195,7 +1299,7 @@ describe(`Cryptocurrency Test Suite`, () => {
                   );
                   chai
                     .request(API_URL)
-                    .put(`${CRYPTO_ENDPOINT}/${createdTransaction.signature}`)
+                    .put(`${CRYPTO_ENDPOINT}/${createdTransaction.address}`)
                     .query({ approve: true, signature })
                     .end(function (err, res) {
                       expect(res.body.errors).to.be.an("array");
@@ -1223,7 +1327,7 @@ describe(`Cryptocurrency Test Suite`, () => {
                   );
                   chai
                     .request(API_URL)
-                    .put(`${CRYPTO_ENDPOINT}/${createdTransaction.signature}`)
+                    .put(`${CRYPTO_ENDPOINT}/${createdTransaction.address}`)
                     .query({ approve: false, signature })
                     .end(function (err, res) {
                       expect(res.body.errors).to.be.an("array");
@@ -1249,7 +1353,7 @@ describe(`Cryptocurrency Test Suite`, () => {
 
                   chai
                     .request(API_URL)
-                    .put(`${CRYPTO_ENDPOINT}/${createdTransaction.signature}`)
+                    .put(`${CRYPTO_ENDPOINT}/${createdTransaction.address}`)
                     .query({ approve: true, signature })
                     .end(function (err, res) {
                       expect(res.body.errors).to.be.an("array");
@@ -1278,7 +1382,7 @@ describe(`Cryptocurrency Test Suite`, () => {
 
                   chai
                     .request(API_URL)
-                    .put(`${CRYPTO_ENDPOINT}/${createdTransaction.signature}`)
+                    .put(`${CRYPTO_ENDPOINT}/${createdTransaction.address}`)
                     .query({ approve: true, signature })
                     .end(function (err, res) {
                       expect(res.body.errors).to.be.an("array");
@@ -1309,7 +1413,7 @@ describe(`Cryptocurrency Test Suite`, () => {
 
                   chai
                     .request(API_URL)
-                    .put(`${CRYPTO_ENDPOINT}/${createdTransaction.signature}`)
+                    .put(`${CRYPTO_ENDPOINT}/${createdTransaction.address}`)
                     .send({ description: "Another description", signature })
                     .end(function (err, res) {
                       expect(res.body.errors).to.be.an("array");
@@ -1339,7 +1443,7 @@ describe(`Cryptocurrency Test Suite`, () => {
 
                   chai
                     .request(API_URL)
-                    .put(`${CRYPTO_ENDPOINT}/${createdTransaction.signature}`)
+                    .put(`${CRYPTO_ENDPOINT}/${createdTransaction.address}`)
                     .send({ description: "Different description", signature })
                     .end(function (err, res) {
                       expect(res.body.errors).to.be.an("array");
@@ -1369,7 +1473,7 @@ describe(`Cryptocurrency Test Suite`, () => {
 
                   chai
                     .request(API_URL)
-                    .put(`${CRYPTO_ENDPOINT}/${createdTransaction.signature}`)
+                    .put(`${CRYPTO_ENDPOINT}/${createdTransaction.address}`)
                     .send({ description: "Another description", signature })
                     .end(function (err, res) {
                       expect(res.body.errors).to.be.an("array");
@@ -1403,7 +1507,7 @@ describe(`Cryptocurrency Test Suite`, () => {
 
                 chai
                   .request(API_URL)
-                  .put(`${CRYPTO_ENDPOINT}/${createdTransaction.signature}`)
+                  .put(`${CRYPTO_ENDPOINT}/${createdTransaction.address}`)
                   .query({ approve: true, signature })
                   .end(function (err, res) {
                     expect(res).to.have.status(200);
@@ -1442,7 +1546,7 @@ describe(`Cryptocurrency Test Suite`, () => {
                 );
                 chai
                   .request(API_URL)
-                  .put(`${CRYPTO_ENDPOINT}/${createdTransaction.signature}`)
+                  .put(`${CRYPTO_ENDPOINT}/${createdTransaction.address}`)
                   .query({ approve: false, signature })
                   .end(function (err, res) {
                     expect(res).to.have.status(200);
@@ -1478,7 +1582,7 @@ describe(`Cryptocurrency Test Suite`, () => {
                 );
                 chai
                   .request(API_URL)
-                  .put(`${CRYPTO_ENDPOINT}/${createdTransaction.signature}`)
+                  .put(`${CRYPTO_ENDPOINT}/${createdTransaction.address}`)
                   .query({ approve: false, signature })
                   .end(function (err, res) {
                     expect(res).to.have.status(200);
@@ -1514,16 +1618,14 @@ describe(`Cryptocurrency Test Suite`, () => {
                 );
                 chai
                   .request(API_URL)
-                  .put(`${CRYPTO_ENDPOINT}/${createdTransaction.signature}`)
+                  .put(`${CRYPTO_ENDPOINT}/${createdTransaction.address}`)
                   .send({ description: "New description", signature })
                   .end(function (err, res) {
                     expect(res).to.have.status(200);
                     setTimeout(() => {
                       chai
                         .request(API_URL)
-                        .get(
-                          `${CRYPTO_ENDPOINT}/${createdTransaction.signature}`
-                        )
+                        .get(`${CRYPTO_ENDPOINT}/${createdTransaction.address}`)
                         .end(function (err, res) {
                           expect(res).to.have.status(200);
                           res.body.should.have
@@ -1554,7 +1656,7 @@ describe(`Cryptocurrency Test Suite`, () => {
                 );
                 chai
                   .request(API_URL)
-                  .put(`${CRYPTO_ENDPOINT}/${createdTransaction.signature}`)
+                  .put(`${CRYPTO_ENDPOINT}/${createdTransaction.address}`)
                   .query({ approve: true })
                   .send({ description: "New description", signature })
                   .end(function (err, res) {
@@ -1571,7 +1673,7 @@ describe(`Cryptocurrency Test Suite`, () => {
                           chai
                             .request(API_URL)
                             .get(
-                              `${CRYPTO_ENDPOINT}/${createdTransaction.signature}`
+                              `${CRYPTO_ENDPOINT}/${createdTransaction.address}`
                             )
                             .end(function (err, res) {
                               expect(res).to.have.status(200);
@@ -1604,7 +1706,7 @@ describe(`Cryptocurrency Test Suite`, () => {
                 );
                 chai
                   .request(API_URL)
-                  .put(`${CRYPTO_ENDPOINT}/${createdTransaction.signature}`)
+                  .put(`${CRYPTO_ENDPOINT}/${createdTransaction.address}`)
                   .query({ approve: false })
                   .send({ description: "New description", signature })
                   .end(function (err, res) {
@@ -1619,7 +1721,7 @@ describe(`Cryptocurrency Test Suite`, () => {
                           chai
                             .request(API_URL)
                             .get(
-                              `${CRYPTO_ENDPOINT}/${createdTransaction.signature}`
+                              `${CRYPTO_ENDPOINT}/${createdTransaction.address}`
                             )
                             .end(function (err, res) {
                               expect(res).to.have.status(200);
@@ -1646,11 +1748,13 @@ describe(`Cryptocurrency Test Suite`, () => {
           this.timeout(25000);
           it("Expiring lastest transactions should be deleted successfully", (done) => {
             const now = new Date();
+            const creationDate = new Date();
             now.setSeconds(now.getSeconds() + 2);
             createTransaction({
               amount: 1,
               senderAlias: "W1000",
               recipientAlias: "W0",
+              creationDate,
               valid_thru: now.toISOString(),
               description: "Expiring valid transaction",
               callback: ({ res }) => {
@@ -1667,7 +1771,7 @@ describe(`Cryptocurrency Test Suite`, () => {
                       transactions: `${
                         createdVariables.transactions.transaction[
                           users.W1000.address
-                        ].expiringTransactionToW0.signature
+                        ].expiringTransactionToW0.address
                       }`,
                     })
                     .end(function (err, res) {
@@ -1683,7 +1787,7 @@ describe(`Cryptocurrency Test Suite`, () => {
                               .that.does.not.include(
                                 createdVariables.transactions.transaction[
                                   users.W1000.address
-                                ].expiringTransactionToW0.signature
+                                ].expiringTransactionToW0.address
                               );
                             res.body.should.have.property("balance").equal(2);
                             done();
@@ -1696,11 +1800,13 @@ describe(`Cryptocurrency Test Suite`, () => {
           });
           it("Non expiring lastest transactions should not be deleted", (done) => {
             const now = new Date();
+            const creationDate = new Date();
             now.setSeconds(now.getSeconds() + 60);
             createTransaction({
               amount: 1,
               senderAlias: "W1000",
               recipientAlias: "W0",
+              creationDate,
               valid_thru: now.toISOString(),
               description: "Expiring valid transaction",
               callback: ({ res }) => {
@@ -1717,7 +1823,7 @@ describe(`Cryptocurrency Test Suite`, () => {
                       transactions: `${
                         createdVariables.transactions.transaction[
                           users.W1000.address
-                        ].nonExpiringTransactionToW0.signature
+                        ].nonExpiringTransactionToW0.address
                       }`,
                     })
                     .end(function (err, res) {
@@ -1733,7 +1839,7 @@ describe(`Cryptocurrency Test Suite`, () => {
                               .that.does.include(
                                 createdVariables.transactions.transaction[
                                   users.W1000.address
-                                ].nonExpiringTransactionToW0.signature
+                                ].nonExpiringTransactionToW0.address
                               );
                             res.body.should.have.property("balance").equal(3);
                             done();
@@ -1761,7 +1867,7 @@ describe(`Cryptocurrency Test Suite`, () => {
                   .that.does.include(
                     createdVariables.transactions.transaction[
                       users.W1000.address
-                    ].expiringTransaction.signature
+                    ].expiringTransaction.address
                   );
                 chai
                   .request(API_URL)
@@ -1782,7 +1888,7 @@ describe(`Cryptocurrency Test Suite`, () => {
                             .that.does.not.include(
                               createdVariables.transactions.transaction[
                                 users.W1000.address
-                              ].expiringTransaction.signature
+                              ].expiringTransaction.address
                             );
                           done();
                         });
@@ -1806,7 +1912,7 @@ describe(`Cryptocurrency Test Suite`, () => {
                 .that.does.include(
                   createdVariables.transactions.transaction[
                     users.CantTransferW1000.address
-                  ].expiringTransaction.signature
+                  ].expiringTransaction.address
                 );
               chai
                 .request(API_URL)
@@ -1824,7 +1930,7 @@ describe(`Cryptocurrency Test Suite`, () => {
                           .that.does.not.include(
                             createdVariables.transactions.transaction[
                               users.CantTransferW1000.address
-                            ].expiringTransaction.signature
+                            ].expiringTransaction.address
                           );
                         expect(res.body.balance).to.equal(2);
                         done();
@@ -1845,6 +1951,19 @@ describe(`Cryptocurrency Test Suite`, () => {
               .request(API_URL)
               .get(`${USERS_ENDPOINT}`)
               .query({ limit: 5 })
+              .end(function (err, res) {
+                expect(res.body).to.be.an("array");
+                expect(res).to.have.status(200);
+                done();
+              });
+          });
+        });
+        describe("Get all simplified users (non expanded & simplified)", () => {
+          it("Non expanded users should be returned", (done) => {
+            chai
+              .request(API_URL)
+              .get(`${USERS_ENDPOINT}`)
+              .query({ limit: 5, simplifyUser: true })
               .end(function (err, res) {
                 expect(res.body).to.be.an("array");
                 expect(res).to.have.status(200);
@@ -1875,7 +1994,7 @@ describe(`Cryptocurrency Test Suite`, () => {
             chai
               .request(API_URL)
               .get(`${USERS_ENDPOINT}`)
-              .query({ expanded: true, limit: 5 })
+              .query({ expand: true, limit: 5 })
               .end(function (err, res) {
                 expect(res).to.have.status(200);
                 expect(res.body).to.be.an("array");
@@ -1892,6 +2011,66 @@ describe(`Cryptocurrency Test Suite`, () => {
               });
           });
         });
+        describe("Get all users (expanded & simplified -> expanded should prevail)", function () {
+          this.slow(1500);
+          this.timeout(5000);
+          it("All users returned should be expanded", (done) => {
+            chai
+              .request(API_URL)
+              .get(`${USERS_ENDPOINT}`)
+              .query({ expand: true, limit: 5 })
+              .end(function (err, res) {
+                expect(res).to.have.status(200);
+                expect(res.body).to.be.an("array");
+                res.body.forEach((user) => {
+                  Array.from(user.latest_transactions).forEach((transaction) =>
+                    expect(transaction).not.to.be.a("string")
+                  );
+                  Array.from(user.pending_transactions).forEach((transaction) =>
+                    expect(transaction).not.to.be.a("string")
+                  );
+                });
+
+                done();
+              });
+          });
+        });
+        describe("Get all users (expanded /w simplifiedTransaction)", function () {
+          this.slow(1500);
+          this.timeout(5000);
+          it("All users returned should be expanded and their transactions simplified", (done) => {
+            chai
+              .request(API_URL)
+              .get(`${USERS_ENDPOINT}`)
+              .query({ expand: true, limit: 5, simplifyTransaction: true })
+              .end(function (err, res) {
+                expect(res).to.have.status(200);
+                expect(res.body).to.be.an("array");
+                res.body.forEach((user) => {
+                  Array.from(user.latest_transactions).forEach(
+                    (transaction) => {
+                      expect(transaction).not.to.be.a("string");
+                      if (transaction.supporting_transactions)
+                        expect(transaction.supporting_transactions).to.be.a(
+                          "number"
+                        );
+                    }
+                  );
+                  Array.from(user.pending_transactions).forEach(
+                    (transaction) => {
+                      expect(transaction).not.to.be.a("string");
+                      if (transaction.supporting_transactions)
+                        expect(transaction.supporting_transactions).to.be.a(
+                          "number"
+                        );
+                    }
+                  );
+                });
+
+                done();
+              });
+          });
+        });
         describe("Get all users and hide their public keys (expanded)", function () {
           this.slow(1500);
           this.timeout(5000);
@@ -1899,7 +2078,7 @@ describe(`Cryptocurrency Test Suite`, () => {
             chai
               .request(API_URL)
               .get(`${USERS_ENDPOINT}`)
-              .query({ expanded: true, limit: 5, hidePublicKey: true })
+              .query({ expand: true, limit: 5, hidePublicKey: true })
               .end(function (err, res) {
                 expect(res).to.have.status(200);
                 expect(res.body).to.be.an("array");
@@ -1970,7 +2149,25 @@ describe(`Cryptocurrency Test Suite`, () => {
           chai
             .request(API_URL)
             .get(`${USERS_ENDPOINT}/${users.W1000.address}`)
-            .query({ expanded: true })
+            .query({ expand: true })
+            .end(function (err, res) {
+              expect(res).to.have.status(200);
+              const user = res.body;
+              expect(res.body).to.be.an("object");
+              Array.from(user.latest_transactions).forEach((transaction) =>
+                expect(transaction).not.to.be.a("string")
+              );
+              Array.from(user.pending_transactions).forEach((transaction) =>
+                expect(transaction).not.to.be.a("string")
+              );
+              done();
+            });
+        });
+        it("User should be retrieved and expanded successfully /w simplified transactions", (done) => {
+          chai
+            .request(API_URL)
+            .get(`${USERS_ENDPOINT}/${users.W1000.address}`)
+            .query({ expand: true, simplifyTransaction: true })
             .end(function (err, res) {
               expect(res).to.have.status(200);
               const user = res.body;
@@ -1988,7 +2185,7 @@ describe(`Cryptocurrency Test Suite`, () => {
           chai
             .request(API_URL)
             .get(`${USERS_ENDPOINT}/${users.W1000.address}`)
-            .query({ expanded: true, hidePublicKey: true })
+            .query({ expand: true, hidePublicKey: true })
             .end(function (err, res) {
               expect(res).to.have.status(200);
               const user = res.body;
@@ -2496,7 +2693,7 @@ describe(`Cryptocurrency Test Suite`, () => {
       describe("User success validations", function () {
         this.slow(15000);
         this.timeout(20000);
-        it("User should be deleted successfully", (done) => {
+        it("User should be deactivated & their balance should be transferred successfully (user with balance greater than zero)", (done) => {
           chai
             .request(API_URL)
             .delete(`${USERS_ENDPOINT}/${users.ToDeleteW1000.address}`)
@@ -2505,6 +2702,18 @@ describe(`Cryptocurrency Test Suite`, () => {
             })
             .end(function (err, res) {
               expect(res).to.have.status(201);
+              done();
+            });
+        });
+        it("User should be deactivated successfully (user with balance equal to zero)", (done) => {
+          chai
+            .request(API_URL)
+            .delete(`${USERS_ENDPOINT}/${users.ToDelete.address}`)
+            .send({
+              reason: "default",
+            })
+            .end(function (err, res) {
+              expect(res).to.have.status(200);
               done();
             });
         });
@@ -2543,15 +2752,14 @@ describe(`Cryptocurrency Test Suite`, () => {
           });
         });
         describe("Change environment variable", () => {
-          it("SAWTOOTH_REST environment variable should be changed", (done) => {
-            const newUrl = `http://${uuidv4()}`;
+          it("USE_REDIS environment variable should be changed", (done) => {
             chai
               .request(API_URL)
               .post(`${CONFIG_ENDPOINT}`)
-              .send({ SAWTOOTH_REST: newUrl })
+              .send({ USE_REDIS: "true" })
               .end(function (err, res) {
                 expect(res).to.have.status(200);
-                expect(res.body.variables.SAWTOOTH_REST).to.eq(newUrl);
+                expect(res.body.variables.USE_REDIS).to.eq("true");
                 done();
               });
           });
@@ -2559,9 +2767,147 @@ describe(`Cryptocurrency Test Suite`, () => {
       });
     });
   });
+
+  describe(`Functionality without Redis`, function () {
+    this.timeout(8000);
+    this.slow(5000);
+    before(function (done) {
+      this.timeout(8000);
+      chai
+        .request(API_URL)
+        .post(`${CONFIG_ENDPOINT}`)
+        .send({ USE_REDIS: "false" })
+        .end(function (err, res) {
+          expect(res).to.have.status(200);
+          expect(res.body.variables.USE_REDIS).to.eq("false");
+          done();
+        });
+    });
+    describe(`${CRYPTO_ENDPOINT}`, () => {
+      describe(`Wrap Redis' set & get function`, () => {
+        describe(`GET ${CRYPTO_ENDPOINT}/:address`, () => {
+          it("Should return the transaction specified", (done) => {
+            chai
+              .request(API_URL)
+              .get(
+                `${CRYPTO_ENDPOINT}/${
+                  createdVariables.transactions.transaction[users.W1000.address]
+                    .coinbase.payload.address
+                }`
+              )
+              .end(function (err, res) {
+                expect(res).to.have.status(200);
+                done();
+              });
+          });
+        });
+      });
+      describe(`Wrap Redis' del function`, () => {
+        describe(`POST ${USERS_ENDPOINT}`, () => {
+          it("Should create the user specified", (done) => {
+            createUser({
+              alias: "Redis",
+              coinbasePermission: true,
+              active: true,
+              callback: ({ res }) => {
+                expect(res).to.have.status(201);
+                done();
+              },
+            });
+          });
+        });
+      });
+    });
+    describe(`${USERS_ENDPOINT} fallback test`, () => {
+      describe(`Redis fallback requests`, () => {
+        describe(`GET ${USERS_ENDPOINT}/:address`, () => {
+          it("Should return the user even if it has no connection to Sawtooth REST API", (done) => {
+            chai
+              .request(API_URL)
+              .get(`${USERS_ENDPOINT}/${users.W1000.address}`)
+              .end(function (err, res) {
+                expect(res).to.have.status(200);
+                done();
+              });
+          });
+        });
+      });
+    });
+  });
+
+  if (process.env.USE_REDIS === "true") {
+    describe(`Redis cache fallback`, function () {
+      this.timeout(8000);
+      this.slow(5000);
+      before(function (done) {
+        const newUrl = `http://${uuidv4()}.com`;
+        this.timeout(8000);
+        chai
+          .request(API_URL)
+          .post(`${CONFIG_ENDPOINT}`)
+          .send({ SAWTOOTH_REST: newUrl, USE_REDIS: "true" })
+          .end(function (err, res) {
+            expect(res).to.have.status(200);
+            expect(res.body.variables.SAWTOOTH_REST).to.eq(newUrl);
+            expect(res.body.variables.USE_REDIS).to.eq("true");
+            done();
+          });
+      });
+      describe(`${CRYPTO_ENDPOINT} fallback test`, () => {
+        describe(`Redis fallback requests`, () => {
+          describe(`GET ${CRYPTO_ENDPOINT}/:address`, () => {
+            it("Should return the transaction even if it has no connection to Sawtooth REST API", (done) => {
+              chai
+                .request(API_URL)
+                .get(
+                  `${CRYPTO_ENDPOINT}/${
+                    createdVariables.transactions.transaction[
+                      users.W1000.address
+                    ].coinbase.payload.address
+                  }`
+                )
+                .end(function (err, res) {
+                  expect(res).to.have.status(200);
+                  done();
+                });
+            });
+          });
+        });
+      });
+      describe(`${USERS_ENDPOINT} fallback test`, () => {
+        describe(`Redis fallback requests`, () => {
+          describe(`GET ${USERS_ENDPOINT}/:address`, () => {
+            it("Should return the user even if it has no connection to Sawtooth REST API", (done) => {
+              chai
+                .request(API_URL)
+                .get(`${USERS_ENDPOINT}/${users.W1000.address}`)
+                .end(function (err, res) {
+                  expect(res).to.have.status(200);
+                  done();
+                });
+            });
+          });
+        });
+      });
+    });
+  }
   describe(`Hyperledger Sawtooth Error Tests`, function () {
     this.timeout(8000);
     this.slow(5000);
+    before(function (done) {
+      const newUrl = `http://${uuidv4()}.com`;
+      this.timeout(8000);
+      chai
+        .request(API_URL)
+        .post(`${CONFIG_ENDPOINT}`)
+        .send({ SAWTOOTH_REST: newUrl, USE_REDIS: "false" })
+        .end(function (err, res) {
+          expect(res).to.have.status(200);
+          expect(res.body.variables.SAWTOOTH_REST).to.eq(newUrl);
+          expect(res.body.variables.USE_REDIS).to.eq("false");
+          done();
+        });
+    });
     describe(`${CRYPTO_ENDPOINT} errors test`, () => {
       describe(`Sawtooth-dependant requests`, () => {
         describe(`GET ${CRYPTO_ENDPOINT}`, () => {
@@ -2582,7 +2928,7 @@ describe(`Cryptocurrency Test Suite`, () => {
               .get(
                 `${CRYPTO_ENDPOINT}/${
                   createdVariables.transactions.transaction[users.W1000.address]
-                    .coinbase.payload.signature
+                    .coinbase.payload.address
                 }`
               )
               .end(function (err, res) {
@@ -2613,7 +2959,7 @@ describe(`Cryptocurrency Test Suite`, () => {
               .put(
                 `${CRYPTO_ENDPOINT}/${
                   createdVariables.transactions.transaction[users.W1000.address]
-                    .coinbase.payload.signature
+                    .coinbase.payload.address
                 }`
               )
               .end(function (err, res) {
