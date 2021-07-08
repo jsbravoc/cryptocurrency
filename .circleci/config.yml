@@ -106,7 +106,7 @@ jobs:
           name: Get final semver
           command: |
             if [[ "${CIRCLE_BRANCH}" == "main" ]]; then
-              ../../../semtag final -s minor
+              ../../../semtag final -s patch
               echo New tag on ${CIRCLE_BRANCH}: $(../../../semtag getcurrent)
             fi
       - run:
