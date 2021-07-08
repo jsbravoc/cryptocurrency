@@ -2,4 +2,4 @@
 . "$(dirname "$0")/_/husky.sh"
 
 #Run tests
-prettier --write src/app/backend && grunt && git add -A
+prettier --write src/app/backend && rm -rf build && grunt && git add -A

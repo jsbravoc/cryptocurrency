@@ -24,7 +24,7 @@
         "**/.DS_Store": true,
         "**/node_modules": true,
         "**/public": true,
-        "**/build": true,
+        "**/build": false,
         "**/resources/docs": false,
         "**/coverage": true,
         "**/.nyc_output": true,
